@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">NovaFiles</string>
+    <string name="nav_browser">Files</string>
+    <string name="nav_favorites">Favorites</string>
+    <string name="nav_vault">Vault</string>
+    <string name="nav_search">Smart Search</string>
+    <string name="nav_settings">Settings</string>
+
+    <string name="storage_access_title">All-files access required</string>
+    <string name="storage_access_body">NovaFiles needs the "All files access" permission to browse and manage your files. It stays on your device only — nothing is sent to the internet.</string>
+    <string name="storage_access_grant">Grant access</string>
+
+    <string name="empty_folder">This folder is empty</string>
+    <string name="empty_favorites">No favorites yet — add them from any file menu</string>
+    <string name="empty_trash">Trash is empty</string>
+    <string name="empty_search">Type a query to start — results appear as you type</string>
+    <string name="empty_vault">Vault is empty — add a file to encrypt it here</string>
+
+    <string name="action_new_folder">New folder</string>
+    <string name="action_refresh">Refresh</string>
+    <string name="action_rename">Rename</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_copy">Copy</string>
+    <string name="action_move">Move</string>
+    <string name="action_paste_here">Paste here</string>
+    <string name="action_details">Details</string>
+    <string name="action_share">Share</string>
+    <string name="action_select_all">Select all</string>
+    <string name="action_clear_selection">Clear selection</string>
+    <string name="action_favorite_add">Add to favorites</string>
+    <string name="action_favorite_remove">Remove from favorites</string>
+    <string name="action_encrypt_vault">Encrypt into Vault</string>
+    <string name="action_decrypt">Decrypt and save a copy</string>
+    <string name="action_delete_forever">Delete forever</string>
+    <string name="action_restore">Restore</string>
+    <string name="action_save">Save</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_ok">OK</string>
+    <string name="action_lock">Lock vault</string>
+    <string name="action_pick_file_encrypt">Pick a file to encrypt</string>
+    <string name="action_decrypt_to">Where to save the decrypted copy?</string>
+    <string name="action_go_up">Parent folder</string>
+    <string name="action_delete_done">Moved to trash</string>
+
+    <string name="dialog_rename_title">Rename</string>
+    <string name="dialog_new_folder_title">New folder</string>
+    <string name="dialog_delete_title">Delete selected items?</string>
+    <string name="dialog_delete_body">%1$d items will move to Trash and can be restored.</string>
+    <string name="dialog_details_title">File details</string>
+
+    <string name="sort_by">Sort by</string>
+    <string name="sort_name">Name</string>
+    <string name="sort_size">Size</string>
+    <string name="sort_date">Date</string>
+    <string name="view_grid">Grid</string>
+    <string name="view_list">List</string>
+    <string name="show_hidden">Show hidden</string>
+
+    <string name="search_hint">Search storage…</string>
+    <string name="filter_type">Type</string>
+    <string name="type_any">Any</string>
+    <string name="type_image">Images</string>
+    <string name="type_video">Videos</string>
+    <string name="type_audio">Audio</string>
+    <string name="type_doc">Documents</string>
+    <string name="type_archive">Archives</string>
+    <string name="type_apk">APK apps</string>
+    <string name="filter_min_size">Bigger than (MB)</string>
+    <string name="filter_max_age">Within last (days)</string>
+    <string name="filter_root">Search from</string>
+    <string name="search_found">%1$d results found</string>
+    <string name="search_scanning">Scanning…</string>
+
+    <string name="vault_locked_title">Vault is locked</string>
+    <string name="vault_pin_hint">Enter PIN</string>
+    <string name="vault_set_pin">Create a vault PIN</string>
+    <string name="vault_confirm_pin">Re-enter PIN</string>
+    <string name="vault_pin_mismatch">PINs do not match</string>
+    <string name="vault_pin_too_short">PIN must be at least 4 digits</string>
+    <string name="vault_wrong_pin">Wrong PIN</string>
+    <string name="vault_unlock">Unlock</string>
+    <string name="vault_unlock_biometric">Unlock with fingerprint</string>
+    <string name="vault_encrypted_done">File encrypted and moved to Vault</string>
+    <string name="vault_decrypted_done">Decrypted copy saved</string>
+    <string name="vault_encrypted_count">%1$d encrypted files — total %2$s</string>
+
+    <string name="editor_title">Text editor</string>
+    <string name="editor_saved">Saved</string>
+    <string name="editor_too_large">File too large to edit (limit 1MB)</string>
+    <string name="editor_read_fail">Could not read file</string>
+
+    <string name="settings_title">Settings</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_theme">Theme mode</string>
+    <string name="theme_system">System</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="settings_about">About NovaFiles</string>
+    <string name="settings_about_body">NovaFiles v0.1.0 — open-source Android file manager built with Kotlin and Jetpack Compose. A modern rival to MiXplorer with a Material 3 interface.</string>
+    <string name="settings_clear_trash">Empty trash</string>
+    <string name="settings_trash_cleared">Trash emptied</string>
+
+    <string name="op_running">Working… %1$s</string>
+    <string name="op_done">Operation completed</string>
+    <string name="op_failed">Operation failed</string>
+    <string name="copied_n">Copied %1$d items</string>
+    <string name="cut_n">Ready to move: %1$d items</string>
+    <string name="details_path">Path</string>
+    <string name="details_size">Size</string>
+    <string name="details_modified">Modified</string>
+    <string name="details_items">Items</string>
+    <string name="items_count">%1$d items</string>
+</resources>

@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">NovaFiles</string>
+    <string name="nav_browser">الملفات</string>
+    <string name="nav_favorites">المفضلة</string>
+    <string name="nav_vault">الخزنة</string>
+    <string name="nav_search">بحث ذكي</string>
+    <string name="nav_settings">الإعدادات</string>
+
+    <string name="storage_access_title">مطلوب صلاحية الوصول لكل الملفات</string>
+    <string name="storage_access_body">يحتاج NovaFiles إلى صلاحية «كل الملفات» لتصفح ملفاتك وإدارتها. هذه الصلاحية تُستخدم على جهازك فقط ولا نرسل شيئاً للإنترنت.</string>
+    <string name="storage_access_grant">منح الصلاحية</string>
+
+    <string name="empty_folder">المجلد فارغ</string>
+    <string name="empty_favorites">لا توجد عناصر في المفضلة بعد — أضفها من قائمة أي ملف</string>
+    <string name="empty_trash">سلة المحذوفات فارغة</string>
+    <string name="empty_search">اكتب كلمة للبدء — النتائج تظهر أثناء الكتابة</string>
+    <string name="empty_vault">الخزنة فارغة — أضف ملفاً لتشفيره هنا</string>
+
+    <string name="action_new_folder">مجلد جديد</string>
+    <string name="action_refresh">تحديث</string>
+    <string name="action_rename">إعادة تسمية</string>
+    <string name="action_delete">حذف</string>
+    <string name="action_copy">نسخ</string>
+    <string name="action_move">نقل</string>
+    <string name="action_paste_here">لصق هنا</string>
+    <string name="action_details">التفاصيل</string>
+    <string name="action_share">مشاركة</string>
+    <string name="action_select_all">تحديد الكل</string>
+    <string name="action_clear_selection">إلغاء التحديد</string>
+    <string name="action_favorite_add">إضافة للمفضلة</string>
+    <string name="action_favorite_remove">إزالة من المفضلة</string>
+    <string name="action_encrypt_vault">تشفير في الخزنة</string>
+    <string name="action_decrypt">فك التشفير وحفظ نسخة</string>
+    <string name="action_delete_forever">حذف نهائياً</string>
+    <string name="action_restore">استعادة</string>
+    <string name="action_save">حفظ</string>
+    <string name="action_cancel">إلغاء</string>
+    <string name="action_ok">موافق</string>
+    <string name="action_lock">قفل الخزنة</string>
+    <string name="action_pick_file_encrypt">اختر ملفاً لتشفيره</string>
+    <string name="action_decrypt_to">أين تحفظ النسخة المفكوكة؟</string>
+    <string name="action_go_up">المجلد الأصل</string>
+    <string name="action_delete_done">تم الحذف إلى السلة</string>
+
+    <string name="dialog_rename_title">إعادة تسمية</string>
+    <string name="dialog_new_folder_title">مجلد جديد</string>
+    <string name="dialog_delete_title">حذف العناصر المحددة؟</string>
+    <string name="dialog_delete_body">ستنتقل %1$d عنصر إلى سلة المحذوفات ويمكن استعادتها.</string>
+    <string name="dialog_details_title">تفاصيل الملف</string>
+
+    <string name="sort_by">الترتيب</string>
+    <string name="sort_name">الاسم</string>
+    <string name="sort_size">الحجم</string>
+    <string name="sort_date">التاريخ</string>
+    <string name="view_grid">شبكة</string>
+    <string name="view_list">قائمة</string>
+    <string name="show_hidden">إظهار المخفيّة</string>
+
+    <string name="search_hint">ابحث في التخزين…</string>
+    <string name="filter_type">النوع</string>
+    <string name="type_any">الكل</string>
+    <string name="type_image">صور</string>
+    <string name="type_video">فيديو</string>
+    <string name="type_audio">صوت</string>
+    <string name="type_doc">مستندات</string>
+    <string name="type_archive">أرشيفات</string>
+    <string name="type_apk">تطبيقات APK</string>
+    <string name="filter_min_size">أصغر من (MB)</string>
+    <string name="filter_max_age">خلال آخر (يوم)</string>
+    <string name="filter_root">البحث من</string>
+    <string name="search_found">تم العثور على %1$d نتيجة</string>
+    <string name="search_scanning">جارٍ الفحص…</string>
+
+    <string name="vault_locked_title">الخزنة مقفلة</string>
+    <string name="vault_pin_hint">أدخل رمز PIN</string>
+    <string name="vault_set_pin">إنشاء رمز PIN للخزنة</string>
+    <string name="vault_confirm_pin">أعد إدخال الرمز</string>
+    <string name="vault_pin_mismatch">الرمزان غير متطابقين</string>
+    <string name="vault_pin_too_short">الرمز يجب أن يكون 4 أرقام على الأقل</string>
+    <string name="vault_wrong_pin">رمز غير صحيح</string>
+    <string name="vault_unlock">فتح</string>
+    <string name="vault_unlock_biometric">فتح بالبصمة</string>
+    <string name="vault_encrypted_done">تم تشفير الملف ونقله إلى الخزنة</string>
+    <string name="vault_decrypted_done">تم فك التشفير وحفظ النسخة</string>
+    <string name="vault_encrypted_count">%1$d ملف مشفر — الحجم الكلي %2$s</string>
+
+    <string name="editor_title">محرر النصوص</string>
+    <string name="editor_saved">تم الحفظ</string>
+    <string name="editor_too_large">الملف كبير جداً للتحرير (الحد 1MB)</string>
+    <string name="editor_read_fail">تعذّرت قراءة الملف</string>
+
+    <string name="settings_title">الإعدادات</string>
+    <string name="settings_language">اللغة</string>
+    <string name="settings_theme">وضع السمة</string>
+    <string name="theme_system">النظام</string>
+    <string name="theme_light">فاتح</string>
+    <string name="theme_dark">داكن</string>
+    <string name="settings_about">عن NovaFiles</string>
+    <string name="settings_about_body">NovaFiles v0.1.0 — مدير ملفات أندرويد مفتوح المصدر مبني بـ Kotlin وJetpack Compose. منافس عصري لـ MiXplorer بواجهة Material 3.</string>
+    <string name="settings_clear_trash">تفريغ سلة المحذوفات</string>
+    <string name="settings_trash_cleared">تم تفريغ السلة</string>
+
+    <string name="op_running">جارٍ التنفيذ… %1$s</string>
+    <string name="op_done">تمت العملية بنجاح</string>
+    <string name="op_failed">فشلت العملية</string>
+    <string name="copied_n">تم نسخ %1$d عنصر</string>
+    <string name="cut_n">جاهز للنقل: %1$d عنصر</string>
+    <string name="details_path">المسار</string>
+    <string name="details_size">الحجم</string>
+    <string name="details_modified">آخر تعديل</string>
+    <string name="details_items">العناصر</string>
+    <string name="items_count">%1$d عنصر</string>
+</resources>

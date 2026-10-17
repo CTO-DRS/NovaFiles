@@ -1,0 +1,158 @@
+package com.novafiles.app.ui.nav
+
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
+import com.novafiles.app.R
+import com.novafiles.app.core.fs.FileType
+import com.novafiles.app.ui.browser.BrowserScreen
+import com.novafiles.app.ui.editor.EditorScreen
+import com.novafiles.app.ui.favorites.FavoritesScreen
+import com.novafiles.app.ui.search.SearchScreen
+import com.novafiles.app.ui.settings.SettingsScreen
+import com.novafiles.app.ui.vault.VaultScreen
+import com.novafiles.app.ui.viewer.ImageViewerScreen
+import java.io.File
+
+/** مسارات التنقل */
+object Routes {
+    const val BROWSER = "browser"
+    const val FAVORITES = "favorites"
+    const val VAULT = "vault"
+    const val SEARCH = "search"
+    const val SETTINGS = "settings"
+    const val EDITOR = "editor?path={path}"
+    const val VIEWER = "viewer?path={path}"
+
+    fun editor(path: String) = "editor?path=${android.net.Uri.encode(path)}"
+    fun viewer(path: String) = "viewer?path=${android.net.Uri.encode(path)}"
+}
+
+private data class Tab(val route: String, val labelRes: Int, val icon: ImageVector)
+
+private val tabs = listOf(
+    Tab(Routes.BROWSER, R.string.nav_browser, Icons.Filled.Folder),
+    Tab(Routes.SEARCH, R.string.nav_search, Icons.Filled.Search),
+    Tab(Routes.FAVORITES, R.string.nav_favorites, Icons.Filled.Star),
+    Tab(Routes.VAULT, R.string.nav_vault, Icons.Filled.Lock),
+    Tab(Routes.SETTINGS, R.string.nav_settings, Icons.Filled.Settings),
+)
+
+@Composable
+fun NovaRoot() {
+    val nav = rememberNavController()
+    val backStack by nav.currentBackStackEntryAsState()
+    val currentRoute = backStack?.destination?.route
+    val showBottomBar = currentRoute in tabs.map { it.route }
+
+    Scaffold(
+        bottomBar = {
+            if (showBottomBar) {
+                NavigationBar {
+                    tabs.forEach { tab ->
+                        val label = stringResource(tab.labelRes)
+                        NavigationBarItem(
+                            selected = currentRoute == tab.route,
+                            onClick = { nav.navigateTop(tab.route) },
+                            icon = { Icon(tab.icon, contentDescription = label) },
+                            label = { Text(label) },
+                        )
+                    }
+                }
+            }
+        }
+    ) { padding ->
+        NovaNavHost(
+            nav = nav,
+            modifier = Modifier.padding(padding),
+        )
+    }
+}
+
+/** فتح ملف: عارض صور، محرر نصوص، أو تطبيق خارجي */
+fun openFile(nav: NavHostController, file: File) {
+    val ctx = nav.context
+    when (FileType.of(file)) {
+        FileType.IMAGE -> nav.navigate(Routes.viewer(file.absolutePath))
+        FileType.TEXT, FileType.CODE -> nav.navigate(Routes.editor(file.absolutePath))
+        else -> com.novafiles.app.util.Intents.view(ctx, file)
+    }
+}
+
+@Composable
+private fun NovaNavHost(nav: NavHostController, modifier: Modifier = Modifier) {
+    NavHost(
+        navController = nav,
+        startDestination = Routes.BROWSER,
+        modifier = modifier,
+    ) {
+        composable(Routes.BROWSER) {
+            BrowserScreen(
+                onOpenFile = { openFile(nav, it) },
+                onOpenSearchFor = { /* يُفتح من شريط التنقل مباشرة */ },
+            )
+        }
+        composable(Routes.SEARCH) {
+            SearchScreen(onOpenFile = { openFile(nav, it) })
+        }
+        composable(Routes.FAVORITES) {
+            FavoritesScreen(onOpenFile = { openFile(nav, it) })
+        }
+        composable(Routes.VAULT) {
+            VaultScreen()
+        }
+        composable(Routes.SETTINGS) {
+            SettingsScreen()
+        }
+        composable(
+            Routes.EDITOR,
+            arguments = listOf(navArgument("path") {
+                type = NavType.StringType
+                nullable = true
+                defaultValue = null
+            }),
+        ) { entry ->
+            EditorScreen(path = entry.arguments?.getString("path"))
+        }
+        composable(
+            Routes.VIEWER,
+            arguments = listOf(navArgument("path") {
+                type = NavType.StringType
+                nullable = true
+                defaultValue = null
+            }),
+        ) { entry ->
+            ImageViewerScreen(path = entry.arguments?.getString("path"))
+        }
+    }
+}
+
+private fun NavHostController.navigateTop(route: String) {
+    navigate(route) {
+        popUpTo(graph.findStartDestination().id) { saveState = true }
+        launchSingleTop = true
+        restoreState = true
+    }
+}
