@@ -228,4 +228,22 @@
     <string name="archive_created">Archive created</string>
     <string name="archive_extracted_to">Extracted to: %1$s</string>
     <string name="archive_failed">Archive operation failed</string>
+
+    <!-- ═══ QR transfer (v0.11) ═══ -->
+    <string name="qr_share_title">Share via QR</string>
+    <string name="qr_show">Show QR Code</string>
+    <string name="qr_send_action">Send via QR</string>
+    <string name="qr_share_hint">Scan from any device on the same WiFi network to connect instantly</string>
+    <string name="qr_send_hint">Scan from the other device on the same network — the link opens the file directly</string>
+    <string name="qr_failed">Could not generate the code</string>
+    <string name="qr_security_note">The link contains server credentials — share it only with your own device</string>
+
+    <!-- ═══ Side folder tree (v0.11) ═══ -->
+    <string name="tree_title">Folder Tree</string>
+    <string name="tree_open">Folder tree</string>
+    <string name="tree_close">Close tree</string>
+
+    <!-- ═══ RAR errors ═══ -->
+    <string name="error_rar_encrypted">Password-protected RAR — encrypted archives are not supported</string>
+    <string name="error_rar5_unsupported">RAR5 archive with an unsupported compression method or dictionary size</string>
 </resources>

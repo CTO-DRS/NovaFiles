@@ -13,8 +13,8 @@ android {
         applicationId = "com.novafiles.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 10
-        versionName = "0.10.0"
+        versionCode = 11
+        versionName = "0.11.0"
     }
 
     buildTypes {
@@ -92,6 +92,7 @@ dependencies {
     implementation(libs.commons.compress)
     implementation(libs.xz)
     implementation(libs.junrar)
+    implementation(libs.zxing.core)
 
     // اختبارات وحدة JVM — مع خادم SSH مدمج لاختبار SFTP حقيقياً
     testImplementation("junit:junit:4.13.2")
