@@ -175,6 +175,7 @@
     <string name="net_name_hint">اختياري</string>
     <string name="net_smb_footer">مثال: خادم «192.168.1.10» ومشاركة «Public» — للمشاركات المؤقتة في Windows جرّب اسم جهازك مثل Users</string>
     <string name="net_ftp_footer">المنفذ الافتراضي 21 — اترك اسم المستخدم فارغاً للدخول المجهول</string>
+    <string name="net_sftp_footer">المنفذ الافتراضي 22 — تُحفظ بصمة مفتاح الخادم عند أول اتصال ناجح وتُرفض الاتصالات إذا تغيّر المفتاح (حماية من هجمات الوسيط)</string>
     <string name="net_credentials_footer">تُحفظ بيانات الدخول على جهازك فقط وتُستخدم للاتصال عند الطلب</string>
     <string name="net_test">اختبار الاتصال</string>
     <string name="net_testing">جارٍ الاختبار…</string>

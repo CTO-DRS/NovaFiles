@@ -175,6 +175,7 @@
     <string name="net_name_hint">Optional</string>
     <string name="net_smb_footer">Example: server “192.168.1.10” and share “Public” — for temporary Windows shares try your PC name like Users</string>
     <string name="net_ftp_footer">Default port is 21 — leave the username empty for anonymous login</string>
+    <string name="net_sftp_footer">Default port is 22 — the server key fingerprint is saved on first successful connection and further connections are rejected if it changes (MITM protection)</string>
     <string name="net_credentials_footer">Credentials are stored on your device only and used when connecting</string>
     <string name="net_test">Test connection</string>
     <string name="net_testing">Testing…</string>

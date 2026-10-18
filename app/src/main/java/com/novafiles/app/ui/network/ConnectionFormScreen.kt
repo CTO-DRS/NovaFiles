@@ -76,6 +76,9 @@ fun ConnectionFormScreen(
     var share by remember { mutableStateOf("") }
     var initialPath by remember { mutableStateOf("") }
 
+    val isSmb = protocol.equals("SMB", true)
+    val isSftp = protocol.equals("SFTP", true)
+
     var loaded by remember { mutableStateOf(false) }
     var testing by remember { mutableStateOf(false) }
     var testResult by remember { mutableStateOf<Boolean?>(null) }
@@ -116,7 +119,7 @@ fun ConnectionFormScreen(
 
     fun validate(): String? {
         if (host.isBlank()) return context.getString(R.string.net_need_host)
-        if (protocol.equals("SMB", true) && share.isBlank()) return context.getString(R.string.net_need_share)
+        if (isSmb && share.isBlank()) return context.getString(R.string.net_need_share)
         return null
     }
 
@@ -132,7 +135,7 @@ fun ConnectionFormScreen(
             testMessage = null
             var opened: com.novafiles.app.core.network.RemoteFs? = null
             try {
-                opened = RemoteFsFactory.open(buildEntity())
+                opened = RemoteFsFactory.open(buildEntity(), context.novaContainer.knownHosts)
                 opened.test()
                 testResult = true
             } catch (e: Exception) {
@@ -180,11 +183,19 @@ fun ConnectionFormScreen(
             IOSGroupHeader(stringResource(R.string.net_protocol_section))
             IOSGroupCard {
                 IOSSegmented(
-                    options = listOf("FTP", "SMB"),
-                    selected = if (protocol.equals("SMB", true)) 1 else 0,
+                    options = listOf("FTP", "SFTP", "SMB"),
+                    selected = when {
+                        isSmb -> 2
+                        isSftp -> 1
+                        else -> 0
+                    },
                     onSelect = { idx ->
                         if (!testing) {
-                            protocol = if (idx == 1) "SMB" else "FTP"
+                            protocol = when (idx) {
+                                1 -> "SFTP"
+                                2 -> "SMB"
+                                else -> "FTP"
+                            }
                             port = RemoteFsFactory.defaultPort(protocol).toString()
                             testResult = null
                             testMessage = null
@@ -211,17 +222,17 @@ fun ConnectionFormScreen(
                 )
                 IOSListRow(
                     title = stringResource(R.string.net_port),
-                    showSeparator = !protocol.equals("SMB", true),
+                    showSeparator = !isSmb,
                     trailing = {
                         IOSMiniField(
                             value = port,
                             onValueChange = { port = it.filter { ch -> ch.isDigit() }.take(5) },
-                            hint = if (protocol.equals("SMB", true)) "445" else "21",
+                            hint = RemoteFsFactory.defaultPort(protocol).toString(),
                             modifier = Modifier.width(96.dp),
                         )
                     },
                 )
-                if (protocol.equals("SMB", true)) {
+                if (isSmb) {
                     IOSListRow(
                         title = stringResource(R.string.net_share),
                         showSeparator = true,
@@ -250,8 +261,11 @@ fun ConnectionFormScreen(
                 }
             }
             IOSGroupFooter(
-                if (protocol.equals("SMB", true)) stringResource(R.string.net_smb_footer)
-                else stringResource(R.string.net_ftp_footer)
+                when {
+                    isSmb -> stringResource(R.string.net_smb_footer)
+                    isSftp -> stringResource(R.string.net_sftp_footer)
+                    else -> stringResource(R.string.net_ftp_footer)
+                }
             )
 
             // ═══ بيانات الدخول ═══
