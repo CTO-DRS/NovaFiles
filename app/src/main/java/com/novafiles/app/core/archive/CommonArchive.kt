@@ -41,7 +41,7 @@ fun stripArchiveExt(fileName: String): String {
 }
 
 /**
- * قراءة الأرشيفات غير-ZIP: TAR (وتغليفه gz/bz2/xz) و7z وRAR4 والضغط أحادي الملف (gz/bz2/xz).
+ * قراءة الأرشيفات غير-ZIP: TAR (وتغليفه gz/bz2/xz) و7z وRAR4+RAR5 (junrar) والضغط أحادي الملف (gz/bz2/xz).
  * كلها للقراءة/الاستخراج فقط — الإنشاء متاح لـ ZIP فقط (ZipArchive).
  * الحجم الأصلي غير معروف مسبقاً في الضغط أحادي الملف → size = -1 وtotal = -1 (تقدم غير محدد).
  */
@@ -175,10 +175,26 @@ object CommonArchive {
         return extracted
     }
 
-    // ─────────────────────────── RAR (junrar — RAR4) ───────────────────────────
+    // ─────────────────────────── RAR (junrar — RAR4 + RAR5) ───────────────────────────
+
+    /** بصمة RAR5: Rar!\x1A\x07\x01\x00 — خلاف ذلك RAR4 القديم أو ليس RAR أصلاً */
+    fun isRar5(file: File): Boolean = runCatching {
+        file.inputStream().use { input ->
+            val head = ByteArray(8)
+            var read = 0
+            while (read < 8) {
+                val n = input.read(head, read, 8 - read)
+                if (n < 0) break
+                read += n
+            }
+            read >= 8 && head.contentEquals(byteArrayOf(0x52, 0x61, 0x72, 0x21, 0x1A.toByte(), 0x07, 0x01, 0x00))
+        }
+    }.getOrDefault(false)
 
     private fun rarHeadersName(h: FileHeader): String =
-        h.fileNameW.takeIf { it.isNotEmpty() } ?: h.fileNameString.takeIf { it.isNotEmpty() } ?: h.fileName
+        h.fileName.takeIf { it.isNotEmpty() }
+            ?: String(h.fileNameByteArray, Charsets.UTF_8).takeIf { it.isNotEmpty() }
+            ?: "unnamed"
 
     private fun listRar(file: File): List<ZipEntryInfo> {
         val arch = Archive(file)
@@ -205,7 +221,12 @@ object CommonArchive {
                     target.mkdirs()
                 } else {
                     target.parentFile?.let { if (!it.exists()) it.mkdirs() }
-                    CountingOutputStream(FileOutputStream(target)) { d, _ -> done = d; onProgress(done, total) }.use { out ->
+                    // عدّاد كل ملف مستقل → نضيفه إلى ما قبله بدل الكتابة المطلقة
+                    val before = done
+                    CountingOutputStream(FileOutputStream(target)) { d, _ ->
+                        done = before + d
+                        onProgress(done, total)
+                    }.use { out ->
                         a.extractFile(h, out)
                     }
                     val m = h.mTime?.time ?: 0L
@@ -289,6 +310,12 @@ object CommonArchive {
             out.write(b, off, len)
             count += len
             if (count % chunk < len) onCount(count, 0L)
+        }
+
+        override fun close() {
+            // إبلاغ نهائي بالحجم الفعلي — الملفات الأصغر من 64KB لا تُطلق نداء أثناء الكتابة
+            onCount(count, 0L)
+            out.close()
         }
     }
 }

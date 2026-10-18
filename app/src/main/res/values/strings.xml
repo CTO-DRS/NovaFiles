@@ -228,4 +228,22 @@
     <string name="archive_created">تم إنشاء الأرشيف</string>
     <string name="archive_extracted_to">استُخرج إلى: %1$s</string>
     <string name="archive_failed">فشل التعامل مع الأرشيف</string>
+
+    <!-- ═══ نقل QR (v0.11) ═══ -->
+    <string name="qr_share_title">رمز QR للمشاركة</string>
+    <string name="qr_show">عرض رمز QR</string>
+    <string name="qr_send_action">إرسال عبر QR</string>
+    <string name="qr_share_hint">امسح الرمز من أي جهاز على نفس شبكة WiFi للاتصال بالخادم مباشرة</string>
+    <string name="qr_send_hint">امسح الرمز من الجهاز الثاني على نفس الشبكة — سيفتح الرابط الملف مباشرة</string>
+    <string name="qr_failed">تعذّر توليد الرمز</string>
+    <string name="qr_security_note">الرابط يحتوي بيانات دخول الخادم — شاركه فقط مع جهازك الآخر</string>
+
+    <!-- ═══ شجرة المجلدات الجانبية (v0.11) ═══ -->
+    <string name="tree_title">شجرة المجلدات</string>
+    <string name="tree_open">شجرة المجلدات</string>
+    <string name="tree_close">إغلاق الشجرة</string>
+
+    <!-- ═══ أخطاء RAR ═══ -->
+    <string name="error_rar_encrypted">أرشيف RAR محمي بكلمة مرور — فك التشفير غير مدعوم</string>
+    <string name="error_rar5_unsupported">أرشيف RAR5 بأسلوب ضغط أو حجم قاموس غير مدعوم بعد</string>
 </resources>
