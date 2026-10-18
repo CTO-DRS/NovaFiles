@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.VpnKey
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -118,19 +119,33 @@ fun NetworkScreen(
                             onClick = { onConnect(conn) },
                             showChevron = true,
                             leading = {
+                                val isSmbProto = conn.protocol.equals("SMB", true)
+                                val isSftpProto = conn.protocol.equals("SFTP", true)
                                 Box(
                                     modifier = Modifier
                                         .size(30.dp)
                                         .background(
-                                            if (conn.protocol.equals("SMB", true)) Color(0x1F34C759) else Color(0x1F007AFF),
+                                            when {
+                                                isSmbProto -> Color(0x1F34C759)
+                                                isSftpProto -> Color(0x1FAF52DE)
+                                                else -> Color(0x1F007AFF)
+                                            },
                                             RoundedCornerShape(7.dp),
                                         ),
                                     contentAlignment = Alignment.Center,
                                 ) {
                                     Icon(
-                                        if (conn.protocol.equals("SMB", true)) Icons.Filled.Dns else Icons.Filled.Cloud,
+                                        when {
+                                            isSmbProto -> Icons.Filled.Dns
+                                            isSftpProto -> Icons.Filled.VpnKey
+                                            else -> Icons.Filled.Cloud
+                                        },
                                         contentDescription = conn.protocol,
-                                        tint = if (conn.protocol.equals("SMB", true)) Color(0xFF34C759) else p.accent,
+                                        tint = when {
+                                            isSmbProto -> Color(0xFF34C759)
+                                            isSftpProto -> Color(0xFFAF52DE)
+                                            else -> p.accent
+                                        },
                                         modifier = Modifier.size(18.dp),
                                     )
                                 }

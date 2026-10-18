@@ -152,7 +152,7 @@ fun RemoteBrowserScreen(
         }
         conn = c
         try {
-            val opened = RemoteFsFactory.open(c)
+            val opened = RemoteFsFactory.open(c, context.novaContainer.knownHosts)
             fs = opened
             val start = c.initialPath
             entries = opened.list(start)
@@ -254,9 +254,12 @@ fun RemoteBrowserScreen(
                 title = conn?.name ?: stringResource(R.string.net_title),
                 subtitle = if (path.isBlank()) {
                     val c = conn
-                    if (c == null) ""
-                    else if (c.protocol.equals("SMB", true)) "smb://${c.host}:${c.port}/${c.share}"
-                    else "ftp://${c.host}:${c.port}"
+                    when {
+                        c == null -> ""
+                        c.protocol.equals("SMB", true) -> "smb://${c.host}:${c.port}/${c.share}"
+                        c.protocol.equals("SFTP", true) -> "sftp://${c.host}:${c.port}"
+                        else -> "ftp://${c.host}:${c.port}"
+                    }
                 } else RemotePaths.nameOf(path),
                 collapsed = true,
                 onBack = { goUp() },

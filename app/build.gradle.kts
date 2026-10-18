@@ -13,8 +13,8 @@ android {
         applicationId = "com.novafiles.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 8
-        versionName = "0.8.0"
+        versionCode = 9
+        versionName = "0.9.0"
     }
 
     buildTypes {
@@ -82,9 +82,10 @@ dependencies {
     // كوروتينات
     implementation(libs.kotlinx.coroutines.android)
 
-    // عميل الشبكة: FTP (Apache Commons Net) و SMB2/3 (SMBJ)
+    // عميل الشبكة: FTP (Apache Commons Net) و SMB2/3 (SMBJ) و SFTP (sshj)
     implementation(libs.commons.net)
     implementation(libs.smbj)
+    implementation(libs.sshj)
     implementation(libs.slf4j.android)
 
     // قراءة الأرشيفات: 7z/TAR/GZ/BZ2/XZ (Apache Commons Compress) + RAR (junrar) + مرمز XZ
@@ -92,6 +93,17 @@ dependencies {
     implementation(libs.xz)
     implementation(libs.junrar)
 
-    // اختبارات وحدة JVM
+    // اختبارات وحدة JVM — مع خادم SSH مدمج لاختبار SFTP حقيقياً
     testImplementation("junit:junit:4.13.2")
+    testImplementation(libs.sshd.core)
+    testImplementation(libs.sshd.sftp)
+    testImplementation(libs.slf4j.simple)
+}
+
+// رابط slf4j-android يتطلب android.util.Log غير المتاح في اختبارات JVM —
+// نستبعده من تهيئات الاختبار ليعمل رابط slf4j-simple بدلاً منه
+configurations.configureEach {
+    if (name.startsWith("test", ignoreCase = true)) {
+        exclude(group = "org.slf4j", module = "slf4j-android")
+    }
 }
