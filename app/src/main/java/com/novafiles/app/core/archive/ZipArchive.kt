@@ -101,21 +101,10 @@ object ZipArchive {
 
     /**
      * الوجهة الآمنة لمدخل: يمنع Zip-Slip (مثل ../../etc) وأسماء الأقراص المطلقة.
-     * يعيد الملف داخل مجلد الوجهة حصراً.
+     * يعيد الملف داخل مجلد الوجهة حصراً. (مندوب إلى الحاجز المشترك ArchiveSafety)
      */
-    internal fun safeDest(destCanonical: File, entryName: String): File {
-        // تطبيع الفواصل وتجريد بادئة المسار المطلق / محركات الأقراص
-        var name = entryName.replace('\\', '/')
-        while (name.startsWith("/")) name = name.substring(1)
-        name = name.replace(Regex("^[A-Za-z]:"), "")
-        // سلسلة canonical تكشف أي .. هاربة حتى لو تنكرت
-        val candidate = File(destCanonical, name).canonicalFile
-        val destPath = destCanonical.canonicalPath + File.separator
-        if (candidate.path != destCanonical.path && !candidate.path.startsWith(destPath)) {
-            throw SecurityException("zip_slip: $entryName")
-        }
-        return candidate
-    }
+    internal fun safeDest(destCanonical: File, entryName: String): File =
+        ArchiveSafety.safeDest(destCanonical, entryName)
 
     // ─────────────────────────── الإنشاء ───────────────────────────
 

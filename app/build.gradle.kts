@@ -13,8 +13,8 @@ android {
         applicationId = "com.novafiles.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 7
-        versionName = "0.7.0"
+        versionCode = 8
+        versionName = "0.8.0"
     }
 
     buildTypes {
@@ -86,6 +86,11 @@ dependencies {
     implementation(libs.commons.net)
     implementation(libs.smbj)
     implementation(libs.slf4j.android)
+
+    // قراءة الأرشيفات: 7z/TAR/GZ/BZ2/XZ (Apache Commons Compress) + RAR (junrar) + مرمز XZ
+    implementation(libs.commons.compress)
+    implementation(libs.xz)
+    implementation(libs.junrar)
 
     // اختبارات وحدة JVM
     testImplementation("junit:junit:4.13.2")

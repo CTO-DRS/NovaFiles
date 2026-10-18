@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterial3Api::class)
 
-package com.novafiles.app.ui.zip
+package com.novafiles.app.ui.archive
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,10 +10,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -25,6 +26,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,7 +35,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.novafiles.app.R
-import com.novafiles.app.core.archive.ZipArchive
+import com.novafiles.app.core.archive.ArchiveEngine
+import com.novafiles.app.core.archive.ZipEntryInfo
 import com.novafiles.app.core.fs.FileType
 import com.novafiles.app.core.fs.LocalBrowser
 import com.novafiles.app.ui.ios.IOSFilledButton
@@ -49,65 +52,70 @@ import kotlinx.coroutines.withContext
 import java.io.File
 
 /**
- * عارض الأرشيف — فتح ملفات zip داخل التطبيق:
- * سرد المحتويات بأحجامها، معلومات الضغط، وزر استخراج كامل مع تقدم حي.
+ * عارض الأرشيف المعمم — يفتح ZIP و7z وTAR (وتغليفه gz/bz2/xz) وRAR وضغط أحادي الملف:
+ * سرد المحتويات بأحجامها، ملخص، وزر استخراج كامل مع تقدم حي (أو غير محدد حين يجهل الحجم).
  */
 @Composable
-fun ZipBrowserScreen(
+fun ArchiveBrowserScreen(
     path: String?,
     onBack: () -> Unit,
 ) {
-    val zip = path?.let { File(it) }
-    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    val archive = path?.let { File(it) }
+    val scope = rememberCoroutineScope()
     val snackbar = remember { SnackbarHostState() }
     val palette = LocalIOSPalette.current
 
-    var entries by remember { mutableStateOf<List<com.novafiles.app.core.archive.ZipEntryInfo>>(emptyList()) }
+    var entries by remember { mutableStateOf<List<ZipEntryInfo>>(emptyList()) }
+    var totalRaw by remember { mutableStateOf(0L) } // -1 = مجهول
     var loading by remember { mutableStateOf(true) }
     var error by remember { mutableStateOf<String?>(null) }
     var extracting by remember { mutableStateOf(false) }
-    var progress by remember { mutableStateOf(0f) }
+    var progress by remember { mutableStateOf<Float?>(null) } // null = غير محدد
     var extractedTo by remember { mutableStateOf<String?>(null) }
 
     // تحميل السرد خارج الخيط الرئيسي
     LaunchedEffect(path) {
-        if (zip == null || !zip.isFile) {
+        if (archive == null || !archive.isFile) {
             error = "no_file"
             loading = false
             return@LaunchedEffect
         }
         loading = true
         val result = withContext(Dispatchers.IO) {
-            runCatching { ZipArchive.list(zip) }
+            runCatching {
+                val list = ArchiveEngine.list(archive)
+                Pair(list, ArchiveEngine.totalUncompressed(archive))
+            }
         }
-        result.onSuccess { entries = it }
-            .onFailure { error = it.message ?: "read_failed" }
+        result.onSuccess { (list, total) ->
+            entries = list
+            totalRaw = total
+        }.onFailure { error = it.message ?: "read_failed" }
         loading = false
     }
 
     // فرز: المجلدات أولًا ثم أبجدياً
     val sorted = remember(entries) {
-        entries.sortedWith(compareByDescending<com.novafiles.app.core.archive.ZipEntryInfo> { it.isDirectory }.thenBy { it.name.lowercase() })
+        entries.sortedWith(compareByDescending<ZipEntryInfo> { it.isDirectory }.thenBy { it.name.lowercase() })
     }
     val filesCount = entries.count { !it.isDirectory }
     val dirsCount = entries.count { it.isDirectory }
-    val totalRaw = entries.sumOf { if (it.isDirectory) 0L else it.size }
-    val zipSize = zip?.length() ?: 0L
+    val compressedSize = archive?.length() ?: 0L
 
-    val doneMsg = stringResource(R.string.zip_done, filesCount)
-    val failMsg = stringResource(R.string.zip_failed)
+    val doneMsg = stringResource(R.string.archive_done, filesCount)
+    val failMsg = stringResource(R.string.archive_failed)
 
     fun extractAll() {
-        val z = zip ?: return
+        val z = archive ?: return
         if (extracting) return
         scope.launch {
             extracting = true
-            progress = 0f
+            progress = null
             val res = withContext(Dispatchers.IO) {
                 runCatching {
                     val dest = uniqueDest(z)
-                    val count = ZipArchive.extractAll(z, dest) { done, total ->
-                        progress = if (total > 0) done.toFloat() / total else 1f
+                    val count = ArchiveEngine.extractAll(z, dest) { done, total ->
+                        progress = if (total > 0) done.toFloat() / total else null
                     }
                     Pair(dest, count)
                 }
@@ -125,8 +133,8 @@ fun ZipBrowserScreen(
         snackbarHost = { SnackbarHost(snackbar) },
         topBar = {
             IOSNavBar(
-                title = zip?.name ?: stringResource(R.string.zip_title),
-                subtitle = zip?.parent,
+                title = archive?.name ?: stringResource(R.string.archive_title),
+                subtitle = archive?.parent,
                 collapsed = true,
                 onBack = onBack,
             )
@@ -139,20 +147,20 @@ fun ZipBrowserScreen(
         ) {
             when {
                 loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    androidx.compose.material3.CircularProgressIndicator()
+                    CircularProgressIndicator()
                 }
                 error != null -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(stringResource(R.string.zip_failed), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(stringResource(R.string.archive_failed), color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 else -> {
                     // ملخص الأرشيف
                     Spacer(Modifier.height(8.dp))
-                    IOSGroupHeader(stringResource(R.string.zip_title))
+                    IOSGroupHeader(stringResource(R.string.archive_title))
                     IOSGroupCard {
                         IOSListRow(
-                            title = stringResource(R.string.zip_counts, filesCount, dirsCount),
+                            title = stringResource(R.string.archive_counts, filesCount, dirsCount),
                             leading = {
-                                androidx.compose.material3.Icon(
+                                Icon(
                                     TypeIcons.icon(FileType.ARCHIVE),
                                     contentDescription = null,
                                     tint = TypeIcons.color(FileType.ARCHIVE),
@@ -161,10 +169,13 @@ fun ZipBrowserScreen(
                             },
                         )
                         IOSListRow(
-                            title = stringResource(R.string.zip_original_size, LocalBrowser.humanSize(totalRaw)),
+                            title = stringResource(
+                                if (totalRaw >= 0) R.string.archive_original_size else R.string.archive_size_unknown,
+                                if (totalRaw >= 0) LocalBrowser.humanSize(totalRaw) else "",
+                            ),
                         )
                         IOSListRow(
-                            title = stringResource(R.string.zip_compressed, LocalBrowser.humanSize(zipSize)),
+                            title = stringResource(R.string.archive_compressed, LocalBrowser.humanSize(compressedSize)),
                             showSeparator = false,
                         )
                     }
@@ -175,18 +186,27 @@ fun ZipBrowserScreen(
                         IOSGroupCard {
                             Column(Modifier.padding(vertical = 12.dp)) {
                                 Text(
-                                    stringResource(R.string.zip_extracting),
+                                    stringResource(R.string.archive_extracting),
                                     style = MaterialTheme.typography.bodySmall,
                                     color = palette.secondaryLabel,
                                     modifier = Modifier.padding(horizontal = 16.dp),
                                 )
                                 Spacer(Modifier.height(8.dp))
-                                LinearProgressIndicator(
-                                    progress = { progress },
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 16.dp),
-                                )
+                                val p = progress
+                                if (p != null) {
+                                    LinearProgressIndicator(
+                                        progress = { p },
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 16.dp),
+                                    )
+                                } else {
+                                    LinearProgressIndicator(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 16.dp),
+                                    )
+                                }
                             }
                         }
                     }
@@ -194,7 +214,7 @@ fun ZipBrowserScreen(
                     if (extractedTo != null && !extracting) {
                         Spacer(Modifier.height(10.dp))
                         Text(
-                            stringResource(R.string.zip_extracted_to, extractedTo ?: ""),
+                            stringResource(R.string.archive_extracted_to, extractedTo ?: ""),
                             style = MaterialTheme.typography.bodySmall,
                             color = palette.secondaryLabel,
                             maxLines = 2,
@@ -205,11 +225,11 @@ fun ZipBrowserScreen(
 
                     // قائمة المحتويات
                     Spacer(Modifier.height(10.dp))
-                    IOSGroupHeader(stringResource(R.string.zip_contents))
+                    IOSGroupHeader(stringResource(R.string.archive_contents))
                     IOSGroupCard(modifier = Modifier.weight(1f)) {
                         if (sorted.isEmpty()) {
                             Text(
-                                stringResource(R.string.zip_empty),
+                                stringResource(R.string.archive_empty),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = palette.secondaryLabel,
                                 modifier = Modifier.padding(16.dp),
@@ -221,8 +241,11 @@ fun ZipBrowserScreen(
                                     val type = if (isDir) FileType.FOLDER else FileType.ofName(entry.name)
                                     IOSListRow(
                                         title = entry.name.trimEnd('/'),
-                                        subtitle = if (isDir) stringResource(R.string.zip_folder)
-                                        else LocalBrowser.humanSize(entry.size),
+                                        subtitle = when {
+                                            isDir -> stringResource(R.string.archive_folder)
+                                            entry.size >= 0 -> LocalBrowser.humanSize(entry.size)
+                                            else -> "—"
+                                        },
                                         showSeparator = index < sorted.lastIndex,
                                         leading = {
                                             Box(
@@ -231,7 +254,7 @@ fun ZipBrowserScreen(
                                                     .clip(androidx.compose.foundation.shape.RoundedCornerShape(7.dp)),
                                                 contentAlignment = Alignment.Center,
                                             ) {
-                                                androidx.compose.material3.Icon(
+                                                Icon(
                                                     TypeIcons.icon(type),
                                                     contentDescription = null,
                                                     tint = TypeIcons.color(type),
@@ -246,7 +269,7 @@ fun ZipBrowserScreen(
                     }
                     Spacer(Modifier.height(12.dp))
                     IOSFilledButton(
-                        text = stringResource(R.string.zip_extract_all),
+                        text = stringResource(R.string.archive_extract_all),
                         onClick = { extractAll() },
                     )
                     Spacer(Modifier.height(16.dp))
@@ -256,10 +279,10 @@ fun ZipBrowserScreen(
     }
 }
 
-/** وجهة استخراج فريدة: الاسم الأساسي، ثم " (2)"، " (3)"… */
-private fun uniqueDest(zip: File): File {
-    val parent = zip.parentFile ?: File(".")
-    val base = zip.nameWithoutExtension.ifEmpty { "archive" }
+/** وجهة استخراج فريدة: الاسم الأساسي (بعد نزع الامتدادات)، ثم " (2)"، " (3)"… */
+private fun uniqueDest(archive: File): File {
+    val parent = archive.parentFile ?: File(".")
+    val base = com.novafiles.app.core.archive.stripArchiveExt(archive.name).ifEmpty { "archive" }
     var dest = File(parent, base)
     var i = 2
     while (dest.exists()) {

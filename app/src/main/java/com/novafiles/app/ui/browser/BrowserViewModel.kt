@@ -5,7 +5,9 @@ import android.os.Environment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.novafiles.app.AppContainer
+import com.novafiles.app.core.archive.ArchiveEngine
 import com.novafiles.app.core.archive.ZipArchive
+import com.novafiles.app.core.archive.stripArchiveExt
 import com.novafiles.app.core.fs.FileOps
 import com.novafiles.app.core.fs.FileType
 import com.novafiles.app.core.fs.LocalBrowser
@@ -240,10 +242,10 @@ class BrowserViewModel(
         }
     }
 
-    /** استخراج أرشيف zip إلى مجلد بنفس اسمه في نفس الدليل */
-    fun extractZip(zip: File) = runOp {
-        val dest = File(zip.parentFile, zip.nameWithoutExtension.ifEmpty { "extracted" })
-        ZipArchive.extractAll(zip, dest)
+    /** استخراج أي أرشيف مدعوم (zip/7z/tar/rar/…) إلى مجلد باسمه في نفس الدليل */
+    fun extractArchive(archive: File) = runOp {
+        val dest = File(archive.parentFile, stripArchiveExt(archive.name).ifEmpty { "extracted" })
+        ArchiveEngine.extractAll(archive, dest)
         "unzip:ok"
     }
 

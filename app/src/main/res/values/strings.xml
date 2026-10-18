@@ -205,21 +205,22 @@
     <string name="net_op_failed">فشلت العملية: %1$s</string>
     <string name="net_need_storage">امنح صلاحية «كل الملفات» لحفظ التنزيلات في مجلد Download</string>
 
-    <!-- ═══ الأرشيفات ZIP ═══ -->
-    <string name="zip_title">عارض الأرشيف</string>
+    <!-- ═══ الأرشيفات (ZIP/7z/TAR/RAR) ═══ -->
+    <string name="archive_title">عارض الأرشيف</string>
     <string name="action_compress">ضغط إلى ZIP</string>
     <string name="action_extract">استخراج هنا</string>
-    <string name="zip_extract_all">استخراج الكل</string>
-    <string name="zip_contents">المحتويات</string>
-    <string name="zip_folder">مجلد</string>
-    <string name="zip_empty">الأرشيف فارغ</string>
-    <string name="zip_counts">ملفات: %1$d • مجلدات: %2$d</string>
-    <string name="zip_original_size">الحجم المفكوك: %1$s</string>
-    <string name="zip_compressed">بعد الضغط: %1$s</string>
-    <string name="zip_extracting">جارٍ الاستخراج…</string>
-    <string name="zip_done">تم استخراج %1$d ملفاً</string>
-    <string name="zip_done_brief">تم الاستخراج</string>
-    <string name="zip_created">تم إنشاء الأرشيف</string>
-    <string name="zip_extracted_to">استُخرج إلى: %1$s</string>
-    <string name="zip_failed">فشل التعامل مع الأرشيف</string>
+    <string name="archive_extract_all">استخراج الكل</string>
+    <string name="archive_contents">المحتويات</string>
+    <string name="archive_folder">مجلد</string>
+    <string name="archive_empty">الأرشيف فارغ</string>
+    <string name="archive_counts">ملفات: %1$d • مجلدات: %2$d</string>
+    <string name="archive_original_size">الحجم المفكوك: %1$s</string>
+    <string name="archive_size_unknown">الحجم المفكوك: غير معروف</string>
+    <string name="archive_compressed">بعد الضغط: %1$s</string>
+    <string name="archive_extracting">جارٍ الاستخراج…</string>
+    <string name="archive_done">تم استخراج %1$d ملفاً</string>
+    <string name="archive_done_brief">تم الاستخراج</string>
+    <string name="archive_created">تم إنشاء الأرشيف</string>
+    <string name="archive_extracted_to">استُخرج إلى: %1$s</string>
+    <string name="archive_failed">فشل التعامل مع الأرشيف</string>
 </resources>

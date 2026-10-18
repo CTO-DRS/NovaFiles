@@ -16,6 +16,9 @@ biometric = "1.1.0"
 commonsNet = "3.11.0"
 smbj = "0.13.0"
 slf4jAndroid = "1.7.36"
+commonsCompress = "1.26.2"
+xz = "1.9"
+junrar = "7.5.5"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -42,6 +45,9 @@ kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-
 commons-net = { group = "commons-net", name = "commons-net", version.ref = "commonsNet" }
 smbj = { group = "com.hierynomus", name = "smbj", version.ref = "smbj" }
 slf4j-android = { group = "org.slf4j", name = "slf4j-android", version.ref = "slf4jAndroid" }
+commons-compress = { group = "org.apache.commons", name = "commons-compress", version.ref = "commonsCompress" }
+xz = { group = "org.tukaani", name = "xz", version.ref = "xz" }
+junrar = { group = "com.github.junrar", name = "junrar", version.ref = "junrar" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

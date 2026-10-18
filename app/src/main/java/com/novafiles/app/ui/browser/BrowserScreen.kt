@@ -79,6 +79,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import coil.compose.AsyncImage
 import com.novafiles.app.R
+import com.novafiles.app.core.archive.ArchiveEngine
 import com.novafiles.app.core.fs.FileType
 import com.novafiles.app.core.fs.LocalBrowser
 import com.novafiles.app.core.fs.SortMode
@@ -144,8 +145,8 @@ fun BrowserScreen(
             msg == "restore:ok" -> snackbar.showSnackbar(context.getString(R.string.op_done))
             msg == "mkdir:ok" || msg == "rename:ok" || msg == "vault:ok" ->
                 snackbar.showSnackbar(context.getString(R.string.op_done))
-            msg == "zip:ok" -> snackbar.showSnackbar(context.getString(R.string.zip_created))
-            msg == "unzip:ok" -> snackbar.showSnackbar(context.getString(R.string.zip_done_brief))
+            msg == "zip:ok" -> snackbar.showSnackbar(context.getString(R.string.archive_created))
+            msg == "unzip:ok" -> snackbar.showSnackbar(context.getString(R.string.archive_done_brief))
             msg.startsWith("copied:") -> snackbar.showSnackbar(
                 context.getString(R.string.copied_n, msg.substringAfter(":").toInt())
             )
@@ -528,7 +529,7 @@ private fun ItemMenu(file: File, vm: BrowserViewModel, context: android.content.
         Icon(Icons.Filled.MoreVert, contentDescription = null, modifier = Modifier.size(if (compact) 18.dp else 22.dp))
     }
     val isFav = vm.favoritesPaths.collectAsState().value.contains(file.absolutePath)
-    val isZip = !file.isDirectory && file.name.endsWith(".zip", ignoreCase = true)
+    val isExtractable = !file.isDirectory && ArchiveEngine.supports(file.name)
     val sEncrypt = stringResource(R.string.action_encrypt_vault)
     val sShare = stringResource(R.string.action_share)
     val sExtract = stringResource(R.string.action_extract)
@@ -543,8 +544,8 @@ private fun ItemMenu(file: File, vm: BrowserViewModel, context: android.content.
         cancelText = stringResource(R.string.action_cancel),
         title = file.name,
         actions = buildList {
-            if (isZip) {
-                add(IOSAction(sExtract) { vm.extractZip(file) })
+            if (isExtractable) {
+                add(IOSAction(sExtract) { vm.extractArchive(file) })
             }
             if (!file.isDirectory) {
                 add(IOSAction(sEncrypt) { vm.encryptIntoVault(file) })

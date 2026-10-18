@@ -23,10 +23,12 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.novafiles.app.R
+import com.novafiles.app.core.archive.ArchiveEngine
 import com.novafiles.app.core.fs.FileType
 import com.novafiles.app.ui.ios.IOSBarItem
 import com.novafiles.app.ui.ios.IOSBottomBar
 import com.novafiles.app.ui.ios.LocalIOSPalette
+import com.novafiles.app.ui.archive.ArchiveBrowserScreen
 import com.novafiles.app.ui.browser.BrowserScreen
 import com.novafiles.app.ui.editor.EditorScreen
 import com.novafiles.app.ui.favorites.FavoritesScreen
@@ -38,7 +40,6 @@ import com.novafiles.app.ui.search.SearchScreen
 import com.novafiles.app.ui.settings.SettingsScreen
 import com.novafiles.app.ui.vault.VaultScreen
 import com.novafiles.app.ui.viewer.ImageViewerScreen
-import com.novafiles.app.ui.zip.ZipBrowserScreen
 import java.io.File
 
 /** مسارات التنقل */
@@ -50,7 +51,7 @@ object Routes {
     const val SETTINGS = "settings"
     const val EDITOR = "editor?path={path}"
     const val VIEWER = "viewer?path={path}"
-    const val ZIP = "zip?path={path}"
+    const val ARCHIVE = "archive?path={path}"
     const val FTP = "ftp"
     const val NETWORK = "network"
     const val CONN_FORM = "connform?connId={connId}"
@@ -58,7 +59,7 @@ object Routes {
 
     fun editor(path: String) = "editor?path=${android.net.Uri.encode(path)}"
     fun viewer(path: String) = "viewer?path=${android.net.Uri.encode(path)}"
-    fun zip(path: String) = "zip?path=${android.net.Uri.encode(path)}"
+    fun archive(path: String) = "archive?path=${android.net.Uri.encode(path)}"
     fun connForm(connId: Long) = "connform?connId=$connId"
     fun remote(connId: Long) = "remote?connId=$connId"
 }
@@ -113,7 +114,7 @@ fun openFile(nav: NavHostController, file: File) {
         FileType.IMAGE -> nav.navigate(Routes.viewer(file.absolutePath))
         FileType.TEXT, FileType.CODE -> nav.navigate(Routes.editor(file.absolutePath))
         FileType.ARCHIVE ->
-            if (file.name.endsWith(".zip", ignoreCase = true)) nav.navigate(Routes.zip(file.absolutePath))
+            if (ArchiveEngine.supports(file.name)) nav.navigate(Routes.archive(file.absolutePath))
             else com.novafiles.app.util.Intents.view(ctx, file)
         else -> com.novafiles.app.util.Intents.view(ctx, file)
     }
@@ -201,14 +202,14 @@ private fun NovaNavHost(nav: NavHostController) {
             ImageViewerScreen(path = entry.arguments?.getString("path"))
         }
         composable(
-            Routes.ZIP,
+            Routes.ARCHIVE,
             arguments = listOf(navArgument("path") {
                 type = NavType.StringType
                 nullable = true
                 defaultValue = null
             }),
         ) { entry ->
-            ZipBrowserScreen(
+            ArchiveBrowserScreen(
                 path = entry.arguments?.getString("path"),
                 onBack = { nav.popBackStack() },
             )
