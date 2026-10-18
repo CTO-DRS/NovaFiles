@@ -57,6 +57,10 @@
     <string name="view_list">قائمة</string>
     <string name="show_hidden">إظهار المخفيّة</string>
 
+    <string name="pane_send_to_other">إرسال إلى اللوحة الأخرى</string>
+    <string name="pane_send_copy">نسخ إلى اللوحة الأخرى</string>
+    <string name="pane_send_move">نقل إلى اللوحة الأخرى</string>
+
     <string name="search_hint">ابحث في التخزين…</string>
     <string name="filter_type">النوع</string>
     <string name="type_any">الكل</string>

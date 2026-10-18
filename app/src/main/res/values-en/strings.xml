@@ -57,6 +57,10 @@
     <string name="view_list">List</string>
     <string name="show_hidden">Show hidden</string>
 
+    <string name="pane_send_to_other">Send to other pane</string>
+    <string name="pane_send_copy">Copy to other pane</string>
+    <string name="pane_send_move">Move to other pane</string>
+
     <string name="search_hint">Search storage…</string>
     <string name="filter_type">Type</string>
     <string name="type_any">Any</string>

@@ -156,6 +156,26 @@ class BrowserViewModel(
         clearSelection()
     }
 
+    /**
+     * إرسال التحديد مباشرة إلى مجلد اللوحة الأخرى (وضع اللوحتين).
+     * يختصر دورة «نسخ ← التبديل ← لصق» إلى نقرة واحدة.
+     */
+    fun sendSelectionTo(targetDir: File, move: Boolean) {
+        val sources = _selection.value.map { File(it) }.filter { it.exists() }
+        clearSelection()
+        if (sources.isEmpty()) return
+        runOp {
+            val res = if (move) FileOps.moveAll(sources, targetDir) else FileOps.copyAll(sources, targetDir)
+            res.getOrThrow()
+            if (move) {
+                clipboardOp.clear()
+                "move:ok"
+            } else {
+                "copied:${sources.size}"
+            }
+        }
+    }
+
     fun pasteHere() {
         val op = clipboardOp.op ?: return
         val sources = clipboardOp.paths.map { File(it) }.filter { it.exists() }
