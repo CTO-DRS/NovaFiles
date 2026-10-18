@@ -71,6 +71,8 @@
     <string name="filter_root">Search from</string>
     <string name="search_found">%1$d results found</string>
     <string name="search_scanning">Scanning…</string>
+    <string name="index_building">Building search index… %1$d items — search becomes instant when done</string>
+    <string name="index_rebuild">Rebuild search index</string>
 
     <string name="vault_locked_title">Vault is locked</string>
     <string name="vault_pin_hint">Enter PIN</string>

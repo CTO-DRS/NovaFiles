@@ -16,9 +16,11 @@ enum class FileType {
             "c", "cpp", "h", "go", "rs", "sh", "yml", "yaml", "toml", "sql", "php", "rb", "swift")
         private val textExts = setOf("txt", "md", "log", "csv", "ini", "conf", "properties")
 
-        fun of(file: File): FileType {
-            if (file.isDirectory) return FOLDER
-            val ext = file.extension.lowercase()
+        fun of(file: File): FileType = if (file.isDirectory) FOLDER else ofName(file.name)
+
+        /** تصنيف من الاسم فقط (لا يحتاج IO — يُستخدم لصفوف الفهرس) */
+        fun ofName(name: String): FileType {
+            val ext = name.substringAfterLast('.', "").lowercase()
             return when {
                 ext in imageExts -> IMAGE
                 ext == "pdf" -> PDF
@@ -34,8 +36,12 @@ enum class FileType {
         }
 
         /** تصنيف يُستخدم لمرشح البحث (يجمع TEXT وCODE وDOC معاً) */
-        fun filterGroup(type: FileType, file: File): Boolean {
-            val real = of(file)
+        fun filterGroup(type: FileType, file: File): Boolean =
+            filterGroup(type, file.name, file.isDirectory)
+
+        /** مرشح البحث من خصائص صف الفهرس مباشرة */
+        fun filterGroup(type: FileType, name: String, isDirectory: Boolean): Boolean {
+            val real = if (isDirectory) FOLDER else ofName(name)
             return when (type) {
                 FOLDER -> real == FOLDER
                 IMAGE, VIDEO, AUDIO, ARCHIVE, APK, PDF -> real == type

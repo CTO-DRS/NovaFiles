@@ -71,6 +71,8 @@
     <string name="filter_root">البحث من</string>
     <string name="search_found">تم العثور على %1$d نتيجة</string>
     <string name="search_scanning">جارٍ الفحص…</string>
+    <string name="index_building">جارٍ بناء فهرس البحث… %1$d عنصرًا — سيصبح البحث فورياً بعد الاكتمال</string>
+    <string name="index_rebuild">إعادة بناء فهرس البحث</string>
 
     <string name="vault_locked_title">الخزنة مقفلة</string>
     <string name="vault_pin_hint">أدخل رمز PIN</string>

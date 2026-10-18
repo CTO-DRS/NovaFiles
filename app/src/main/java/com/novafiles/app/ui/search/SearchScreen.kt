@@ -36,6 +36,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,6 +47,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.novafiles.app.R
+import com.novafiles.app.core.fs.FileIndexer
 import com.novafiles.app.core.fs.FileType
 import com.novafiles.app.core.fs.LocalBrowser
 import com.novafiles.app.core.fs.SearchEngine
@@ -56,6 +58,7 @@ import com.novafiles.app.ui.ios.IOSNavIconButton
 import com.novafiles.app.ui.ios.IOSNavBar
 import com.novafiles.app.ui.ios.IOSSearchField
 import com.novafiles.app.ui.ios.LocalIOSPalette
+import com.novafiles.app.novaContainer
 import com.novafiles.app.util.TypeIcons
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -64,9 +67,10 @@ import kotlinx.coroutines.launch
 import androidx.compose.ui.platform.LocalContext
 import java.io.File
 
-/** شاشة البحث الذكي — فحص فوري مع مرشحات النوع والحجم والتاريخ */
+/** شاشة البحث الذكي — نتائج فورية من فهرس Room-FTS، وفحص حيّ احتياطي قبل جاهزية الفهرس */
 @Composable
 fun SearchScreen(onOpenFile: (File) -> Unit) {
+    val container = LocalContext.current.novaContainer
     var query by remember { mutableStateOf("") }
     var typeFilter by remember { mutableStateOf(FileType.OTHER) } // OTHER = الكل
     var minSizeMb by remember { mutableStateOf("") }
@@ -76,18 +80,25 @@ fun SearchScreen(onOpenFile: (File) -> Unit) {
     var filtersOpen by remember { mutableStateOf(false) }
     var typeOpen by remember { mutableStateOf(false) }
     var job by remember { mutableStateOf<Job?>(null) }
+    val scope = rememberCoroutineScope()
 
-    val root = remember { File("/storage/emulated/0") }
+    val root = remember { File(FileIndexer.ROOT) }
+    val indexReady by FileIndexer.ready.collectAsState()
+    val indexBusy by FileIndexer.indexing.collectAsState()
+    val indexProgress by FileIndexer.progress.collectAsState()
+
+    // تحفيز الفهرسة الأولى عند فتح الشاشة (إن لم تكن جاهزة)
+    LaunchedEffect(Unit) { if (!indexReady) launch { FileIndexer.ensureIndexed(container.db) } }
 
     // إعادة تشغيل البحث مع خصم زمني قصير (تجربة كتابة سلسة)
-    LaunchedEffect(query, typeFilter, minSizeMb, maxAgeDays) {
+    LaunchedEffect(query, typeFilter, minSizeMb, maxAgeDays, indexReady) {
         job?.cancel()
         if (query.isBlank() && typeFilter == FileType.OTHER && minSizeMb.isBlank() && maxAgeDays.isBlank()) {
             state = SearchEngine.SearchState.Results(emptyList(), done = true)
             scanning = false
             return@LaunchedEffect
         }
-        delay(350)
+        delay(250)
         val q = SearchEngine.Query(
             text = query,
             type = typeFilter,
@@ -96,17 +107,26 @@ fun SearchScreen(onOpenFile: (File) -> Unit) {
             root = root,
             showHidden = false,
         )
-        scanning = true
-        job = launch {
-            kotlinx.coroutines.withTimeoutOrNull(60_000) {
-                SearchEngine.searchStream(q)
-                    .catch { state = SearchEngine.SearchState.Results(emptyList(), done = true) }
-                    .collect { st ->
-                        state = st
-                        if (st is SearchEngine.SearchState.Results && st.done) scanning = false
-                    }
-            }
+        if (indexReady) {
+            // ★ بحث فوري من الفهرس — بلا فحص ولا انتظار
             scanning = false
+            state = runCatching {
+                SearchEngine.SearchState.Results(FileIndexer.search(container.db, q), done = true)
+            }.getOrElse { SearchEngine.SearchState.Results(emptyList(), done = true) }
+        } else {
+            // فحص حيّ احتياطي حتى تكتمل الفهرسة
+            scanning = true
+            job = launch {
+                kotlinx.coroutines.withTimeoutOrNull(60_000) {
+                    SearchEngine.searchStream(q)
+                        .catch { state = SearchEngine.SearchState.Results(emptyList(), done = true) }
+                        .collect { st ->
+                            state = st
+                            if (st is SearchEngine.SearchState.Results && st.done) scanning = false
+                        }
+                }
+                scanning = false
+            }
         }
     }
 
@@ -158,6 +178,16 @@ fun SearchScreen(onOpenFile: (File) -> Unit) {
                 onValueChange = { maxAgeDays = it.filter { c -> c.isDigit() } },
                 hint = stringResource(R.string.filter_max_age),
                 modifier = Modifier.width(150.dp),
+            )
+        }
+
+        // حالة الفهرسة الخلفية (تظهر حتى يصبح البحث فورياً)
+        if (indexBusy) {
+            Text(
+                stringResource(R.string.index_building, indexProgress),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
             )
         }
 
@@ -226,6 +256,9 @@ fun SearchScreen(onOpenFile: (File) -> Unit) {
         actions = listOf(
             IOSAction(stringResource(R.string.filter_min_size)) { },
             IOSAction(stringResource(R.string.filter_max_age)) { },
+            IOSAction(stringResource(R.string.index_rebuild)) {
+                scope.launch { FileIndexer.rebuild(container.db) }
+            },
         ),
     )
 }
