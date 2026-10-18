@@ -45,12 +45,22 @@ import com.novafiles.app.R
 import com.novafiles.app.core.archive.ArchiveEngine
 import com.novafiles.app.core.fs.FileType
 import com.novafiles.app.core.fs.LocalBrowser
+import com.novafiles.app.core.ftp.FtpServerService
+import com.novafiles.app.core.ftp.localIpv4
+import com.novafiles.app.core.perms.StorageAccess
+import com.novafiles.app.core.qr.QrPayloads
+import com.novafiles.app.data.prefs.SettingsStore
 import com.novafiles.app.ui.ios.IOSAction
 import com.novafiles.app.ui.ios.IOSActionSheet
 import com.novafiles.app.ui.ios.IOSAlertDialog
 import com.novafiles.app.ui.ios.IOSAlertTextField
 import com.novafiles.app.ui.ios.IOSGroupCard
+import com.novafiles.app.ui.ios.LocalIOSPalette
+import com.novafiles.app.ui.qr.QrDialog
 import com.novafiles.app.util.TypeIcons
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import java.io.File
 
 /**
@@ -76,6 +86,75 @@ internal fun PermissionBanner(onGrant: () -> Unit) {
     }
 }
 
+/** حالة حوار QR السريع — رابط جاهز + ما إذا كنا من بدأ الخادم ليجري إيقافه عند الإغلاق */
+data class QuickQrState(
+    val title: String,
+    val url: String,
+    val stopOnClose: Boolean,
+)
+
+/**
+ * تشغيل «إرسال عبر QR»: يشغّل خادم FTP بجذر مجلد العنصر المحدد
+ * ويولّد رابطاً مباشراً للمسح من الجهاز الثاني.
+ * يعمل من قائمة العنصر أو شريط التحديد في الوضعين الأحادي واللوحين.
+ */
+internal fun launchQuickQr(
+    context: android.content.Context,
+    scope: CoroutineScope,
+    files: List<File>,
+    onReady: (QuickQrState) -> Unit,
+    onError: () -> Unit,
+) {
+    val target = files.firstOrNull() ?: return
+    val root = target.parentFile ?: return
+    if (!StorageAccess.hasAccess(context)) {
+        onError()
+        return
+    }
+    scope.launch {
+        val prefs = SettingsStore(context)
+        val port = runCatching { prefs.ftpPort.first() }.getOrDefault(2121).coerceIn(1024, 65535)
+        val user = runCatching { prefs.ftpUser.first() }.getOrDefault("nova").ifBlank { "nova" }
+        val pass = runCatching { prefs.ftpPass.first() }.getOrDefault("nova").ifBlank { "nova" }
+        val ip = localIpv4()
+        if (ip == null) {
+            onError()
+            return@launch
+        }
+        // إن كان الخادم يعمل أصلاً بمجلد آخر نتركه يعمل بعد الإغلاق
+        val stopOnClose = !FtpServerService.state.value.running
+        FtpServerService.start(context, root.absolutePath, port, user, pass)
+        val title = if (files.size == 1) target.name else "${files.size}"
+        onReady(
+            QuickQrState(
+                title = title,
+                url = QrPayloads.ftpTargetUrl(ip, port, user, pass, root.absolutePath, target.absolutePath),
+                stopOnClose = stopOnClose,
+            ),
+        )
+    }
+}
+
+/** مضيف حوار QR السريع — يعرض الرمز ويتولى إيقاف الخادم إن بدأناه له */
+@Composable
+internal fun QuickQrHost(
+    state: QuickQrState?,
+    itemCount: Int,
+    onDismiss: () -> Unit,
+) {
+    if (state == null) return
+    val context = LocalContext.current
+    QrDialog(
+        title = state.title,
+        url = state.url,
+        hint = stringResource(R.string.qr_send_hint),
+        onDismiss = {
+            if (state.stopOnClose) FtpServerService.stop(context)
+            onDismiss()
+        },
+    )
+}
+
 /** ترجمة رسائل ViewModel الداخلية إلى نصوص Snackbar — مشتركة بين الوضعين */
 suspend fun showBrowserMessage(snackbar: SnackbarHostState, context: android.content.Context, msg: String) {
     when {
@@ -93,6 +172,9 @@ suspend fun showBrowserMessage(snackbar: SnackbarHostState, context: android.con
         msg.startsWith("cut:") -> snackbar.showSnackbar(
             context.getString(R.string.cut_n, msg.substringAfter(":").toInt())
         )
+        msg == "rar_encrypted" -> snackbar.showSnackbar(context.getString(R.string.error_rar_encrypted))
+        msg == "rar5_unsupported" -> snackbar.showSnackbar(context.getString(R.string.error_rar5_unsupported))
+        msg == "qr_no_network" -> snackbar.showSnackbar(context.getString(R.string.ftp_no_wifi))
         else -> snackbar.showSnackbar(msg)
     }
 }
@@ -237,6 +319,7 @@ internal fun GridFileItem(
 @Composable
 internal fun ItemMenu(file: File, vm: BrowserViewModel, context: android.content.Context, compact: Boolean = false) {
     var open by remember { mutableStateOf(false) }
+    val qrScope = androidx.compose.runtime.rememberCoroutineScope()
     IconButton(onClick = { open = true }, modifier = Modifier.size(if (compact) 30.dp else 40.dp)) {
         Icon(Icons.Filled.MoreVert, contentDescription = null, modifier = Modifier.size(if (compact) 18.dp else 22.dp))
     }
@@ -244,6 +327,7 @@ internal fun ItemMenu(file: File, vm: BrowserViewModel, context: android.content
     val isExtractable = !file.isDirectory && ArchiveEngine.supports(file.name)
     val sEncrypt = stringResource(R.string.action_encrypt_vault)
     val sShare = stringResource(R.string.action_share)
+    val sQrSend = stringResource(R.string.qr_send_action)
     val sExtract = stringResource(R.string.action_extract)
     val sFavAdd = stringResource(R.string.action_favorite_add)
     val sFavRemove = stringResource(R.string.action_favorite_remove)
@@ -263,6 +347,18 @@ internal fun ItemMenu(file: File, vm: BrowserViewModel, context: android.content
                 add(IOSAction(sEncrypt) { vm.encryptIntoVault(file) })
                 add(IOSAction(sShare) { com.novafiles.app.util.Intents.share(context, file) })
             }
+            add(
+                IOSAction(sQrSend) {
+                    open = false
+                    launchQuickQr(
+                        context = context,
+                        scope = qrScope,
+                        files = listOf(file),
+                        onReady = { vm.showQuickQr(it) },
+                        onError = { vm.notify("qr_no_network") },
+                    )
+                },
+            )
             add(
                 IOSAction(
                     if (isFav) sFavRemove else sFavAdd,

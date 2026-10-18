@@ -18,6 +18,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountTree
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
@@ -27,6 +28,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.FolderZip
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.QrCode2
 import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material.icons.filled.ViewList
@@ -44,6 +46,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -129,8 +132,11 @@ private fun SinglePaneBrowser(
     val listState = rememberLazyListState()
     val gridState = rememberLazyGridState()
     val palette = LocalIOSPalette.current
+    val scope = rememberCoroutineScope()
     var menuOpen by remember { mutableStateOf(false) }
     var sortOpen by remember { mutableStateOf(false) }
+    var treeOpen by remember { mutableStateOf(false) }
+    val quickQr by vm.quickQr.collectAsState()
 
     // تحميل المسار عند أول ظهور وعند تغيّره
     LaunchedEffect(Unit) { vm.load(path) }
@@ -165,6 +171,10 @@ private fun SinglePaneBrowser(
                     collapsed = scrolled,
                     onBack = if (File(path).parentFile != null) ({ vm.up() }) else null,
                     actions = {
+                        IOSNavIconButton(
+                            Icons.Filled.AccountTree,
+                            contentDescription = stringResource(R.string.tree_open),
+                        ) { treeOpen = true }
                         if (hasClipboard) {
                             IOSNavIconButton(
                                 Icons.Filled.ContentPaste,
@@ -194,6 +204,18 @@ private fun SinglePaneBrowser(
                     onBack = { vm.clearSelection() },
                     backIcon = Icons.Filled.Close,
                     actions = {
+                        IOSNavIconButton(
+                            Icons.Filled.QrCode2,
+                            contentDescription = stringResource(R.string.qr_send_action),
+                        ) {
+                            launchQuickQr(
+                                context = context,
+                                scope = scope,
+                                files = selection.map { File(it) },
+                                onReady = { vm.showQuickQr(it) },
+                                onError = { vm.notify("qr_no_network") },
+                            )
+                        }
                         IOSNavIconButton(
                             Icons.Filled.SelectAll,
                             contentDescription = stringResource(R.string.action_select_all),
@@ -308,7 +330,22 @@ private fun SinglePaneBrowser(
             )
             BrowserDialog.None -> {}
         }
+
+        // لوحة الشجرة الجانبية — فوق كل شيء، من الحافة الابتدائية
+        DirectoryTreePanel(
+            visible = treeOpen,
+            currentPath = path,
+            onNavigate = { vm.load(it) },
+            onDismiss = { treeOpen = false },
+        )
     }
+
+    // حوار إرسال QR السريع
+    QuickQrHost(
+        state = quickQr,
+        itemCount = 1,
+        onDismiss = { vm.consumeQuickQr() },
+    )
 
     // تحديث الصلاحية بعد العودة من الإعدادات
     LaunchedEffect(path) { hasAccess = StorageAccess.hasAccess(context) }
@@ -345,6 +382,16 @@ private fun SinglePaneBrowser(
             IOSAction(stringResource(R.string.menu_network)) {
                 menuOpen = false
                 onOpenNetwork()
+            },
+            IOSAction(stringResource(R.string.qr_show)) {
+                menuOpen = false
+                launchQuickQr(
+                    context = context,
+                    scope = scope,
+                    files = listOf(File(path)),
+                    onReady = { vm.showQuickQr(it) },
+                    onError = { vm.notify("qr_no_network") },
+                )
             },
         ),
     )

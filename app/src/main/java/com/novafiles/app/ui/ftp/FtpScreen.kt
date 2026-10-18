@@ -23,6 +23,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.QrCode2
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -49,6 +50,7 @@ import com.novafiles.app.R
 import com.novafiles.app.core.ftp.FtpServerService
 import com.novafiles.app.core.ftp.localIpv4
 import com.novafiles.app.core.perms.StorageAccess
+import com.novafiles.app.core.qr.QrPayloads
 import com.novafiles.app.data.prefs.SettingsStore
 import com.novafiles.app.ui.ios.IOSAlertDialog
 import com.novafiles.app.ui.ios.IOSFilledButton
@@ -60,6 +62,7 @@ import com.novafiles.app.ui.ios.IOSMiniField
 import com.novafiles.app.ui.ios.IOSSwitch
 import com.novafiles.app.ui.ios.IOSNavBar
 import com.novafiles.app.ui.ios.LocalIOSPalette
+import com.novafiles.app.ui.qr.QrDialog
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -84,6 +87,7 @@ fun FtpScreen(onBack: () -> Unit) {
     var pass by remember { mutableStateOf("nova") }
     var alertText by remember { mutableStateOf<String?>(null) }
     var copied by remember { mutableStateOf(false) }
+    var qrOpen by remember { mutableStateOf(false) }
 
     // تحميل الإعدادات المحفوظة
     LaunchedEffect(Unit) {
@@ -134,6 +138,11 @@ fun FtpScreen(onBack: () -> Unit) {
         clipboard.setText(AnnotatedString(url))
         copied = true
     }
+
+    // رابط QR الكامل مع بيانات الدخول — من الحقول المحفوظة نفسها
+    val qrUrl = if (running && ip != null) {
+        QrPayloads.ftpShareUrl(ip, shareState.port, user.trim().ifBlank { "nova" }, pass.trim().ifBlank { "nova" })
+    } else null
 
     LaunchedEffect(copied) { if (copied) { delay(2000); copied = false } }
 
@@ -219,6 +228,23 @@ fun FtpScreen(onBack: () -> Unit) {
                             )
                         }
                         Spacer(Modifier.width(8.dp))
+                        // زر عرض رمز QR
+                        Box(
+                            modifier = Modifier
+                                .size(34.dp)
+                                .background(p.fill, RoundedCornerShape(9.dp)),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.QrCode2,
+                                contentDescription = stringResource(R.string.qr_show),
+                                tint = p.accent,
+                                modifier = Modifier
+                                    .size(20.dp)
+                                    .clickable { qrOpen = true },
+                            )
+                        }
+                        Spacer(Modifier.width(8.dp))
                         Box(
                             modifier = Modifier
                                 .size(34.dp)
@@ -291,8 +317,13 @@ fun FtpScreen(onBack: () -> Unit) {
             }
             IOSGroupFooter(stringResource(R.string.ftp_settings_footer))
 
-            // ═══ زر النسخ البديل أثناء العمل ═══
+            // ═══ زر النسخ البديل وزر QR أثناء العمل ═══
             if (running && shareState.url != null) {
+                IOSFilledButton(
+                    text = stringResource(R.string.qr_show),
+                    onClick = { qrOpen = true },
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                )
                 IOSFilledButton(
                     text = stringResource(R.string.ftp_copy_url),
                     onClick = { copyUrl() },
@@ -313,6 +344,16 @@ fun FtpScreen(onBack: () -> Unit) {
             IOSGroupFooter(stringResource(R.string.ftp_security_note))
             Spacer(Modifier.height(16.dp))
         }
+    }
+
+    // ═══ حوار رمز QR ═══
+    if (qrOpen && qrUrl != null) {
+        QrDialog(
+            title = stringResource(R.string.qr_share_title),
+            url = qrUrl,
+            hint = stringResource(R.string.qr_share_hint),
+            onDismiss = { qrOpen = false },
+        )
     }
 
     // ═══ تنبيهات ═══

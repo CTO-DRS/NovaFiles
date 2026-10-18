@@ -18,6 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
@@ -70,6 +71,10 @@ class BrowserViewModel(
 
     private val _op = MutableStateFlow(OpState())
     val op: StateFlow<OpState> = _op
+
+    // حوار «إرسال عبر QR» السريع — مشترك بين قائمة العنصر وشريط التحديد
+    private val _quickQr = MutableStateFlow<QuickQrState?>(null)
+    val quickQr: StateFlow<QuickQrState?> = _quickQr.asStateFlow()
 
     val viewGrid: StateFlow<Boolean> = container.settings.viewGrid
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
@@ -323,6 +328,19 @@ class BrowserViewModel(
 
     fun consumeMessage() {
         _message.value = null
+    }
+
+    /** رسالة مباشرة إلى شريط التنبيهات (تُستخدم من تدفقات خارج runOp) */
+    fun notify(msg: String) {
+        _message.value = msg
+    }
+
+    fun showQuickQr(state: QuickQrState) {
+        _quickQr.value = state
+    }
+
+    fun consumeQuickQr() {
+        _quickQr.value = null
     }
 
     fun setViewGrid(grid: Boolean) = viewModelScope.launch { container.settings.setViewGrid(grid) }
