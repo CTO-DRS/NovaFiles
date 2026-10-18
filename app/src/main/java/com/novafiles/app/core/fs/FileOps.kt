@@ -15,9 +15,26 @@ object FileOps {
     private fun totalBytes(files: List<File>): Long =
         files.sumOf { if (it.isDirectory) it.walkTopDown().filter { f -> f.isFile }.sumOf { f -> f.length() } else it.length() }
 
+    /**
+     * يمنع نسخ/نقل مجلد إلى نفسه أو إلى داخل أحد مجلداته الفرعية.
+     * بدونه يسقط المسار الاحتياطي (نسخ ثم حذف) في عودية لا نهائية تلتهم القرص.
+     */
+    private fun validateNotSelfTarget(sources: List<File>, targetDir: File) {
+        val target = targetDir.canonicalFile.path
+        for (src in sources) {
+            val s = src.canonicalFile
+            if (!s.isDirectory) continue
+            val sp = s.path
+            require(target != sp && !target.startsWith(sp + File.separator)) {
+                "cannot copy/move directory \"${s.name}\" into itself or a subdirectory of itself"
+            }
+        }
+    }
+
     /** نسخ قائمة عناصر إلى مجلد هدف مع تقرير تقدم */
     suspend fun copyAll(sources: List<File>, targetDir: File): Result<Int> = withContext(Dispatchers.IO) {
         runCatching {
+            validateNotSelfTarget(sources, targetDir)
             var done = 0L
             for (src in sources) {
                 copyRec(src, uniqueChild(targetDir, src.name)) { n -> done += n }
@@ -29,6 +46,7 @@ object FileOps {
     /** نقل = نسخ ثم حذف المصدر (مع مسار سريع عبر renameTo داخل القرص نفسه) */
     suspend fun moveAll(sources: List<File>, targetDir: File): Result<Int> = withContext(Dispatchers.IO) {
         runCatching {
+            validateNotSelfTarget(sources, targetDir)
             for (src in sources) {
                 val dst = uniqueChild(targetDir, src.name)
                 if (!src.renameTo(dst)) {
