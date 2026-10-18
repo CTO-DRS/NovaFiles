@@ -31,6 +31,9 @@ import com.novafiles.app.ui.browser.BrowserScreen
 import com.novafiles.app.ui.editor.EditorScreen
 import com.novafiles.app.ui.favorites.FavoritesScreen
 import com.novafiles.app.ui.ftp.FtpScreen
+import com.novafiles.app.ui.network.ConnectionFormScreen
+import com.novafiles.app.ui.network.NetworkScreen
+import com.novafiles.app.ui.network.RemoteBrowserScreen
 import com.novafiles.app.ui.search.SearchScreen
 import com.novafiles.app.ui.settings.SettingsScreen
 import com.novafiles.app.ui.vault.VaultScreen
@@ -47,9 +50,14 @@ object Routes {
     const val EDITOR = "editor?path={path}"
     const val VIEWER = "viewer?path={path}"
     const val FTP = "ftp"
+    const val NETWORK = "network"
+    const val CONN_FORM = "connform?connId={connId}"
+    const val REMOTE = "remote?connId={connId}"
 
     fun editor(path: String) = "editor?path=${android.net.Uri.encode(path)}"
     fun viewer(path: String) = "viewer?path=${android.net.Uri.encode(path)}"
+    fun connForm(connId: Long) = "connform?connId=$connId"
+    fun remote(connId: Long) = "remote?connId=$connId"
 }
 
 private data class Tab(val route: String, val labelRes: Int, val icon: androidx.compose.ui.graphics.vector.ImageVector)
@@ -116,6 +124,7 @@ private fun NovaNavHost(nav: NavHostController) {
                 onOpenFile = { openFile(nav, it) },
                 onOpenSearchFor = { /* يُفتح من شريط التنقل مباشرة */ },
                 onOpenFtp = { nav.navigate(Routes.FTP) },
+                onOpenNetwork = { nav.navigate(Routes.NETWORK) },
             )
         }
         composable(Routes.SEARCH) {
@@ -132,6 +141,38 @@ private fun NovaNavHost(nav: NavHostController) {
         }
         composable(Routes.FTP) {
             FtpScreen(onBack = { nav.popBackStack() })
+        }
+        composable(Routes.NETWORK) {
+            NetworkScreen(
+                onBack = { nav.popBackStack() },
+                onConnect = { nav.navigate(Routes.remote(it.id)) },
+                onEdit = { nav.navigate(Routes.connForm(it.id)) },
+                onAdd = { nav.navigate(Routes.connForm(0L)) },
+            )
+        }
+        composable(
+            Routes.CONN_FORM,
+            arguments = listOf(navArgument("connId") {
+                type = NavType.LongType
+                defaultValue = 0L
+            }),
+        ) { entry ->
+            ConnectionFormScreen(
+                connectionId = entry.arguments?.getLong("connId") ?: 0L,
+                onBack = { nav.popBackStack() },
+                onSaved = { nav.popBackStack() },
+            )
+        }
+        composable(
+            Routes.REMOTE,
+            arguments = listOf(navArgument("connId") {
+                type = NavType.LongType
+            }),
+        ) { entry ->
+            RemoteBrowserScreen(
+                connectionId = entry.arguments?.getLong("connId") ?: 0L,
+                onBack = { nav.popBackStack() },
+            )
         }
         composable(
             Routes.EDITOR,

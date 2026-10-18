@@ -13,8 +13,8 @@ android {
         applicationId = "com.novafiles.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 5
-        versionName = "0.5.0"
+        versionCode = 6
+        versionName = "0.6.0"
     }
 
     buildTypes {
@@ -39,6 +39,7 @@ android {
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
+            excludes += "/META-INF/{INDEX.LIST,DEPENDENCIES,LICENSE,LICENSE.txt,NOTICE,NOTICE.txt}"
         }
     }
 }
@@ -80,6 +81,11 @@ dependencies {
 
     // كوروتينات
     implementation(libs.kotlinx.coroutines.android)
+
+    // عميل الشبكة: FTP (Apache Commons Net) و SMB2/3 (SMBJ)
+    implementation(libs.commons.net)
+    implementation(libs.smbj)
+    implementation(libs.slf4j.android)
 
     // اختبارات وحدة JVM
     testImplementation("junit:junit:4.13.2")

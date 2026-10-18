@@ -86,6 +86,8 @@ class FtpServer(
             val ss = ServerSocket()
             ss.reuseAddress = true
             ss.bind(InetSocketAddress("0.0.0.0", port))
+            // عند طلب منفذ عابر (0) نحدّث الحقل بالمنفذ الفعلي المقيد
+            if (port == 0) port = ss.localPort
             serverSocket = ss
             isRunning = true
             acceptThread = Thread({

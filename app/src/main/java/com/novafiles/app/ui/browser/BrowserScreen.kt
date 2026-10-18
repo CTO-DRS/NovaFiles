@@ -99,6 +99,7 @@ fun BrowserScreen(
     onOpenFile: (File) -> Unit,
     onOpenSearchFor: (String) -> Unit,
     onOpenFtp: () -> Unit = {},
+    onOpenNetwork: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val vm: BrowserViewModel = viewModel(
@@ -348,6 +349,10 @@ fun BrowserScreen(
             IOSAction(stringResource(R.string.menu_wifi_share)) {
                 menuOpen = false
                 onOpenFtp()
+            },
+            IOSAction(stringResource(R.string.menu_network)) {
+                menuOpen = false
+                onOpenNetwork()
             },
         ),
     )

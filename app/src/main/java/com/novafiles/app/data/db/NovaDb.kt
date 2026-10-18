@@ -79,6 +79,40 @@ data class FileIndexFtsEntity(
     val name: String,
 )
 
+/** اتصال شبكة محفوظ (FTP أو SMB) لشاشة «الاتصال بالخوادم» */
+@Entity(tableName = "connections")
+data class ConnectionEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val name: String,
+    val protocol: String,      // "FTP" أو "SMB"
+    val host: String,
+    val port: Int,
+    val domain: String = "",
+    val username: String = "",
+    val password: String = "",
+    val share: String = "",    // SMB: اسم المشاركة
+    val initialPath: String = "",
+    val lastUsedAt: Long = 0L,
+)
+
+@Dao
+interface ConnectionsDao {
+    @Query("SELECT * FROM connections ORDER BY lastUsedAt DESC, id DESC")
+    fun observeAll(): Flow<List<ConnectionEntity>>
+
+    @Query("SELECT * FROM connections WHERE id = :id")
+    suspend fun byId(id: Long): ConnectionEntity?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsert(c: ConnectionEntity): Long
+
+    @Query("DELETE FROM connections WHERE id = :id")
+    suspend fun remove(id: Long)
+
+    @Query("UPDATE connections SET lastUsedAt = :ts WHERE id = :id")
+    suspend fun touch(id: Long, ts: Long)
+}
+
 @Dao
 interface FileIndexDao {
     @Query("SELECT COUNT(*) FROM file_index")
@@ -109,12 +143,13 @@ interface FileIndexDao {
 }
 
 @Database(
-    entities = [FavoriteEntity::class, TagEntity::class, FileIndexEntity::class, FileIndexFtsEntity::class],
-    version = 2,
+    entities = [FavoriteEntity::class, TagEntity::class, FileIndexEntity::class, FileIndexFtsEntity::class, ConnectionEntity::class],
+    version = 3,
     exportSchema = false,
 )
 abstract class NovaDb : RoomDatabase() {
     abstract fun favoritesDao(): FavoritesDao
     abstract fun tagsDao(): TagsDao
     abstract fun fileIndexDao(): FileIndexDao
+    abstract fun connectionsDao(): ConnectionsDao
 }
