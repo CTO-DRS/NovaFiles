@@ -97,7 +97,7 @@
     <string name="theme_light">Light</string>
     <string name="theme_dark">Dark</string>
     <string name="settings_about">About NovaFiles</string>
-    <string name="settings_about_body">NovaFiles v0.1.0 — open-source Android file manager built with Kotlin and Jetpack Compose. A modern rival to MiXplorer with a Material 3 interface.</string>
+    <string name="settings_about_body">NovaFiles v0.2.0 — an open-source Android file manager built with Kotlin and Jetpack Compose. A modern MiXplorer rival with a native iPhone-style interface.</string>
     <string name="settings_clear_trash">Empty trash</string>
     <string name="settings_trash_cleared">Trash emptied</string>
 

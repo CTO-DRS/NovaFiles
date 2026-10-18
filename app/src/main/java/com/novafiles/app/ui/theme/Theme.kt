@@ -2,38 +2,51 @@ package com.novafiles.app.ui.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
 import com.novafiles.app.data.prefs.ThemeMode
+import com.novafiles.app.ui.ios.IOSDark
+import com.novafiles.app.ui.ios.IOSLight
+import com.novafiles.app.ui.ios.LocalIOSPalette
 
+/**
+ * ثيم NovaFiles بلوحة iOS الرسمية — يحوّل ألوان كوبرتينو إلى
+ * MaterialTheme بحيث تظهر كل العناصر المتبقية بمظهر iOS موحّد.
+ * ملاحظة: ألوان النظام الديناميكية معطّلة عمداً للحفاظ على الهوية.
+ */
 private val LightScheme = lightColorScheme(
-    primary = NovaPrimary,
-    onPrimary = NovaSurfaceLight,
-    secondary = NovaSecondary,
-    tertiary = NovaTertiary,
-    error = NovaError,
-    background = NovaBackgroundLight,
-    surface = NovaSurfaceLight,
-    surfaceVariant = NovaSurfaceVariantLight,
+    primary = IOSLight.accent,
+    onPrimary = Color.White,
+    secondary = IOSLight.accent,
+    tertiary = IOSLight.orange,
+    error = IOSLight.destructive,
+    background = IOSLight.groupedBg,
+    onBackground = IOSLight.label,
+    surface = IOSLight.cardBg,
+    onSurface = IOSLight.label,
+    surfaceVariant = IOSLight.fill,
+    onSurfaceVariant = IOSLight.secondaryLabel,
+    outline = IOSLight.separator,
 )
 
-// لون نص داكن إضافي
-private val Color_DarkOnPrimary = androidx.compose.ui.graphics.Color(0xFF2A2760)
-
 private val DarkScheme = darkColorScheme(
-    primary = NovaPrimaryDark,
-    onPrimary = Color_DarkOnPrimary,
-    secondary = NovaSecondary,
-    tertiary = NovaTertiary,
-    error = NovaError,
-    background = NovaBackgroundDark,
-    surface = NovaSurfaceDark,
-    surfaceVariant = NovaSurfaceVariantDark,
+    primary = IOSDark.accent,
+    onPrimary = Color.White,
+    secondary = IOSDark.accent,
+    tertiary = IOSDark.orange,
+    error = IOSDark.destructive,
+    background = IOSDark.groupedBg,
+    onBackground = IOSDark.label,
+    surface = IOSDark.cardBg,
+    onSurface = IOSDark.label,
+    surfaceVariant = IOSDark.fill,
+    onSurfaceVariant = IOSDark.secondaryLabel,
+    outline = IOSDark.separator,
 )
 
 @Composable
@@ -46,13 +59,11 @@ fun NovaTheme(
         ThemeMode.LIGHT -> false
         ThemeMode.DARK -> true
     }
-    val colorScheme = when {
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
-        darkTheme -> DarkScheme
-        else -> LightScheme
+    val colorScheme = if (darkTheme) DarkScheme else LightScheme
+
+    CompositionLocalProvider(
+        LocalIOSPalette provides if (darkTheme) IOSDark else IOSLight,
+    ) {
+        MaterialTheme(colorScheme = colorScheme, content = content)
     }
-    MaterialTheme(colorScheme = colorScheme, content = content)
 }

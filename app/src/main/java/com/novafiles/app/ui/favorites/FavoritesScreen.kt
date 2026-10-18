@@ -24,7 +24,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -40,6 +39,8 @@ import com.novafiles.app.R
 import com.novafiles.app.core.fs.FileType
 import com.novafiles.app.core.fs.LocalBrowser
 import com.novafiles.app.novaContainer
+import com.novafiles.app.ui.ios.IOSNavBar
+import com.novafiles.app.ui.ios.LocalIOSPalette
 import com.novafiles.app.util.TypeIcons
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.rememberCoroutineScope
@@ -54,8 +55,12 @@ fun FavoritesScreen(onOpenFile: (File) -> Unit) {
     val scope = rememberCoroutineScope()
     val favorites by container.db.favoritesDao().observeAll().collectAsState(initial = emptyList())
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        TopAppBar(title = { Text(stringResource(R.string.nav_favorites)) })
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(LocalIOSPalette.current.groupedBg),
+    ) {
+        IOSNavBar(title = stringResource(R.string.nav_favorites))
 
         if (favorites.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

@@ -31,9 +31,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -53,6 +51,11 @@ import com.novafiles.app.R
 import com.novafiles.app.core.fs.FileType
 import com.novafiles.app.core.fs.LocalBrowser
 import com.novafiles.app.core.fs.SearchEngine
+import com.novafiles.app.ui.ios.IOSMiniField
+import com.novafiles.app.ui.ios.IOSNavIconButton
+import com.novafiles.app.ui.ios.IOSNavBar
+import com.novafiles.app.ui.ios.IOSSearchField
+import com.novafiles.app.ui.ios.LocalIOSPalette
 import com.novafiles.app.util.TypeIcons
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -107,13 +110,13 @@ fun SearchScreen(onOpenFile: (File) -> Unit) {
         }
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        TopAppBar(
-            title = { Text(stringResource(R.string.nav_search)) },
+    Column(modifier = Modifier.fillMaxSize().background(LocalIOSPalette.current.groupedBg)) {
+        IOSNavBar(
+            title = stringResource(R.string.nav_search),
             actions = {
                 Box {
-                    IconButton(onClick = { filtersOpen = true }) {
-                        Icon(Icons.Filled.FilterList, contentDescription = stringResource(R.string.filter_type))
+                    IOSNavIconButton(Icons.Filled.FilterList, contentDescription = stringResource(R.string.filter_type)) {
+                        filtersOpen = true
                     }
                     DropdownMenu(expanded = filtersOpen, onDismissRequest = { filtersOpen = false }) {
                         DropdownMenuItem(
@@ -129,12 +132,11 @@ fun SearchScreen(onOpenFile: (File) -> Unit) {
             },
         )
 
-        OutlinedTextField(
+        IOSSearchField(
             value = query,
             onValueChange = { query = it },
-            placeholder = { Text(stringResource(R.string.search_hint)) },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp),
+            hint = stringResource(R.string.search_hint),
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
         )
 
         // شريط المرشحات
@@ -173,18 +175,16 @@ fun SearchScreen(onOpenFile: (File) -> Unit) {
                     }
                 }
             }
-            OutlinedTextField(
+            IOSMiniField(
                 value = minSizeMb,
                 onValueChange = { minSizeMb = it.filter { c -> c.isDigit() } },
-                label = { Text(stringResource(R.string.filter_min_size), maxLines = 1) },
-                singleLine = true,
+                hint = stringResource(R.string.filter_min_size),
                 modifier = Modifier.width(150.dp),
             )
-            OutlinedTextField(
+            IOSMiniField(
                 value = maxAgeDays,
                 onValueChange = { maxAgeDays = it.filter { c -> c.isDigit() } },
-                label = { Text(stringResource(R.string.filter_max_age), maxLines = 1) },
-                singleLine = true,
+                hint = stringResource(R.string.filter_max_age),
                 modifier = Modifier.width(150.dp),
             )
         }

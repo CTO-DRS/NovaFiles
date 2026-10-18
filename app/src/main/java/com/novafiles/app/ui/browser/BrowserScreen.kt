@@ -19,13 +19,16 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.ContentCut
 import androidx.compose.material.icons.filled.ContentPaste
@@ -43,25 +46,20 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.ViewList
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -87,6 +85,12 @@ import com.novafiles.app.core.fs.LocalBrowser
 import com.novafiles.app.core.fs.SortMode
 import com.novafiles.app.core.perms.StorageAccess
 import com.novafiles.app.novaContainer
+import com.novafiles.app.ui.ios.IOSAlertDialog
+import com.novafiles.app.ui.ios.IOSAlertTextField
+import com.novafiles.app.ui.ios.IOSGroupCard
+import com.novafiles.app.ui.ios.IOSNavIconButton
+import com.novafiles.app.ui.ios.IOSNavBar
+import com.novafiles.app.ui.ios.LocalIOSPalette
 import com.novafiles.app.util.TypeIcons
 import java.io.File
 
@@ -114,9 +118,15 @@ fun BrowserScreen(
     val favorites by vm.favoritesPaths.collectAsState()
     val clipboard = vm.clipboardOp.paths
     val clipboardOp = vm.clipboardOp.op
+    val hasClipboard = clipboardOp != null
 
     val snackbar = remember { SnackbarHostState() }
     var hasAccess by remember { mutableStateOf(StorageAccess.hasAccess(context)) }
+    val listState = rememberLazyListState()
+    val gridState = rememberLazyGridState()
+    val palette = LocalIOSPalette.current
+    var menuOpen by remember { mutableStateOf(false) }
+    var sortOpen by remember { mutableStateOf(false) }
 
     // تحميل المسار عند أول ظهور وعند تغيّره
     LaunchedEffect(Unit) { vm.load(path) }
@@ -149,38 +159,103 @@ fun BrowserScreen(
     }
 
     Scaffold(
+        containerColor = palette.groupedBg,
         snackbarHost = { SnackbarHost(snackbar) },
         topBar = {
             if (selection.isEmpty()) {
-                BrowserTopBar(
-                    path = path,
-                    viewGrid = viewGrid,
-                    showHidden = showHidden,
-                    sort = vm.sortModeNow(),
-                    clipboardCount = clipboard.size,
-                    hasClipboard = clipboardOp != null,
-                    onUp = { vm.up() },
-                    onToggleView = { vm.setViewGrid(!viewGrid) },
-                    onToggleHidden = { vm.setShowHidden(!showHidden) },
-                    onSort = { vm.setSort(it) },
-                    onRefresh = { vm.refresh() },
-                    onNewFolder = { vm.showDialog(BrowserDialog.NewFolder) },
-                    onPaste = { vm.pasteHere() },
+                val scrolled = if (viewGrid) {
+                    gridState.firstVisibleItemIndex > 0 || gridState.firstVisibleItemScrollOffset > 12
+                } else {
+                    listState.firstVisibleItemIndex > 0 || listState.firstVisibleItemScrollOffset > 12
+                }
+                IOSNavBar(
+                    title = File(path).name.ifEmpty { "NovaFiles" },
+                    subtitle = path,
+                    collapsed = scrolled,
+                    onBack = if (File(path).parentFile != null) ({ vm.up() }) else null,
+                    actions = {
+                        if (hasClipboard) {
+                            IOSNavIconButton(
+                                Icons.Filled.ContentPaste,
+                                contentDescription = stringResource(R.string.action_paste_here),
+                            ) { vm.pasteHere() }
+                        }
+                        Box {
+                            IOSNavIconButton(Icons.Filled.Sort, contentDescription = stringResource(R.string.sort_by)) {
+                                sortOpen = true
+                            }
+                            DropdownMenu(expanded = sortOpen, onDismissRequest = { sortOpen = false }) {
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.sort_name)) },
+                                    onClick = { vm.setSort(SortMode.NAME); sortOpen = false },
+                                )
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.sort_size)) },
+                                    onClick = { vm.setSort(SortMode.SIZE); sortOpen = false },
+                                )
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.sort_date)) },
+                                    onClick = { vm.setSort(SortMode.DATE); sortOpen = false },
+                                )
+                            }
+                        }
+                        IOSNavIconButton(
+                            if (viewGrid) Icons.Filled.ViewList else Icons.Filled.GridView,
+                            contentDescription = stringResource(R.string.view_grid),
+                        ) { vm.setViewGrid(!viewGrid) }
+                        Box {
+                            IOSNavIconButton(Icons.Filled.MoreVert, contentDescription = null) {
+                                menuOpen = true
+                            }
+                            DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.action_new_folder)) },
+                                    onClick = { vm.showDialog(BrowserDialog.NewFolder); menuOpen = false },
+                                    leadingIcon = { Icon(Icons.Filled.CreateNewFolder, null) },
+                                )
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.action_refresh)) },
+                                    onClick = { vm.refresh(); menuOpen = false },
+                                    leadingIcon = { Icon(Icons.Filled.Refresh, null) },
+                                )
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.show_hidden)) },
+                                    onClick = { vm.setShowHidden(!showHidden); menuOpen = false },
+                                )
+                            }
+                        }
+                        IOSNavIconButton(
+                            Icons.Filled.Add,
+                            contentDescription = stringResource(R.string.action_new_folder),
+                        ) { vm.showDialog(BrowserDialog.NewFolder) }
+                    },
                 )
             } else {
-                SelectionTopBar(
-                    count = selection.size,
-                    onSelectAll = { vm.selectAll() },
-                    onCopy = { vm.copySelection() },
-                    onCut = { vm.cutSelection() },
-                    onDelete = { vm.showDialog(BrowserDialog.ConfirmDelete(selection.size)) },
-                    onClear = { vm.clearSelection() },
+                IOSNavBar(
+                    title = stringResource(R.string.items_count, selection.size),
+                    collapsed = true,
+                    onBack = { vm.clearSelection() },
+                    backIcon = Icons.Filled.Close,
+                    actions = {
+                        IOSNavIconButton(
+                            Icons.Filled.SelectAll,
+                            contentDescription = stringResource(R.string.action_select_all),
+                        ) { vm.selectAll() }
+                        IOSNavIconButton(
+                            Icons.Filled.ContentCopy,
+                            contentDescription = stringResource(R.string.action_copy),
+                        ) { vm.copySelection() }
+                        IOSNavIconButton(
+                            Icons.Filled.ContentCut,
+                            contentDescription = stringResource(R.string.action_move),
+                        ) { vm.cutSelection() }
+                        IOSNavIconButton(
+                            Icons.Filled.Delete,
+                            contentDescription = stringResource(R.string.action_delete),
+                            tint = palette.destructive,
+                        ) { vm.showDialog(BrowserDialog.ConfirmDelete(selection.size)) }
+                    },
                 )
-            }
-        },
-        floatingActionButton = {
-            FloatingActionButton(onClick = { vm.showDialog(BrowserDialog.NewFolder) }) {
-                Icon(Icons.Filled.CreateNewFolder, contentDescription = stringResource(R.string.action_new_folder))
             }
         },
     ) { padding ->
@@ -207,6 +282,7 @@ fun BrowserScreen(
                 LazyVerticalGrid(
                     columns = GridCells.Adaptive(minSize = 96.dp),
                     modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp),
+                    state = gridState,
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
@@ -226,7 +302,7 @@ fun BrowserScreen(
                     }
                 }
             } else {
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                LazyColumn(modifier = Modifier.fillMaxSize(), state = listState) {
                     items(items, key = { it.absolutePath }) { file ->
                         ListFileItem(
                             file = file,
@@ -260,18 +336,14 @@ fun BrowserScreen(
                 onConfirm = { name -> vm.rename(d.file, name); vm.closeDialog() },
             )
             is BrowserDialog.Details -> DetailsDialog(file = d.file, onClose = { vm.closeDialog() })
-            is BrowserDialog.ConfirmDelete -> AlertDialog(
-                onDismissRequest = { vm.closeDialog() },
-                title = { Text(stringResource(R.string.dialog_delete_title)) },
-                text = { Text(stringResource(R.string.dialog_delete_body, d.count)) },
-                confirmButton = {
-                    TextButton(onClick = { vm.deleteSelection(); vm.closeDialog() }) {
-                        Text(stringResource(R.string.action_delete))
-                    }
-                },
-                dismissButton = {
-                    TextButton(onClick = { vm.closeDialog() }) { Text(stringResource(R.string.action_cancel)) }
-                },
+            is BrowserDialog.ConfirmDelete -> IOSAlertDialog(
+                title = stringResource(R.string.dialog_delete_title),
+                message = stringResource(R.string.dialog_delete_body, d.count),
+                confirmText = stringResource(R.string.action_delete),
+                onConfirm = { vm.deleteSelection(); vm.closeDialog() },
+                dismissText = stringResource(R.string.action_cancel),
+                onDismiss = { vm.closeDialog() },
+                destructive = true,
             )
             BrowserDialog.None -> {}
         }
@@ -282,146 +354,16 @@ fun BrowserScreen(
 }
 
 @Composable
-private fun BrowserTopBar(
-    path: String,
-    viewGrid: Boolean,
-    showHidden: Boolean,
-    sort: SortMode,
-    clipboardCount: Int,
-    hasClipboard: Boolean,
-    onUp: () -> Unit,
-    onToggleView: () -> Unit,
-    onToggleHidden: () -> Unit,
-    onSort: (SortMode) -> Unit,
-    onRefresh: () -> Unit,
-    onNewFolder: () -> Unit,
-    onPaste: () -> Unit,
-) {
-    var menuOpen by remember { mutableStateOf(false) }
-    var sortOpen by remember { mutableStateOf(false) }
-
-    TopAppBar(
-        title = {
-            Column {
-                Text(File(path).name.ifEmpty { "NovaFiles" }, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                Text(
-                    path,
-                    style = MaterialTheme.typography.labelSmall,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-        },
-        navigationIcon = {
-            if (File(path).parentFile != null) {
-                IconButton(onClick = onUp) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_go_up))
-                }
-            }
-        },
-        actions = {
-            if (hasClipboard) {
-                IconButton(onClick = onPaste) {
-                    Icon(Icons.Filled.ContentPaste, contentDescription = stringResource(R.string.action_paste_here))
-                }
-            }
-            Box {
-                IconButton(onClick = { sortOpen = true }) {
-                    Icon(Icons.Filled.Sort, contentDescription = stringResource(R.string.sort_by))
-                }
-                DropdownMenu(expanded = sortOpen, onDismissRequest = { sortOpen = false }) {
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.sort_name)) },
-                        onClick = { onSort(SortMode.NAME); sortOpen = false },
-                    )
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.sort_size)) },
-                        onClick = { onSort(SortMode.SIZE); sortOpen = false },
-                    )
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.sort_date)) },
-                        onClick = { onSort(SortMode.DATE); sortOpen = false },
-                    )
-                }
-            }
-            IconButton(onClick = onToggleView) {
-                Icon(
-                    if (viewGrid) Icons.Filled.ViewList else Icons.Filled.GridView,
-                    contentDescription = stringResource(R.string.view_grid),
-                )
-            }
-            Box {
-                IconButton(onClick = { menuOpen = true }) {
-                    Icon(Icons.Filled.MoreVert, contentDescription = null)
-                }
-                DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.action_new_folder)) },
-                        onClick = { onNewFolder(); menuOpen = false },
-                        leadingIcon = { Icon(Icons.Filled.CreateNewFolder, null) },
-                    )
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.action_refresh)) },
-                        onClick = { onRefresh(); menuOpen = false },
-                        leadingIcon = { Icon(Icons.Filled.Refresh, null) },
-                    )
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.show_hidden)) },
-                        onClick = { onToggleHidden(); menuOpen = false },
-                        trailingIcon = { if (showHidden) Icon(Icons.Filled.Close, null) },
-                    )
-                }
-            }
-        },
-    )
-}
-
-@Composable
-private fun SelectionTopBar(
-    count: Int,
-    onSelectAll: () -> Unit,
-    onCopy: () -> Unit,
-    onCut: () -> Unit,
-    onDelete: () -> Unit,
-    onClear: () -> Unit,
-) {
-    TopAppBar(
-        title = { Text(stringResource(R.string.items_count, count)) },
-        navigationIcon = {
-            IconButton(onClick = onClear) {
-                Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.action_clear_selection))
-            }
-        },
-        actions = {
-            IconButton(onClick = onSelectAll) {
-                Icon(Icons.Filled.SelectAll, contentDescription = stringResource(R.string.action_select_all))
-            }
-            IconButton(onClick = onCopy) {
-                Icon(Icons.Filled.ContentCopy, contentDescription = stringResource(R.string.action_copy))
-            }
-            IconButton(onClick = onCut) {
-                Icon(Icons.Filled.ContentCut, contentDescription = stringResource(R.string.action_move))
-            }
-            IconButton(onClick = onDelete) {
-                Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.action_delete))
-            }
-        },
-    )
-}
-
-@Composable
 private fun PermissionBanner(onGrant: () -> Unit) {
-    Card(
-        modifier = Modifier.fillMaxWidth().padding(12.dp),
-        colors = androidx.compose.material3.CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-        ),
-    ) {
+    IOSGroupCard {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(stringResource(R.string.storage_access_title), style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.size(4.dp))
-            Text(stringResource(R.string.storage_access_body), style = MaterialTheme.typography.bodySmall)
+            Text(
+                stringResource(R.string.storage_access_body),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
             Spacer(Modifier.size(8.dp))
             TextButton(onClick = onGrant) { Text(stringResource(R.string.storage_access_grant)) }
         }
@@ -619,53 +561,56 @@ private fun ItemMenu(file: File, vm: BrowserViewModel, context: android.content.
 @Composable
 private fun NameDialog(title: String, initial: String, onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
     var text by remember { mutableStateOf(initial) }
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(title) },
-        text = {
-            OutlinedTextField(
-                value = text,
-                onValueChange = { text = it },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth(),
-            )
+    IOSAlertDialog(
+        title = title,
+        confirmText = stringResource(R.string.action_ok),
+        onConfirm = { if (text.isNotBlank()) onConfirm(text.trim()) },
+        dismissText = stringResource(R.string.action_cancel),
+        onDismiss = onDismiss,
+        content = {
+            IOSAlertTextField(value = text, onValueChange = { text = it })
         },
-        confirmButton = {
-            TextButton(onClick = { if (text.isNotBlank()) onConfirm(text.trim()) }) {
-                Text(stringResource(R.string.action_ok))
-            }
-        },
-        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) } },
     )
 }
 
 @Composable
 private fun DetailsDialog(file: File, onClose: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onClose,
-        title = { Text(stringResource(R.string.dialog_details_title)) },
-        text = {
-            Column {
-                Text(file.name, style = MaterialTheme.typography.titleSmall)
+    IOSAlertDialog(
+        title = stringResource(R.string.dialog_details_title),
+        confirmText = stringResource(R.string.action_ok),
+        onConfirm = onClose,
+        content = {
+            Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                Text(
+                    file.name,
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
                 Spacer(Modifier.size(8.dp))
-                Text("${stringResource(R.string.details_path)}: ${file.absolutePath}", style = MaterialTheme.typography.bodySmall)
+                Text(
+                    "${stringResource(R.string.details_path)}: ${file.absolutePath}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
                 if (file.isDirectory) {
                     Text(
                         "${stringResource(R.string.details_items)}: ${LocalBrowser.itemCount(file)}",
                         style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 } else {
                     Text(
                         "${stringResource(R.string.details_size)}: ${LocalBrowser.humanSize(file.length())}",
                         style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
                 Text(
                     "${stringResource(R.string.details_modified)}: ${LocalBrowser.formatDate(file.lastModified())}",
                     style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         },
-        confirmButton = { TextButton(onClick = onClose) { Text(stringResource(R.string.action_ok)) } },
     )
 }

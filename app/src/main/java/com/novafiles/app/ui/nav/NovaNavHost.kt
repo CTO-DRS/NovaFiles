@@ -1,21 +1,18 @@
 package com.novafiles.app.ui.nav
 
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -27,6 +24,9 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.novafiles.app.R
 import com.novafiles.app.core.fs.FileType
+import com.novafiles.app.ui.ios.IOSBarItem
+import com.novafiles.app.ui.ios.IOSBottomBar
+import com.novafiles.app.ui.ios.LocalIOSPalette
 import com.novafiles.app.ui.browser.BrowserScreen
 import com.novafiles.app.ui.editor.EditorScreen
 import com.novafiles.app.ui.favorites.FavoritesScreen
@@ -50,7 +50,7 @@ object Routes {
     fun viewer(path: String) = "viewer?path=${android.net.Uri.encode(path)}"
 }
 
-private data class Tab(val route: String, val labelRes: Int, val icon: ImageVector)
+private data class Tab(val route: String, val labelRes: Int, val icon: androidx.compose.ui.graphics.vector.ImageVector)
 
 private val tabs = listOf(
     Tab(Routes.BROWSER, R.string.nav_browser, Icons.Filled.Folder),
@@ -66,28 +66,30 @@ fun NovaRoot() {
     val backStack by nav.currentBackStackEntryAsState()
     val currentRoute = backStack?.destination?.route
     val showBottomBar = currentRoute in tabs.map { it.route }
+    val palette = LocalIOSPalette.current
 
-    Scaffold(
-        bottomBar = {
-            if (showBottomBar) {
-                NavigationBar {
-                    tabs.forEach { tab ->
-                        val label = stringResource(tab.labelRes)
-                        NavigationBarItem(
-                            selected = currentRoute == tab.route,
-                            onClick = { nav.navigateTop(tab.route) },
-                            icon = { Icon(tab.icon, contentDescription = label) },
-                            label = { Text(label) },
-                        )
-                    }
-                }
-            }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(palette.groupedBg),
+    ) {
+        Box(modifier = Modifier.weight(1f)) {
+            NovaNavHost(nav = nav)
         }
-    ) { padding ->
-        NovaNavHost(
-            nav = nav,
-            modifier = Modifier.padding(padding),
-        )
+        // ═══ شريط التبويبات السفلي بنمط iOS ═══
+        if (showBottomBar) {
+            IOSBottomBar(
+                items = tabs.map { tab ->
+                    IOSBarItem(
+                        key = tab.route,
+                        label = stringResource(tab.labelRes),
+                        icon = tab.icon,
+                    )
+                },
+                selected = currentRoute ?: Routes.BROWSER,
+                onSelect = { route -> nav.navigateTop(route) },
+            )
+        }
     }
 }
 
@@ -102,11 +104,10 @@ fun openFile(nav: NavHostController, file: File) {
 }
 
 @Composable
-private fun NovaNavHost(nav: NavHostController, modifier: Modifier = Modifier) {
+private fun NovaNavHost(nav: NavHostController) {
     NavHost(
         navController = nav,
         startDestination = Routes.BROWSER,
-        modifier = modifier,
     ) {
         composable(Routes.BROWSER) {
             BrowserScreen(

@@ -97,7 +97,7 @@
     <string name="theme_light">فاتح</string>
     <string name="theme_dark">داكن</string>
     <string name="settings_about">عن NovaFiles</string>
-    <string name="settings_about_body">NovaFiles v0.1.0 — مدير ملفات أندرويد مفتوح المصدر مبني بـ Kotlin وJetpack Compose. منافس عصري لـ MiXplorer بواجهة Material 3.</string>
+    <string name="settings_about_body">NovaFiles v0.2.0 — مدير ملفات أندرويد مفتوح المصدر مبني بـ Kotlin وJetpack Compose. منافس عصري لـ MiXplorer بواجهة بتصميم iPhone الأصيل.</string>
     <string name="settings_clear_trash">تفريغ سلة المحذوفات</string>
     <string name="settings_trash_cleared">تم تفريغ السلة</string>
 

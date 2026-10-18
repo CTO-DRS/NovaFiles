@@ -4,25 +4,15 @@ package com.novafiles.app.ui.settings
 
 import android.os.Environment
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -30,20 +20,32 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.os.LocaleListCompat
 import com.novafiles.app.R
 import com.novafiles.app.data.prefs.ThemeMode
 import com.novafiles.app.novaContainer
+import com.novafiles.app.ui.ios.IOSCheckMark
+import com.novafiles.app.ui.ios.IOSGroupCard
+import com.novafiles.app.ui.ios.IOSGroupFooter
+import com.novafiles.app.ui.ios.IOSGroupHeader
+import com.novafiles.app.ui.ios.IOSListRow
+import com.novafiles.app.ui.ios.IOSNavBar
+import com.novafiles.app.ui.ios.LocalIOSPalette
 import kotlinx.coroutines.launch
-import androidx.compose.runtime.rememberCoroutineScope
 import java.io.File
 
-/** الإعدادات: اللغة (عربي/إنجليزي)، السمة (نظام/فاتح/داكن)، تفريغ السلة، عن التطبيق */
+/**
+ * الإعدادات بنمط إعدادات iOS تماماً:
+ * عنوان كبير، قوائم مجمّعة بحواف دائرية، فاصل شعري داخلي،
+ * وعلامة ✓ زرقاء للخيار المحدد (اللغة والسمة).
+ */
 @Composable
 fun SettingsScreen() {
     val context = LocalContext.current
@@ -52,6 +54,7 @@ fun SettingsScreen() {
     var themeMode by remember { mutableStateOf(ThemeMode.SYSTEM) }
     var localeTag by remember { mutableStateOf("ar") }
     var cleared by remember { mutableStateOf(false) }
+    val scrollState = rememberScrollState()
 
     LaunchedEffect(Unit) {
         container.settings.themeMode.collect {
@@ -66,95 +69,98 @@ fun SettingsScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState()),
+            .background(LocalIOSPalette.current.groupedBg)
+            .verticalScroll(scrollState),
     ) {
-        TopAppBar(title = { Text(stringResource(R.string.settings_title)) })
+        IOSNavBar(
+            title = stringResource(R.string.settings_title),
+            collapsed = scrollState.value > 24,
+        )
 
         // ----- اللغة -----
-        SectionCard(title = stringResource(R.string.settings_language)) {
-            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                SegmentedButton(
-                    selected = localeTag == "ar",
-                    onClick = {
-                        localeTag = "ar"
-                        AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("ar"))
-                    },
-                    shape = SegmentedButtonDefaults.itemShape(index = 0, count = 2),
-                ) { Text("العربية") }
-                SegmentedButton(
-                    selected = localeTag == "en",
-                    onClick = {
-                        localeTag = "en"
-                        AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("en"))
-                    },
-                    shape = SegmentedButtonDefaults.itemShape(index = 1, count = 2),
-                ) { Text("English") }
-            }
+        IOSGroupHeader(stringResource(R.string.settings_language))
+        IOSGroupCard {
+            IOSListRow(
+                title = "العربية",
+                onClick = {
+                    localeTag = "ar"
+                    AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("ar"))
+                },
+                showSeparator = true,
+                trailing = { if (localeTag == "ar") IOSCheckMark() },
+            )
+            IOSListRow(
+                title = "English",
+                onClick = {
+                    localeTag = "en"
+                    AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("en"))
+                },
+                showSeparator = false,
+                trailing = { if (localeTag == "en") IOSCheckMark() },
+            )
         }
 
         // ----- السمة -----
-        SectionCard(title = stringResource(R.string.settings_theme)) {
-            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                val modes = listOf(
-                    ThemeMode.SYSTEM to R.string.theme_system,
-                    ThemeMode.LIGHT to R.string.theme_light,
-                    ThemeMode.DARK to R.string.theme_dark,
-                )
-                modes.forEachIndexed { index, (mode, labelRes) ->
-                    SegmentedButton(
-                        selected = themeMode == mode,
-                        onClick = {
-                            themeMode = mode
-                            scope.launch { container.settings.setThemeMode(mode) }
-                        },
-                        shape = SegmentedButtonDefaults.itemShape(index = index, count = modes.size),
-                    ) { Text(stringResource(labelRes)) }
-                }
-            }
+        IOSGroupHeader(stringResource(R.string.settings_theme))
+        IOSGroupCard {
+            IOSListRow(
+                title = stringResource(R.string.theme_system),
+                onClick = {
+                    themeMode = ThemeMode.SYSTEM
+                    scope.launch { container.settings.setThemeMode(ThemeMode.SYSTEM) }
+                },
+                trailing = { if (themeMode == ThemeMode.SYSTEM) IOSCheckMark() },
+            )
+            IOSListRow(
+                title = stringResource(R.string.theme_light),
+                onClick = {
+                    themeMode = ThemeMode.LIGHT
+                    scope.launch { container.settings.setThemeMode(ThemeMode.LIGHT) }
+                },
+                trailing = { if (themeMode == ThemeMode.LIGHT) IOSCheckMark() },
+            )
+            IOSListRow(
+                title = stringResource(R.string.theme_dark),
+                onClick = {
+                    themeMode = ThemeMode.DARK
+                    scope.launch { container.settings.setThemeMode(ThemeMode.DARK) }
+                },
+                showSeparator = false,
+                trailing = { if (themeMode == ThemeMode.DARK) IOSCheckMark() },
+            )
         }
 
-        // ----- سلة المحذوفات -----
-        SectionCard(title = stringResource(R.string.nav_settings)) {
-            TextButton(onClick = {
-                scope.launch {
-                    val trash = File(Environment.getExternalStorageDirectory(), ".NovaFilesTrash")
-                    trash.deleteRecursively()
-                    trash.mkdirs()
-                    cleared = true
-                }
-            }) { Text(stringResource(R.string.settings_clear_trash)) }
-            if (cleared) {
-                Text(
-                    stringResource(R.string.settings_trash_cleared),
-                    color = MaterialTheme.colorScheme.primary,
-                    style = MaterialTheme.typography.bodySmall,
-                )
-            }
+        // ----- الصيانة -----
+        IOSGroupHeader(stringResource(R.string.nav_settings))
+        IOSGroupCard {
+            IOSListRow(
+                title = stringResource(R.string.settings_clear_trash),
+                destructive = true,
+                showSeparator = false,
+                onClick = {
+                    scope.launch {
+                        val trash = File(Environment.getExternalStorageDirectory(), ".NovaFilesTrash")
+                        trash.deleteRecursively()
+                        trash.mkdirs()
+                        cleared = true
+                    }
+                },
+            )
+        }
+        if (cleared) {
+            IOSGroupFooter(stringResource(R.string.settings_trash_cleared))
         }
 
         // ----- عن التطبيق -----
-        SectionCard(title = stringResource(R.string.settings_about)) {
-            Text(
+        IOSGroupHeader(stringResource(R.string.settings_about))
+        IOSGroupCard {
+            androidx.compose.material3.Text(
                 stringResource(R.string.settings_about_body),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = TextStyle(fontSize = 13.sp),
+                color = LocalIOSPalette.current.secondaryLabel,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
             )
         }
-        Spacer(Modifier.size(32.dp))
-    }
-}
-
-@Composable
-private fun SectionCard(title: String, content: @Composable () -> Unit) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 6.dp),
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(title, style = MaterialTheme.typography.titleMedium)
-            Spacer(Modifier.size(12.dp))
-            content()
-        }
+        Spacer(Modifier.height(32.dp))
     }
 }

@@ -10,6 +10,7 @@ import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -28,19 +29,14 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -59,6 +55,11 @@ import androidx.core.content.ContextCompat
 import com.novafiles.app.R
 import com.novafiles.app.core.fs.LocalBrowser
 import com.novafiles.app.novaContainer
+import com.novafiles.app.ui.ios.IOSFilledButton
+import com.novafiles.app.ui.ios.IOSMiniField
+import com.novafiles.app.ui.ios.IOSNavIconButton
+import com.novafiles.app.ui.ios.IOSNavBar
+import com.novafiles.app.ui.ios.LocalIOSPalette
 import com.novafiles.app.util.TypeIcons
 import com.novafiles.app.core.fs.FileType
 import java.io.File
@@ -149,27 +150,26 @@ fun VaultScreen() {
     }
 
     Scaffold(
+        containerColor = LocalIOSPalette.current.groupedBg,
         snackbarHost = { SnackbarHost(snackbar) },
         topBar = {
-            TopAppBar(
-                title = { Text(stringResource(R.string.nav_vault)) },
+            IOSNavBar(
+                title = stringResource(R.string.nav_vault),
                 actions = {
                     if (unlocked) {
-                        IconButton(onClick = { unlocked = false }) {
-                            Icon(Icons.Filled.Lock, contentDescription = stringResource(R.string.action_lock))
-                        }
+                        IOSNavIconButton(
+                            Icons.Filled.Lock,
+                            contentDescription = stringResource(R.string.action_lock),
+                        ) { unlocked = false }
+                    }
+                    if (unlocked) {
+                        IOSNavIconButton(
+                            Icons.Filled.Add,
+                            contentDescription = stringResource(R.string.action_pick_file_encrypt),
+                        ) { pickToEncrypt.launch(arrayOf("*/*")) }
                     }
                 },
             )
-        },
-        floatingActionButton = {
-            if (unlocked) {
-                FloatingActionButton(onClick = {
-                    pickToEncrypt.launch(arrayOf("*/*"))
-                }) {
-                    Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.action_pick_file_encrypt))
-                }
-            }
         },
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
@@ -285,26 +285,26 @@ private fun SetPinScreen(onDone: () -> Unit) {
     ) {
         Text(stringResource(R.string.vault_set_pin), style = MaterialTheme.typography.headlineSmall)
         Spacer(Modifier.size(16.dp))
-        OutlinedTextField(
+        IOSMiniField(
             value = pin,
             onValueChange = { pin = it.filter { c -> c.isDigit() }.take(8) },
-            label = { Text(stringResource(R.string.vault_pin_hint)) },
-            singleLine = true,
+            hint = stringResource(R.string.vault_pin_hint),
             modifier = Modifier.fillMaxWidth(),
         )
         Spacer(Modifier.size(8.dp))
-        OutlinedTextField(
+        IOSMiniField(
             value = confirm,
             onValueChange = { confirm = it.filter { c -> c.isDigit() }.take(8) },
-            label = { Text(stringResource(R.string.vault_confirm_pin)) },
-            singleLine = true,
+            hint = stringResource(R.string.vault_confirm_pin),
             modifier = Modifier.fillMaxWidth(),
         )
         if (error != null) {
+            Spacer(Modifier.size(8.dp))
             Text(error!!, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
         }
         Spacer(Modifier.size(16.dp))
-        Button(
+        IOSFilledButton(
+            text = stringResource(R.string.action_ok),
             onClick = {
                 when {
                     pin.length < 4 -> error = context.getString(R.string.vault_pin_too_short)
@@ -315,8 +315,7 @@ private fun SetPinScreen(onDone: () -> Unit) {
                     }
                 }
             },
-            modifier = Modifier.fillMaxWidth(),
-        ) { Text(stringResource(R.string.action_ok)) }
+        )
     }
 }
 
@@ -372,27 +371,38 @@ private fun UnlockScreen(
         Spacer(Modifier.size(12.dp))
         Text(stringResource(R.string.vault_locked_title), style = MaterialTheme.typography.headlineSmall)
         Spacer(Modifier.size(16.dp))
-        OutlinedTextField(
+        IOSMiniField(
             value = pin,
             onValueChange = { pin = it.filter { c -> c.isDigit() }.take(8); wrong = false },
-            label = { Text(stringResource(R.string.vault_pin_hint)) },
-            isError = wrong,
-            supportingText = { if (wrong) Text(stringResource(R.string.vault_wrong_pin)) },
-            singleLine = true,
+            hint = stringResource(R.string.vault_pin_hint),
             modifier = Modifier.fillMaxWidth(),
         )
+        if (wrong) {
+            Spacer(Modifier.size(4.dp))
+            Text(stringResource(R.string.vault_wrong_pin), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+        }
         Spacer(Modifier.size(16.dp))
         Row(horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(8.dp)) {
-            Button(onClick = {
-                scope.launch {
-                    if (vault.verifyPin(pin)) onUnlocked() else wrong = true
-                }
-            }) { Text(stringResource(R.string.vault_unlock)) }
-            if (canBiometric) {
-                TextButton(onClick = { showBiometric() }) {
-                    Text(stringResource(R.string.vault_unlock_biometric))
-                }
-            }
+            IOSFilledButton(
+                text = stringResource(R.string.vault_unlock),
+                onClick = {
+                    scope.launch {
+                        if (vault.verifyPin(pin)) onUnlocked() else wrong = true
+                    }
+                },
+                modifier = Modifier.weight(1f),
+            )
+        }
+        if (canBiometric) {
+            Spacer(Modifier.size(8.dp))
+            Text(
+                stringResource(R.string.vault_unlock_biometric),
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier
+                    .clickable { showBiometric() }
+                    .padding(8.dp),
+            )
         }
     }
 }

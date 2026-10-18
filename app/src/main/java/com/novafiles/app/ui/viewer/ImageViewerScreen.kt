@@ -1,5 +1,3 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
-
 package com.novafiles.app.ui.viewer
 
 import androidx.activity.compose.BackHandler
@@ -9,14 +7,8 @@ import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -34,6 +26,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.novafiles.app.R
+import com.novafiles.app.ui.ios.IOSNavIconButton
+import com.novafiles.app.ui.ios.IOSNavBar
 import java.io.File
 
 /** عارض صور مع تكبير بالإصبعين وتحريك */
@@ -80,28 +74,20 @@ fun ImageViewerScreen(path: String?) {
             )
         }
 
-        TopAppBar(
-            title = {
-                Text(
-                    file?.name ?: "NovaFiles",
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            },
-            navigationIcon = {
-                IconButton(onClick = { backDispatcher?.onBackPressed() }) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
-                }
-            },
+        // شريط iOS العلوي الشفاف الداكن (مثل عارض الصور في iOS)
+        IOSNavBar(
+            title = file?.name ?: "NovaFiles",
+            forceDark = true,
+            transparent = true,
+            collapsed = true,
+            onBack = { backDispatcher?.onBackPressed() },
             actions = {
-                IconButton(onClick = { resetZoom() }) {
-                    Icon(Icons.Filled.Refresh, contentDescription = null)
-                }
+                IOSNavIconButton(
+                    Icons.Filled.Refresh,
+                    contentDescription = null,
+                    tint = androidx.compose.ui.graphics.Color.White,
+                ) { resetZoom() }
             },
-            colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(
-                containerColor = Color.Transparent,
-            ),
             modifier = Modifier.align(Alignment.TopCenter),
         )
     }
