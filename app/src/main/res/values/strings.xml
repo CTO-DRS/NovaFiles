@@ -113,4 +113,37 @@
     <string name="details_modified">آخر تعديل</string>
     <string name="details_items">العناصر</string>
     <string name="items_count">%1$d عنصر</string>
+
+    <!-- مشاركة عبر WiFi (خادم FTP) -->
+    <string name="ftp_title">مشاركة عبر WiFi</string>
+    <string name="ftp_share_switch">خادم الملفات</string>
+    <string name="ftp_share_hint">شارك ملفاتك مع أي جهاز على نفس الشبكة</string>
+    <string name="ftp_status_running">الخادم يعمل</string>
+    <string name="ftp_status_stopped">الخادم متوقف</string>
+    <string name="ftp_status_hint">شغّل الخادم ليظهر رابط الوصول هنا</string>
+    <string name="ftp_copy_url">نسخ رابط الوصول</string>
+    <string name="ftp_copied">تم نسخ الرابط</string>
+    <string name="ftp_root_label">المجلد المشترك: %1$s</string>
+    <string name="ftp_settings_section">إعدادات الخادم</string>
+    <string name="ftp_port">المنفذ</string>
+    <string name="ftp_username">اسم المستخدم</string>
+    <string name="ftp_password">كلمة المرور</string>
+    <string name="ftp_settings_footer">تنطبق التعديلات عند التشغيل القادم — أوقف الخادم لتغييرها</string>
+    <string name="ftp_howto_header">كيف تتصل؟</string>
+    <string name="ftp_howto_1">تأكد أن الجهازين على نفس شبكة WiFi</string>
+    <string name="ftp_howto_2">في Windows: افتح مستكشف الملفات واكتب الرابط في شريط العنوان</string>
+    <string name="ftp_howto_3">في Mac أو لينكس: استخدم Finder أو FileZilla</string>
+    <string name="ftp_howto_4">من أي هاتف آخر: استخدم تطبيق ملفات يدعم FTP</string>
+    <string name="ftp_security_note">تنبيه: البيانات تُنقل دون تشفير داخل شبكتك المحلية — أوقف الخادم بعد الانتهاء ولا تستخدمه على شبكات عامة.</string>
+    <string name="ftp_need_storage">امنح صلاحية «كل الملفات» أولًا من تبويب الملفات لتتمكن من مشاركة تخزينك</string>
+    <string name="ftp_bad_port">المنفذ يجب أن يكون رقماً بين 1024 و 65535</string>
+    <string name="ftp_need_credentials">أدخل اسم مستخدم وكلمة مرور غير فارغين</string>
+    <string name="ftp_no_wifi">لا يوجد اتصال شبكة — تأكد من تشغيل WiFi</string>
+    <string name="ftp_start_failed">تعذّر تشغيل الخادم على المنفذ %1$d — جرّب منفذاً آخر</string>
+    <string name="ftp_alert_title">المشاركة عبر WiFi</string>
+    <string name="ftp_notif_channel">مشاركة الملفات</string>
+    <string name="ftp_notif_channel_desc">يظهر أثناء عمل خادم المشاركة عبر WiFi</string>
+    <string name="ftp_notification_title">NovaFiles — المشاركة تعمل</string>
+    <string name="ftp_notification_text">يمكن الوصول لملفاتك من المتصفح أو مستكشف الملفات</string>
+    <string name="menu_wifi_share">مشاركة عبر WiFi</string>
 </resources>

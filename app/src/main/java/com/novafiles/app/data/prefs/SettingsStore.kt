@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.datastore.preferences.core.Preferences
@@ -38,6 +39,9 @@ class SettingsStore(private val context: Context) {
         val SORT = stringPreferencesKey("sort")
         val SHOW_HIDDEN = booleanPreferencesKey("show_hidden")
         val THEME = stringPreferencesKey("theme_mode")
+        val FTP_PORT = intPreferencesKey("ftp_port")
+        val FTP_USER = stringPreferencesKey("ftp_user")
+        val FTP_PASS = stringPreferencesKey("ftp_pass")
     }
 
     val viewGrid: Flow<Boolean> = context.dataStore.data.map { it[Keys.VIEW_GRID] ?: false }
@@ -45,10 +49,18 @@ class SettingsStore(private val context: Context) {
     val sortMode: Flow<String> = context.dataStore.data.map { it[Keys.SORT] ?: "name" }
     val themeMode: Flow<String> = context.dataStore.data.map { it[Keys.THEME] ?: ThemeMode.SYSTEM.name }
 
+    // إعدادات المشاركة عبر WiFi (خادم FTP)
+    val ftpPort: Flow<Int> = context.dataStore.data.map { it[Keys.FTP_PORT] ?: 2121 }
+    val ftpUser: Flow<String> = context.dataStore.data.map { it[Keys.FTP_USER] ?: "nova" }
+    val ftpPass: Flow<String> = context.dataStore.data.map { it[Keys.FTP_PASS] ?: "nova" }
+
     suspend fun setViewGrid(grid: Boolean) = context.dataStore.edit { it[Keys.VIEW_GRID] = grid }
     suspend fun setShowHidden(hidden: Boolean) = context.dataStore.edit { it[Keys.SHOW_HIDDEN] = hidden }
     suspend fun setSortMode(mode: String) = context.dataStore.edit { it[Keys.SORT] = mode }
     suspend fun setThemeMode(mode: ThemeMode) = context.dataStore.edit { it[Keys.THEME] = mode.name }
+    suspend fun setFtpPort(port: Int) = context.dataStore.edit { it[Keys.FTP_PORT] = port }
+    suspend fun setFtpUser(user: String) = context.dataStore.edit { it[Keys.FTP_USER] = user }
+    suspend fun setFtpPass(pass: String) = context.dataStore.edit { it[Keys.FTP_PASS] = pass }
 
     /** وصول خام للتخزين (تستخدمه الخزنة لحفظ ملح وتجزئة PIN) */
     suspend fun peekRaw(): Preferences = context.dataStore.data.first()

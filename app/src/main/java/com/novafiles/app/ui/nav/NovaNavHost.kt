@@ -30,6 +30,7 @@ import com.novafiles.app.ui.ios.LocalIOSPalette
 import com.novafiles.app.ui.browser.BrowserScreen
 import com.novafiles.app.ui.editor.EditorScreen
 import com.novafiles.app.ui.favorites.FavoritesScreen
+import com.novafiles.app.ui.ftp.FtpScreen
 import com.novafiles.app.ui.search.SearchScreen
 import com.novafiles.app.ui.settings.SettingsScreen
 import com.novafiles.app.ui.vault.VaultScreen
@@ -45,6 +46,7 @@ object Routes {
     const val SETTINGS = "settings"
     const val EDITOR = "editor?path={path}"
     const val VIEWER = "viewer?path={path}"
+    const val FTP = "ftp"
 
     fun editor(path: String) = "editor?path=${android.net.Uri.encode(path)}"
     fun viewer(path: String) = "viewer?path=${android.net.Uri.encode(path)}"
@@ -113,6 +115,7 @@ private fun NovaNavHost(nav: NavHostController) {
             BrowserScreen(
                 onOpenFile = { openFile(nav, it) },
                 onOpenSearchFor = { /* يُفتح من شريط التنقل مباشرة */ },
+                onOpenFtp = { nav.navigate(Routes.FTP) },
             )
         }
         composable(Routes.SEARCH) {
@@ -126,6 +129,9 @@ private fun NovaNavHost(nav: NavHostController) {
         }
         composable(Routes.SETTINGS) {
             SettingsScreen()
+        }
+        composable(Routes.FTP) {
+            FtpScreen(onBack = { nav.popBackStack() })
         }
         composable(
             Routes.EDITOR,

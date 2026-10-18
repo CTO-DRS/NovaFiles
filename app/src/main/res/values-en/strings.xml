@@ -113,4 +113,37 @@
     <string name="details_modified">Modified</string>
     <string name="details_items">Items</string>
     <string name="items_count">%1$d items</string>
+
+    <!-- WiFi sharing (FTP server) -->
+    <string name="ftp_title">WiFi Sharing</string>
+    <string name="ftp_share_switch">File server</string>
+    <string name="ftp_share_hint">Share your files with any device on the same network</string>
+    <string name="ftp_status_running">Server is running</string>
+    <string name="ftp_status_stopped">Server is stopped</string>
+    <string name="ftp_status_hint">Turn on the server to show the access URL here</string>
+    <string name="ftp_copy_url">Copy access URL</string>
+    <string name="ftp_copied">URL copied</string>
+    <string name="ftp_root_label">Shared folder: %1$s</string>
+    <string name="ftp_settings_section">Server settings</string>
+    <string name="ftp_port">Port</string>
+    <string name="ftp_username">Username</string>
+    <string name="ftp_password">Password</string>
+    <string name="ftp_settings_footer">Changes apply on next start — stop the server to edit them</string>
+    <string name="ftp_howto_header">How to connect?</string>
+    <string name="ftp_howto_1">Make sure both devices are on the same WiFi network</string>
+    <string name="ftp_howto_2">On Windows: open File Explorer and type the URL in the address bar</string>
+    <string name="ftp_howto_3">On Mac or Linux: use Finder or FileZilla</string>
+    <string name="ftp_howto_4">From another phone: use any file manager that supports FTP</string>
+    <string name="ftp_security_note">Note: data is transferred unencrypted inside your local network — stop the server when done and avoid public networks.</string>
+    <string name="ftp_need_storage">Grant "All files access" from the Files tab first to share your storage</string>
+    <string name="ftp_bad_port">Port must be a number between 1024 and 65535</string>
+    <string name="ftp_need_credentials">Enter a non-empty username and password</string>
+    <string name="ftp_no_wifi">No network connection — make sure WiFi is on</string>
+    <string name="ftp_start_failed">Could not start the server on port %1$d — try another port</string>
+    <string name="ftp_alert_title">WiFi Sharing</string>
+    <string name="ftp_notif_channel">File sharing</string>
+    <string name="ftp_notif_channel_desc">Shown while the WiFi sharing server is running</string>
+    <string name="ftp_notification_title">NovaFiles — sharing active</string>
+    <string name="ftp_notification_text">Your files are reachable from any browser or file explorer</string>
+    <string name="menu_wifi_share">WiFi Sharing</string>
 </resources>

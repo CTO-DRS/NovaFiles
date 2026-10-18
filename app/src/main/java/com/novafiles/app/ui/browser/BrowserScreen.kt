@@ -98,6 +98,7 @@ import java.io.File
 fun BrowserScreen(
     onOpenFile: (File) -> Unit,
     onOpenSearchFor: (String) -> Unit,
+    onOpenFtp: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val vm: BrowserViewModel = viewModel(
@@ -344,6 +345,10 @@ fun BrowserScreen(
                 stringResource(R.string.show_hidden),
                 selected = showHidden,
             ) { vm.setShowHidden(!showHidden) },
+            IOSAction(stringResource(R.string.menu_wifi_share)) {
+                menuOpen = false
+                onOpenFtp()
+            },
         ),
     )
 }
