@@ -204,4 +204,22 @@
     <string name="net_op_running">Transferring: %1$s — %2$s</string>
     <string name="net_op_failed">Operation failed: %1$s</string>
     <string name="net_need_storage">Grant "All files access" to save downloads into the Download folder</string>
+
+    <!-- ═══ ZIP archives ═══ -->
+    <string name="zip_title">Archive Viewer</string>
+    <string name="action_compress">Compress to ZIP</string>
+    <string name="action_extract">Extract Here</string>
+    <string name="zip_extract_all">Extract All</string>
+    <string name="zip_contents">Contents</string>
+    <string name="zip_folder">Folder</string>
+    <string name="zip_empty">Archive is empty</string>
+    <string name="zip_counts">Files: %1$d • Folders: %2$d</string>
+    <string name="zip_original_size">Uncompressed: %1$s</string>
+    <string name="zip_compressed">Compressed: %1$s</string>
+    <string name="zip_extracting">Extracting…</string>
+    <string name="zip_done">Extracted %1$d files</string>
+    <string name="zip_done_brief">Extraction complete</string>
+    <string name="zip_created">Archive created</string>
+    <string name="zip_extracted_to">Extracted to: %1$s</string>
+    <string name="zip_failed">Archive operation failed</string>
 </resources>

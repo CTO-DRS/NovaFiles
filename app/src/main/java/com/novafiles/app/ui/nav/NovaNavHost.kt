@@ -38,6 +38,7 @@ import com.novafiles.app.ui.search.SearchScreen
 import com.novafiles.app.ui.settings.SettingsScreen
 import com.novafiles.app.ui.vault.VaultScreen
 import com.novafiles.app.ui.viewer.ImageViewerScreen
+import com.novafiles.app.ui.zip.ZipBrowserScreen
 import java.io.File
 
 /** مسارات التنقل */
@@ -49,6 +50,7 @@ object Routes {
     const val SETTINGS = "settings"
     const val EDITOR = "editor?path={path}"
     const val VIEWER = "viewer?path={path}"
+    const val ZIP = "zip?path={path}"
     const val FTP = "ftp"
     const val NETWORK = "network"
     const val CONN_FORM = "connform?connId={connId}"
@@ -56,6 +58,7 @@ object Routes {
 
     fun editor(path: String) = "editor?path=${android.net.Uri.encode(path)}"
     fun viewer(path: String) = "viewer?path=${android.net.Uri.encode(path)}"
+    fun zip(path: String) = "zip?path=${android.net.Uri.encode(path)}"
     fun connForm(connId: Long) = "connform?connId=$connId"
     fun remote(connId: Long) = "remote?connId=$connId"
 }
@@ -103,12 +106,15 @@ fun NovaRoot() {
     }
 }
 
-/** فتح ملف: عارض صور، محرر نصوص، أو تطبيق خارجي */
+/** فتح ملف: عارض صور، محرر نصوص، عارض أرشيف، أو تطبيق خارجي */
 fun openFile(nav: NavHostController, file: File) {
     val ctx = nav.context
     when (FileType.of(file)) {
         FileType.IMAGE -> nav.navigate(Routes.viewer(file.absolutePath))
         FileType.TEXT, FileType.CODE -> nav.navigate(Routes.editor(file.absolutePath))
+        FileType.ARCHIVE ->
+            if (file.name.endsWith(".zip", ignoreCase = true)) nav.navigate(Routes.zip(file.absolutePath))
+            else com.novafiles.app.util.Intents.view(ctx, file)
         else -> com.novafiles.app.util.Intents.view(ctx, file)
     }
 }
@@ -193,6 +199,19 @@ private fun NovaNavHost(nav: NavHostController) {
             }),
         ) { entry ->
             ImageViewerScreen(path = entry.arguments?.getString("path"))
+        }
+        composable(
+            Routes.ZIP,
+            arguments = listOf(navArgument("path") {
+                type = NavType.StringType
+                nullable = true
+                defaultValue = null
+            }),
+        ) { entry ->
+            ZipBrowserScreen(
+                path = entry.arguments?.getString("path"),
+                onBack = { nav.popBackStack() },
+            )
         }
     }
 }

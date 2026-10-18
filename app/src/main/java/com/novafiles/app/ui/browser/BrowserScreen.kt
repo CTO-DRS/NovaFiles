@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.ContentCut
 import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.CreateNewFolder
+import androidx.compose.material.icons.filled.FolderZip
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DriveFileRenameOutline
 import androidx.compose.material.icons.filled.Info
@@ -143,6 +144,8 @@ fun BrowserScreen(
             msg == "restore:ok" -> snackbar.showSnackbar(context.getString(R.string.op_done))
             msg == "mkdir:ok" || msg == "rename:ok" || msg == "vault:ok" ->
                 snackbar.showSnackbar(context.getString(R.string.op_done))
+            msg == "zip:ok" -> snackbar.showSnackbar(context.getString(R.string.zip_created))
+            msg == "unzip:ok" -> snackbar.showSnackbar(context.getString(R.string.zip_done_brief))
             msg.startsWith("copied:") -> snackbar.showSnackbar(
                 context.getString(R.string.copied_n, msg.substringAfter(":").toInt())
             )
@@ -210,6 +213,10 @@ fun BrowserScreen(
                             Icons.Filled.SelectAll,
                             contentDescription = stringResource(R.string.action_select_all),
                         ) { vm.selectAll() }
+                        IOSNavIconButton(
+                            Icons.Filled.FolderZip,
+                            contentDescription = stringResource(R.string.action_compress),
+                        ) { vm.zipSelection() }
                         IOSNavIconButton(
                             Icons.Filled.ContentCopy,
                             contentDescription = stringResource(R.string.action_copy),
@@ -521,8 +528,10 @@ private fun ItemMenu(file: File, vm: BrowserViewModel, context: android.content.
         Icon(Icons.Filled.MoreVert, contentDescription = null, modifier = Modifier.size(if (compact) 18.dp else 22.dp))
     }
     val isFav = vm.favoritesPaths.collectAsState().value.contains(file.absolutePath)
+    val isZip = !file.isDirectory && file.name.endsWith(".zip", ignoreCase = true)
     val sEncrypt = stringResource(R.string.action_encrypt_vault)
     val sShare = stringResource(R.string.action_share)
+    val sExtract = stringResource(R.string.action_extract)
     val sFavAdd = stringResource(R.string.action_favorite_add)
     val sFavRemove = stringResource(R.string.action_favorite_remove)
     val sRename = stringResource(R.string.action_rename)
@@ -534,6 +543,9 @@ private fun ItemMenu(file: File, vm: BrowserViewModel, context: android.content.
         cancelText = stringResource(R.string.action_cancel),
         title = file.name,
         actions = buildList {
+            if (isZip) {
+                add(IOSAction(sExtract) { vm.extractZip(file) })
+            }
             if (!file.isDirectory) {
                 add(IOSAction(sEncrypt) { vm.encryptIntoVault(file) })
                 add(IOSAction(sShare) { com.novafiles.app.util.Intents.share(context, file) })

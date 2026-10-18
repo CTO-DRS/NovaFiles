@@ -5,6 +5,7 @@ import android.os.Environment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.novafiles.app.AppContainer
+import com.novafiles.app.core.archive.ZipArchive
 import com.novafiles.app.core.fs.FileOps
 import com.novafiles.app.core.fs.FileType
 import com.novafiles.app.core.fs.LocalBrowser
@@ -218,6 +219,44 @@ class BrowserViewModel(
     fun encryptIntoVault(file: File) = runOp {
         container.vault.encryptIntoVault(file).getOrThrow()
         "vault:ok"
+    }
+
+    // ----- الأرشيفات ZIP -----
+
+    /** ضغط العناصر المحددة إلى ملف zip في المجلد الحالي */
+    fun zipSelection() {
+        val sources = _selection.value.map { File(it) }.filter { it.exists() }
+        clearSelection()
+        if (sources.isEmpty()) return
+        runOp {
+            val base = if (sources.size == 1) {
+                sources[0].nameWithoutExtension.ifEmpty { sources[0].name }
+            } else {
+                File(_path.value).name.ifEmpty { "Archive" }
+            }
+            val out = uniqueZipName(File(_path.value), "$base.zip")
+            ZipArchive.createZip(sources, out)
+            "zip:ok"
+        }
+    }
+
+    /** استخراج أرشيف zip إلى مجلد بنفس اسمه في نفس الدليل */
+    fun extractZip(zip: File) = runOp {
+        val dest = File(zip.parentFile, zip.nameWithoutExtension.ifEmpty { "extracted" })
+        ZipArchive.extractAll(zip, dest)
+        "unzip:ok"
+    }
+
+    private fun uniqueZipName(dir: File, name: String): File {
+        var f = File(dir, name)
+        if (!f.exists()) return f
+        val base = name.removeSuffix(".zip")
+        var i = 2
+        while (f.exists()) {
+            f = File(dir, "$base ($i).zip")
+            i++
+        }
+        return f
     }
 
     private fun runOp(block: suspend () -> String) {
