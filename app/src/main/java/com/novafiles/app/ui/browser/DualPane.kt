@@ -25,6 +25,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountTree
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.CompareArrows
@@ -35,6 +36,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.FolderZip
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.QrCode2
 import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material.icons.filled.ViewList
@@ -53,6 +55,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -234,6 +237,9 @@ private fun BrowserPane(
     var menuOpen by remember { mutableStateOf(false) }
     var sortOpen by remember { mutableStateOf(false) }
     var sendOpen by remember { mutableStateOf(false) }
+    var treeOpen by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+    val quickQr by vm.quickQr.collectAsState()
     val focusInteraction = remember { MutableInteractionSource() }
 
     LaunchedEffect(Unit) { vm.load(path) }
@@ -260,6 +266,10 @@ private fun BrowserPane(
                             collapsed = scrolled,
                             onBack = if (File(path).parentFile != null) ({ onFocus(); vm.up() }) else null,
                             actions = {
+                                IOSNavIconButton(
+                                    Icons.Filled.AccountTree,
+                                    contentDescription = stringResource(R.string.tree_open),
+                                ) { onFocus(); treeOpen = true }
                                 if (hasClipboard) {
                                     IOSNavIconButton(
                                         Icons.Filled.ContentPaste,
@@ -295,6 +305,19 @@ private fun BrowserPane(
                                         Icons.Filled.CompareArrows,
                                         contentDescription = stringResource(R.string.pane_send_to_other),
                                     ) { onFocus(); sendOpen = true }
+                                }
+                                IOSNavIconButton(
+                                    Icons.Filled.QrCode2,
+                                    contentDescription = stringResource(R.string.qr_send_action),
+                                ) {
+                                    onFocus()
+                                    launchQuickQr(
+                                        context = context,
+                                        scope = scope,
+                                        files = selection.map { File(it) },
+                                        onReady = { vm.showQuickQr(it) },
+                                        onError = { vm.notify("qr_no_network") },
+                                    )
                                 }
                                 IOSNavIconButton(
                                     Icons.Filled.SelectAll,
@@ -428,7 +451,22 @@ private fun BrowserPane(
             )
             BrowserDialog.None -> {}
         }
+
+        // لوحة الشجرة الجانبية لهذه اللوحة — خارج طبقة البهت
+        DirectoryTreePanel(
+            visible = treeOpen,
+            currentPath = path,
+            onNavigate = { vm.load(it) },
+            onDismiss = { treeOpen = false },
+        )
     }
+
+    // حوار إرسال QR السريع لهذه اللوحة
+    QuickQrHost(
+        state = quickQr,
+        itemCount = 1,
+        onDismiss = { vm.consumeQuickQr() },
+    )
 
     // ورقة الإرسال إلى اللوحة الأخرى — جوهر وضع اللوحتين
     IOSActionSheet(
@@ -475,6 +513,16 @@ private fun BrowserPane(
             IOSAction(stringResource(R.string.menu_network)) {
                 menuOpen = false
                 onOpenNetwork()
+            },
+            IOSAction(stringResource(R.string.qr_show)) {
+                menuOpen = false
+                launchQuickQr(
+                    context = context,
+                    scope = scope,
+                    files = listOf(File(path)),
+                    onReady = { vm.showQuickQr(it) },
+                    onError = { vm.notify("qr_no_network") },
+                )
             },
         ),
     )
