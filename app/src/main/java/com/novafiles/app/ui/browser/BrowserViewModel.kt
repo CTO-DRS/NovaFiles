@@ -74,6 +74,10 @@ class BrowserViewModel(
     val showHidden: StateFlow<Boolean> = container.settings.showHidden
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
+    val sortMode: StateFlow<SortMode> = container.settings.sortMode
+        .map { SortMode.fromKey(it) }
+        .stateIn(viewModelScope, SharingStarted.Eagerly, SortMode.NAME)
+
     private var currentSort = SortMode.NAME
 
     val favoritesPaths: StateFlow<Set<String>> = container.db.favoritesDao().observeAll()

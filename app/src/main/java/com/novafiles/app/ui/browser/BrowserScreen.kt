@@ -48,8 +48,6 @@ import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.ViewList
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -87,6 +85,8 @@ import com.novafiles.app.core.perms.StorageAccess
 import com.novafiles.app.novaContainer
 import com.novafiles.app.ui.ios.IOSAlertDialog
 import com.novafiles.app.ui.ios.IOSAlertTextField
+import com.novafiles.app.ui.ios.IOSAction
+import com.novafiles.app.ui.ios.IOSActionSheet
 import com.novafiles.app.ui.ios.IOSGroupCard
 import com.novafiles.app.ui.ios.IOSNavIconButton
 import com.novafiles.app.ui.ios.IOSNavBar
@@ -115,6 +115,7 @@ fun BrowserScreen(
     val opState by vm.op.collectAsState()
     val viewGrid by vm.viewGrid.collectAsState()
     val showHidden by vm.showHidden.collectAsState()
+    val sortMode by vm.sortMode.collectAsState()
     val favorites by vm.favoritesPaths.collectAsState()
     val clipboard = vm.clipboardOp.paths
     val clipboardOp = vm.clipboardOp.op
@@ -180,49 +181,15 @@ fun BrowserScreen(
                                 contentDescription = stringResource(R.string.action_paste_here),
                             ) { vm.pasteHere() }
                         }
-                        Box {
-                            IOSNavIconButton(Icons.Filled.Sort, contentDescription = stringResource(R.string.sort_by)) {
-                                sortOpen = true
-                            }
-                            DropdownMenu(expanded = sortOpen, onDismissRequest = { sortOpen = false }) {
-                                DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.sort_name)) },
-                                    onClick = { vm.setSort(SortMode.NAME); sortOpen = false },
-                                )
-                                DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.sort_size)) },
-                                    onClick = { vm.setSort(SortMode.SIZE); sortOpen = false },
-                                )
-                                DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.sort_date)) },
-                                    onClick = { vm.setSort(SortMode.DATE); sortOpen = false },
-                                )
-                            }
+                        IOSNavIconButton(Icons.Filled.Sort, contentDescription = stringResource(R.string.sort_by)) {
+                            sortOpen = true
                         }
                         IOSNavIconButton(
                             if (viewGrid) Icons.Filled.ViewList else Icons.Filled.GridView,
                             contentDescription = stringResource(R.string.view_grid),
                         ) { vm.setViewGrid(!viewGrid) }
-                        Box {
-                            IOSNavIconButton(Icons.Filled.MoreVert, contentDescription = null) {
-                                menuOpen = true
-                            }
-                            DropdownMenu(expanded = menuOpen, onDismissRequest = { menuOpen = false }) {
-                                DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.action_new_folder)) },
-                                    onClick = { vm.showDialog(BrowserDialog.NewFolder); menuOpen = false },
-                                    leadingIcon = { Icon(Icons.Filled.CreateNewFolder, null) },
-                                )
-                                DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.action_refresh)) },
-                                    onClick = { vm.refresh(); menuOpen = false },
-                                    leadingIcon = { Icon(Icons.Filled.Refresh, null) },
-                                )
-                                DropdownMenuItem(
-                                    text = { Text(stringResource(R.string.show_hidden)) },
-                                    onClick = { vm.setShowHidden(!showHidden); menuOpen = false },
-                                )
-                            }
+                        IOSNavIconButton(Icons.Filled.MoreVert, contentDescription = null) {
+                            menuOpen = true
                         }
                         IOSNavIconButton(
                             Icons.Filled.Add,
@@ -351,6 +318,34 @@ fun BrowserScreen(
 
     // تحديث الصلاحية بعد العودة من الإعدادات
     LaunchedEffect(path) { hasAccess = StorageAccess.hasAccess(context) }
+
+    // ورقة إجراءات iOS — الترتيب
+    IOSActionSheet(
+        visible = sortOpen,
+        onDismiss = { sortOpen = false },
+        cancelText = stringResource(R.string.action_cancel),
+        title = stringResource(R.string.sort_by),
+        actions = listOf(
+            IOSAction(stringResource(R.string.sort_name), selected = sortMode == SortMode.NAME) { vm.setSort(SortMode.NAME) },
+            IOSAction(stringResource(R.string.sort_size), selected = sortMode == SortMode.SIZE) { vm.setSort(SortMode.SIZE) },
+            IOSAction(stringResource(R.string.sort_date), selected = sortMode == SortMode.DATE) { vm.setSort(SortMode.DATE) },
+        ),
+    )
+
+    // ورقة إجراءات iOS — خيارات المجلد
+    IOSActionSheet(
+        visible = menuOpen,
+        onDismiss = { menuOpen = false },
+        cancelText = stringResource(R.string.action_cancel),
+        actions = listOf(
+            IOSAction(stringResource(R.string.action_new_folder)) { vm.showDialog(BrowserDialog.NewFolder) },
+            IOSAction(stringResource(R.string.action_refresh)) { vm.refresh() },
+            IOSAction(
+                stringResource(R.string.show_hidden),
+                selected = showHidden,
+            ) { vm.setShowHidden(!showHidden) },
+        ),
+    )
 }
 
 @Composable
@@ -508,54 +503,47 @@ private fun GridFileItem(
     }
 }
 
-/** قائمة الخيارات لكل عنصر (تعمل من لقطة الطبقة العليا) */
+/** ورقة إجراءات iOS لكل عنصر (تعمل من لقطة الطبقة العليا) */
 @Composable
 private fun ItemMenu(file: File, vm: BrowserViewModel, context: android.content.Context, compact: Boolean = false) {
     var open by remember { mutableStateOf(false) }
-    Box {
-        IconButton(onClick = { open = true }, modifier = Modifier.size(if (compact) 30.dp else 40.dp)) {
-            Icon(Icons.Filled.MoreVert, contentDescription = null, modifier = Modifier.size(if (compact) 18.dp else 22.dp))
-        }
-        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
-            val isFav = vm.favoritesPaths.collectAsState().value.contains(file.absolutePath)
+    IconButton(onClick = { open = true }, modifier = Modifier.size(if (compact) 30.dp else 40.dp)) {
+        Icon(Icons.Filled.MoreVert, contentDescription = null, modifier = Modifier.size(if (compact) 18.dp else 22.dp))
+    }
+    val isFav = vm.favoritesPaths.collectAsState().value.contains(file.absolutePath)
+    val sEncrypt = stringResource(R.string.action_encrypt_vault)
+    val sShare = stringResource(R.string.action_share)
+    val sFavAdd = stringResource(R.string.action_favorite_add)
+    val sFavRemove = stringResource(R.string.action_favorite_remove)
+    val sRename = stringResource(R.string.action_rename)
+    val sDetails = stringResource(R.string.action_details)
+    val sDelete = stringResource(R.string.action_delete)
+    IOSActionSheet(
+        visible = open,
+        onDismiss = { open = false },
+        cancelText = stringResource(R.string.action_cancel),
+        title = file.name,
+        actions = buildList {
             if (!file.isDirectory) {
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.action_encrypt_vault)) },
-                    onClick = { open = false; vm.encryptIntoVault(file) },
-                    leadingIcon = { Icon(Icons.Filled.Lock, null) },
-                )
-                DropdownMenuItem(
-                    text = { Text(stringResource(R.string.action_share)) },
-                    onClick = { open = false; com.novafiles.app.util.Intents.share(context, file) },
-                    leadingIcon = { Icon(Icons.Filled.Share, null) },
-                )
+                add(IOSAction(sEncrypt) { vm.encryptIntoVault(file) })
+                add(IOSAction(sShare) { com.novafiles.app.util.Intents.share(context, file) })
             }
-            DropdownMenuItem(
-                text = { Text(if (isFav) stringResource(R.string.action_favorite_remove) else stringResource(R.string.action_favorite_add)) },
-                onClick = { open = false; vm.toggleFavorite(file) },
-                leadingIcon = { Icon(if (isFav) Icons.Filled.Star else Icons.Filled.StarBorder, null) },
+            add(
+                IOSAction(
+                    if (isFav) sFavRemove else sFavAdd,
+                    selected = isFav,
+                ) { vm.toggleFavorite(file) },
             )
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.action_rename)) },
-                onClick = { open = false; vm.showDialog(BrowserDialog.Rename(file)) },
-                leadingIcon = { Icon(Icons.Filled.DriveFileRenameOutline, null) },
-            )
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.action_details)) },
-                onClick = { open = false; vm.showDialog(BrowserDialog.Details(file)) },
-                leadingIcon = { Icon(Icons.Filled.Info, null) },
-            )
-            DropdownMenuItem(
-                text = { Text(stringResource(R.string.action_delete)) },
-                onClick = {
-                    open = false
+            add(IOSAction(sRename) { vm.showDialog(BrowserDialog.Rename(file)) })
+            add(IOSAction(sDetails) { vm.showDialog(BrowserDialog.Details(file)) })
+            add(
+                IOSAction(sDelete, destructive = true) {
                     vm.toggleSelect(file)
                     vm.showDialog(BrowserDialog.ConfirmDelete(1))
                 },
-                leadingIcon = { Icon(Icons.Filled.Delete, null) },
             )
-        }
-    }
+        },
+    )
 }
 
 @Composable

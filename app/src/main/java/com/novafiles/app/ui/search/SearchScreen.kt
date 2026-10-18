@@ -25,8 +25,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -51,6 +49,8 @@ import com.novafiles.app.R
 import com.novafiles.app.core.fs.FileType
 import com.novafiles.app.core.fs.LocalBrowser
 import com.novafiles.app.core.fs.SearchEngine
+import com.novafiles.app.ui.ios.IOSAction
+import com.novafiles.app.ui.ios.IOSActionSheet
 import com.novafiles.app.ui.ios.IOSMiniField
 import com.novafiles.app.ui.ios.IOSNavIconButton
 import com.novafiles.app.ui.ios.IOSNavBar
@@ -114,20 +114,8 @@ fun SearchScreen(onOpenFile: (File) -> Unit) {
         IOSNavBar(
             title = stringResource(R.string.nav_search),
             actions = {
-                Box {
-                    IOSNavIconButton(Icons.Filled.FilterList, contentDescription = stringResource(R.string.filter_type)) {
-                        filtersOpen = true
-                    }
-                    DropdownMenu(expanded = filtersOpen, onDismissRequest = { filtersOpen = false }) {
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.filter_min_size)) },
-                            onClick = { filtersOpen = false },
-                        )
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.filter_max_age)) },
-                            onClick = { filtersOpen = false },
-                        )
-                    }
+                IOSNavIconButton(Icons.Filled.FilterList, contentDescription = stringResource(R.string.filter_type)) {
+                    filtersOpen = true
                 }
             },
         )
@@ -158,22 +146,6 @@ fun SearchScreen(onOpenFile: (File) -> Unit) {
                         )
                     },
                 )
-                DropdownMenu(expanded = typeOpen, onDismissRequest = { typeOpen = false }) {
-                    listOf(
-                        FileType.OTHER to R.string.type_any,
-                        FileType.IMAGE to R.string.type_image,
-                        FileType.VIDEO to R.string.type_video,
-                        FileType.AUDIO to R.string.type_audio,
-                        FileType.DOC to R.string.type_doc,
-                        FileType.ARCHIVE to R.string.type_archive,
-                        FileType.APK to R.string.type_apk,
-                    ).forEach { (t, res) ->
-                        DropdownMenuItem(
-                            text = { Text(stringResource(res)) },
-                            onClick = { typeFilter = t; typeOpen = false },
-                        )
-                    }
-                }
             }
             IOSMiniField(
                 value = minSizeMb,
@@ -224,6 +196,38 @@ fun SearchScreen(onOpenFile: (File) -> Unit) {
             }
         }
     }
+
+    // ورقة إجراءات iOS — نوع الملف
+    val typeOptions = listOf(
+        FileType.OTHER to stringResource(R.string.type_any),
+        FileType.IMAGE to stringResource(R.string.type_image),
+        FileType.VIDEO to stringResource(R.string.type_video),
+        FileType.AUDIO to stringResource(R.string.type_audio),
+        FileType.DOC to stringResource(R.string.type_doc),
+        FileType.ARCHIVE to stringResource(R.string.type_archive),
+        FileType.APK to stringResource(R.string.type_apk),
+    )
+    IOSActionSheet(
+        visible = typeOpen,
+        onDismiss = { typeOpen = false },
+        cancelText = stringResource(R.string.action_cancel),
+        title = stringResource(R.string.filter_type),
+        actions = typeOptions.map { (t, label) ->
+            IOSAction(label, selected = typeFilter == t) { typeFilter = t }
+        },
+    )
+
+    // ورقة إجراءات iOS — المرشحات
+    IOSActionSheet(
+        visible = filtersOpen,
+        onDismiss = { filtersOpen = false },
+        cancelText = stringResource(R.string.action_cancel),
+        title = stringResource(R.string.filter_type),
+        actions = listOf(
+            IOSAction(stringResource(R.string.filter_min_size)) { },
+            IOSAction(stringResource(R.string.filter_max_age)) { },
+        ),
+    )
 }
 
 @OptIn(ExperimentalFoundationApi::class)
