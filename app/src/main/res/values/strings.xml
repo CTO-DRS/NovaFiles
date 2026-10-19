@@ -158,8 +158,8 @@
     <string name="net_more">خيارات الاتصال</string>
     <string name="net_saved_header">الاتصالات المحفوظة</string>
     <string name="net_empty_title">لا توجد اتصالات محفوظة</string>
-    <string name="net_empty_body">أضف اتصالاً بخادم FTP أو مشاركة SMB (Windows/Samba/NAS) للوصول إلى ملفاتك عبر الشبكة</string>
-    <string name="net_footer">تُحفظ الاتصالات على جهازك فقط — يدعم FTP وSMB2/SMB3</string>
+    <string name="net_empty_body">أضف اتصالاً بخادم FTP أو مشاركة SMB أو خادم WebDAV (Nextcloud/ownCloud) للوصول إلى ملفاتك عبر الشبكة</string>
+    <string name="net_footer">تُحفظ الاتصالات على جهازك فقط — يدعم FTP وSMB2/SMB3 وSFTP وWebDAV</string>
     <string name="net_connect">اتصال</string>
     <string name="net_edit">تعديل</string>
     <string name="net_delete_confirm">حذف الاتصال؟</string>
@@ -180,6 +180,8 @@
     <string name="net_smb_footer">مثال: خادم «192.168.1.10» ومشاركة «Public» — للمشاركات المؤقتة في Windows جرّب اسم جهازك مثل Users</string>
     <string name="net_ftp_footer">المنفذ الافتراضي 21 — اترك اسم المستخدم فارغاً للدخول المجهول</string>
     <string name="net_sftp_footer">المنفذ الافتراضي 22 — تُحفظ بصمة مفتاح الخادم عند أول اتصال ناجح وتُرفض الاتصالات إذا تغيّر المفتاح (حماية من هجمات الوسيط)</string>
+    <string name="net_webdav_path">المسار الأساسي</string>
+    <string name="net_webdav_footer">WebDAV (Nextcloud/ownCloud/أي خادم DAV) — المنفذ الافتراضي 443 عبر HTTPS؛ المسار الأساسي مثل /remote.php/dav/files/اسم_المستخدم، واتركه فارغاً لجذر الخادم. اكتب http:// في الخادم لإجبار اتصال غير مشفر</string>
     <string name="net_credentials_footer">تُحفظ بيانات الدخول على جهازك فقط وتُستخدم للاتصال عند الطلب</string>
     <string name="net_test">اختبار الاتصال</string>
     <string name="net_testing">جارٍ الاختبار…</string>

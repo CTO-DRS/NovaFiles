@@ -13,8 +13,8 @@ android {
         applicationId = "com.novafiles.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 12
-        versionName = "0.12.0"
+        versionCode = 13
+        versionName = "0.13.0"
     }
 
     buildTypes {
@@ -87,6 +87,7 @@ dependencies {
     implementation(libs.commons.net)
     implementation(libs.smbj)
     implementation(libs.sshj)
+    implementation(libs.okhttp) // v0.13 — عميل WebDAV
     implementation(libs.slf4j.android)
 
     // قراءة الأرشيفات: 7z/TAR/GZ/BZ2/XZ (Apache Commons Compress) + RAR (junrar) + مرمز XZ

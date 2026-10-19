@@ -21,6 +21,7 @@ xz = "1.9"
 junrar = "8.1.2"
 zxing = "3.5.3"
 sshj = "0.38.0"
+okhttp = "4.12.0"
 sshd = "2.13.2"
 slf4jSimple = "1.7.36"
 
@@ -55,6 +56,7 @@ xz = { group = "org.tukaani", name = "xz", version.ref = "xz" }
 junrar = { group = "com.github.junrar", name = "junrar", version.ref = "junrar" }
 zxing-core = { group = "com.google.zxing", name = "core", version.ref = "zxing" }
 sshj = { group = "com.hierynomus", name = "sshj", version.ref = "sshj" }
+okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 sshd-core = { group = "org.apache.sshd", name = "sshd-core", version.ref = "sshd" }
 sshd-sftp = { group = "org.apache.sshd", name = "sshd-sftp", version.ref = "sshd" }
 slf4j-simple = { group = "org.slf4j", name = "slf4j-simple", version.ref = "slf4jSimple" }
