@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.ContentCut
 import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.DriveFileRenameOutline
 import androidx.compose.material.icons.filled.FolderZip
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.MoreVert
@@ -80,6 +81,8 @@ fun BrowserScreen(
     onOpenSearchFor: (String) -> Unit,
     onOpenFtp: () -> Unit = {},
     onOpenNetwork: () -> Unit = {},
+    onOpenOps: () -> Unit = {},
+    onOpenDirectSend: () -> Unit = {},
 ) {
     val widthDp = LocalConfiguration.current.screenWidthDp
     if (shouldUseDualPane(widthDp)) {
@@ -94,6 +97,8 @@ fun BrowserScreen(
             onOpenSearchFor = onOpenSearchFor,
             onOpenFtp = onOpenFtp,
             onOpenNetwork = onOpenNetwork,
+            onOpenOps = onOpenOps,
+            onOpenDirectSend = onOpenDirectSend,
         )
     }
 }
@@ -104,6 +109,8 @@ private fun SinglePaneBrowser(
     onOpenSearchFor: (String) -> Unit,
     onOpenFtp: () -> Unit,
     onOpenNetwork: () -> Unit,
+    onOpenOps: () -> Unit,
+    onOpenDirectSend: () -> Unit,
 ) {
     val context = LocalContext.current
     val vm: BrowserViewModel = viewModel(
@@ -137,6 +144,21 @@ private fun SinglePaneBrowser(
     var sortOpen by remember { mutableStateOf(false) }
     var treeOpen by remember { mutableStateOf(false) }
     val quickQr by vm.quickQr.collectAsState()
+    val opRecords by vm.opRecords.collectAsState()
+
+    // v0.12 — تحديث تلقائي للمجلد عندما تنتهي عملية خلفية (نسخ/نقل/حذف…)
+    var lastFinishedOps by remember { mutableStateOf(0) }
+    LaunchedEffect(opRecords) {
+        val finished = opRecords.count {
+            it.status == com.novafiles.app.core.ops.OpStatus.DONE ||
+                it.status == com.novafiles.app.core.ops.OpStatus.FAILED ||
+                it.status == com.novafiles.app.core.ops.OpStatus.CANCELLED
+        }
+        if (finished > lastFinishedOps) {
+            lastFinishedOps = finished
+            vm.refresh()
+        }
+    }
 
     // تحميل المسار عند أول ظهور وعند تغيّره
     LaunchedEffect(Unit) { vm.load(path) }
@@ -144,7 +166,19 @@ private fun SinglePaneBrowser(
     // رسائل سريعة: نترجم المفاتيح الداخلية إلى نصوص
     LaunchedEffect(message) {
         val msg = message ?: return@LaunchedEffect
-        showBrowserMessage(snackbar, context, msg)
+        if (msg.startsWith("rename_batch:")) {
+            // إعادة تسمية جماعية — شريط مع زر «تراجع» لاستعادة الأسماء الأصلية
+            val result = snackbar.showSnackbar(
+                context.getString(R.string.batch_done_n, msg.substringAfter(":").toInt()),
+                actionLabel = context.getString(R.string.batch_undo),
+                duration = androidx.compose.material3.SnackbarDuration.Long,
+            )
+            if (result == androidx.compose.material3.SnackbarResult.ActionPerformed) {
+                vm.undoBatchRename()
+            }
+        } else {
+            showBrowserMessage(snackbar, context, msg)
+        }
         vm.consumeMessage()
     }
 
@@ -204,6 +238,12 @@ private fun SinglePaneBrowser(
                     onBack = { vm.clearSelection() },
                     backIcon = Icons.Filled.Close,
                     actions = {
+                        if (selection.size > 1) {
+                            IOSNavIconButton(
+                                Icons.Filled.DriveFileRenameOutline,
+                                contentDescription = stringResource(R.string.batch_action),
+                            ) { vm.showDialog(BrowserDialog.BatchRename) }
+                        }
                         IOSNavIconButton(
                             Icons.Filled.QrCode2,
                             contentDescription = stringResource(R.string.qr_send_action),
@@ -328,6 +368,13 @@ private fun SinglePaneBrowser(
                 onDismiss = { vm.closeDialog() },
                 destructive = true,
             )
+            BrowserDialog.BatchRename -> BatchRenameSheet(
+                files = selection.map { File(it) }.sortedBy { it.name.lowercase() },
+                onDismiss = { vm.closeDialog() },
+                onApply = { plan ->
+                    vm.applyBatchRename(plan)
+                },
+            )
             BrowserDialog.None -> {}
         }
 
@@ -378,6 +425,14 @@ private fun SinglePaneBrowser(
             IOSAction(stringResource(R.string.menu_wifi_share)) {
                 menuOpen = false
                 onOpenFtp()
+            },
+            IOSAction(stringResource(R.string.direct_menu_entry)) {
+                menuOpen = false
+                onOpenDirectSend()
+            },
+            IOSAction(stringResource(R.string.ops_menu_entry)) {
+                menuOpen = false
+                onOpenOps()
             },
             IOSAction(stringResource(R.string.menu_network)) {
                 menuOpen = false

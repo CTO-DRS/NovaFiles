@@ -246,4 +246,82 @@
     <!-- ═══ أخطاء RAR ═══ -->
     <string name="error_rar_encrypted">أرشيف RAR محمي بكلمة مرور — فك التشفير غير مدعوم</string>
     <string name="error_rar5_unsupported">أرشيف RAR5 بأسلوب ضغط أو حجم قاموس غير مدعوم بعد</string>
+
+    <!-- ══════════ v0.12 — قائمة العمليات الخلفية ══════════ -->
+    <string name="ops_title">العمليات الخلفية</string>
+    <string name="ops_empty">لا توجد عمليات جارية أو سابقة</string>
+    <string name="ops_menu_entry">العمليات الخلفية</string>
+    <string name="ops_queued_n">أُضيفت العملية للخلفية: %1$d عنصر — يمكنك متابعة العمل</string>
+    <string name="ops_pause">إيقاف مؤقت</string>
+    <string name="ops_resume">استئناف</string>
+    <string name="ops_clear_finished">مسح المنتهية</string>
+    <string name="ops_error">سبب الفشل: %1$s</string>
+    <string name="ops_status_queued">في الانتظار…</string>
+    <string name="ops_status_running">قيد التنفيذ…</string>
+    <string name="ops_status_paused">موقوفة مؤقتاً</string>
+    <string name="ops_status_done">اكتملت بنجاح</string>
+    <string name="ops_status_failed">فشلت</string>
+    <string name="ops_status_cancelled">أُلغيت</string>
+    <string name="op_title_copy">نسخ %1$d عنصر</string>
+    <string name="op_title_move">نقل %1$d عنصر</string>
+    <string name="op_title_trash">حذف %1$d عنصر</string>
+    <string name="op_title_zip">ضغط %1$d عنصر</string>
+    <string name="op_title_extract">استخراج أرشيف</string>
+    <string name="op_running_generic">جارٍ التنفيذ…</string>
+    <string name="ops_active_count">عمليات نشطة: %1$d</string>
+    <string name="ops_notif_channel">العمليات الخلفية</string>
+    <string name="ops_notif_channel_desc">يظهر أثناء تنفيذ عمليات النسخ والنقل والضغط في الخلفية</string>
+    <string name="ops_notif_title">NovaFiles — عمليات قيد التنفيذ</string>
+
+    <!-- ══════════ v0.12 — إعادة التسمية الجماعية ══════════ -->
+    <string name="batch_action">تسمية جماعية</string>
+    <string name="batch_title">إعادة تسمية جماعية — %1$d عنصر</string>
+    <string name="batch_subtitle">جاهز للتنفيذ: %1$d من %2$d — التعارضات تُميّز بالأحمر</string>
+    <string name="batch_prefix">بادئة</string>
+    <string name="batch_suffix">لاحقة</string>
+    <string name="batch_base">اسم أساس جديد</string>
+    <string name="batch_counter">ترقيم</string>
+    <string name="batch_find">ابحث</string>
+    <string name="batch_replace">استبدل بـ</string>
+    <string name="batch_regex">تعبير نمطي</string>
+    <string name="batch_date">إدراج التاريخ</string>
+    <string name="case_keep">كما هو</string>
+    <string name="case_lower">صغير</string>
+    <string name="case_upper">كبير</string>
+    <string name="case_capitalize">أول حرف كبير</string>
+    <string name="batch_preview">المعاينة الحية</string>
+    <string name="batch_unchanged">بدون تغيير</string>
+    <string name="batch_exists">الاسم موجود</string>
+    <string name="batch_duplicate">مكرر داخل الدفعة</string>
+    <string name="batch_invalid">اسم غير صالح</string>
+    <string name="batch_apply">تطبيق على %1$d عنصر</string>
+    <string name="batch_done_n">تمت إعادة تسمية %1$d عنصر</string>
+    <string name="batch_undo">تراجع</string>
+    <string name="batch_undo_done">استُعيدت الأسماء الأصلية</string>
+
+    <!-- ══════════ v0.12 — النقل المباشر Wi-Fi Direct ══════════ -->
+    <string name="direct_menu_entry">نقل مباشر (Wi-Fi Direct)</string>
+    <string name="direct_send_title">إرسال مباشر</string>
+    <string name="direct_receive_title">استقبال مباشر</string>
+    <string name="direct_subtitle">اتصال جهاز-لجهاز دون موجّه</string>
+    <string name="direct_discovering">جارٍ البحث عن الأجهزة القريبة…</string>
+    <string name="direct_peers">الأجهزة القريبة</string>
+    <string name="direct_no_peers_title">لا توجد أجهزة بعد</string>
+    <string name="direct_no_peers_body_send">افتح NovaFiles على الجهاز الآخر واختر «نقل مباشر ← استقبال»، أو تأكد أن Wi-Fi Direct مفعّل على الجهازين</string>
+    <string name="direct_no_peers_body_receive">اطلب من الجهاز المرسل البحث عن الأجهزة واختيار جهازك — سيظهر طلب اقتران على شاشتك</string>
+    <string name="direct_pairing">جارٍ الاقتران — وافق على الطلب في الجهاز الآخر…</string>
+    <string name="direct_connected_send">تم الاتصال — خادم المشاركة يعمل عبر Wi-Fi Direct</string>
+    <string name="direct_qr_hint">امسح رمز QR من الجهاز المستقبل (أو انسخ الرابط منه) لتصفح ملفاتك ونقلها</string>
+    <string name="direct_qr_title">رمز المصافحة</string>
+    <string name="direct_qr_hint2">الرمز يعمل فقط داخل رابط Wi-Fi Direct الحالي</string>
+    <string name="direct_connected_receive">تم الاقتران — جهازك جاهز للاستقبال</string>
+    <string name="direct_owner_address">عنوان المجموعة: %1$s</string>
+    <string name="direct_receive_steps">الصق رابط الإرسال من الجهاز الآخر (nova-direct://) لفتح متصفح ملفاته مباشرة</string>
+    <string name="direct_paste_button">إدخال رابط الإرسال</string>
+    <string name="direct_paste_from_clipboard">لصق من الحافظة</string>
+    <string name="direct_paste_title">رابط الإرسال</string>
+    <string name="direct_paste_hint">nova-direct://…</string>
+    <string name="direct_open_link">فتح اتصال</string>
+    <string name="direct_failed">تعذّر الاتصال: %1$s</string>
+    <string name="direct_footer">النقل المباشر يعمل بين جهازين عبر Wi-Fi Direct دون أي شبكة خارجية — يُستخدم خادم FTP المدمج لنقل البيانات</string>
 </resources>

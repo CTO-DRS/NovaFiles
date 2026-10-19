@@ -11,6 +11,11 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
+    <!-- v0.12: Wi-Fi Direct — اكتشاف الأجهزة القريبة والاقتران المباشر -->
+    <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
+    <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES" android:usesPermissionFlags="neverForLocation" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" android:maxSdkVersion="32" />
+
     <!-- القفل الحيوي (بصمة/وجه) للخزنة المشفرة -->
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
 
@@ -39,11 +44,24 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+            <!-- v0.12: مصافحة النقل المباشر — مسح رمز QR يفتح اتصال الجهاز الآخر -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="nova-direct" />
+            </intent-filter>
         </activity>
 
         <!-- مشاركة الملفات عبر WiFi — خادم FTP كخدمة أمامية -->
         <service
             android:name=".core.ftp.FtpServerService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+
+        <!-- v0.12: العمليات الخلفية — خدمة أمامية للنسخ/النقل/الضغط خارج الشاشة -->
+        <service
+            android:name=".core.ops.OpService"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
 

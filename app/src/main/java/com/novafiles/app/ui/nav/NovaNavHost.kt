@@ -11,6 +11,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -25,11 +26,13 @@ import androidx.navigation.navArgument
 import com.novafiles.app.R
 import com.novafiles.app.core.archive.ArchiveEngine
 import com.novafiles.app.core.fs.FileType
+import com.novafiles.app.novaContainer
 import com.novafiles.app.ui.ios.IOSBarItem
 import com.novafiles.app.ui.ios.IOSBottomBar
 import com.novafiles.app.ui.ios.LocalIOSPalette
 import com.novafiles.app.ui.archive.ArchiveBrowserScreen
 import com.novafiles.app.ui.browser.BrowserScreen
+import com.novafiles.app.ui.direct.DirectScreen
 import com.novafiles.app.ui.editor.EditorScreen
 import com.novafiles.app.ui.favorites.FavoritesScreen
 import com.novafiles.app.ui.ftp.FtpScreen
@@ -37,9 +40,11 @@ import com.novafiles.app.ui.network.ConnectionFormScreen
 import com.novafiles.app.ui.network.NetworkScreen
 import com.novafiles.app.ui.network.RemoteBrowserScreen
 import com.novafiles.app.ui.search.SearchScreen
+import com.novafiles.app.ui.ops.OpsScreen
 import com.novafiles.app.ui.settings.SettingsScreen
 import com.novafiles.app.ui.vault.VaultScreen
 import com.novafiles.app.ui.viewer.ImageViewerScreen
+import androidx.lifecycle.viewmodel.initializer
 import java.io.File
 
 /** مسارات التنقل */
@@ -56,12 +61,15 @@ object Routes {
     const val NETWORK = "network"
     const val CONN_FORM = "connform?connId={connId}"
     const val REMOTE = "remote?connId={connId}"
+    const val OPS = "ops"
+    const val DIRECT = "direct?mode={mode}"
 
     fun editor(path: String) = "editor?path=${android.net.Uri.encode(path)}"
     fun viewer(path: String) = "viewer?path=${android.net.Uri.encode(path)}"
     fun archive(path: String) = "archive?path=${android.net.Uri.encode(path)}"
     fun connForm(connId: Long) = "connform?connId=$connId"
     fun remote(connId: Long) = "remote?connId=$connId"
+    fun direct(sendMode: Boolean) = "direct?mode=${if (sendMode) "send" else "receive"}"
 }
 
 private data class Tab(val route: String, val labelRes: Int, val icon: androidx.compose.ui.graphics.vector.ImageVector)
@@ -81,6 +89,30 @@ fun NovaRoot() {
     val currentRoute = backStack?.destination?.route
     val showBottomBar = currentRoute in tabs.map { it.route }
     val palette = LocalIOSPalette.current
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+
+    // v0.12 — استهلاك حمولة nova-direct:// القادمة من مسح QR:
+    // إنشاء اتصال FTP مؤقت للجهاز المرسل ثم فتح متصفح الخادم البعيد
+    LaunchedEffect(Unit) {
+        val payload = context.novaContainer.pendingDirectPayload ?: return@LaunchedEffect
+        context.novaContainer.pendingDirectPayload = null
+        kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            val id = context.novaContainer.db.connectionsDao().upsert(
+                com.novafiles.app.data.db.ConnectionEntity(
+                    name = payload.deviceName.ifEmpty { "Wi-Fi Direct" },
+                    protocol = "FTP",
+                    host = payload.host,
+                    port = payload.port,
+                    username = payload.user,
+                    password = payload.pass,
+                ),
+            )
+            kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                nav.navigate(Routes.remote(id))
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -132,6 +164,8 @@ private fun NovaNavHost(nav: NavHostController) {
                 onOpenSearchFor = { /* يُفتح من شريط التنقل مباشرة */ },
                 onOpenFtp = { nav.navigate(Routes.FTP) },
                 onOpenNetwork = { nav.navigate(Routes.NETWORK) },
+                onOpenOps = { nav.navigate(Routes.OPS) },
+                onOpenDirectSend = { nav.navigate(Routes.direct(sendMode = true)) },
             )
         }
         composable(Routes.SEARCH) {
@@ -148,6 +182,32 @@ private fun NovaNavHost(nav: NavHostController) {
         }
         composable(Routes.FTP) {
             FtpScreen(onBack = { nav.popBackStack() })
+        }
+        composable(Routes.OPS) {
+            // شاشة العمليات — نفس قائمة OpQueue عبر الحاوية المشتركة
+            val ctx = nav.context
+            val vm: com.novafiles.app.ui.browser.BrowserViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+                factory = androidx.lifecycle.viewmodel.viewModelFactory {
+                    initializer({
+                        com.novafiles.app.ui.browser.BrowserViewModel(ctx.novaContainer, ctx.applicationContext)
+                    })
+                },
+            )
+            OpsScreen(vm = vm, onBack = { nav.popBackStack() })
+        }
+        composable(
+            Routes.DIRECT,
+            arguments = listOf(navArgument("mode") {
+                type = NavType.StringType
+                defaultValue = "send"
+            }),
+        ) { entry ->
+            val sendMode = entry.arguments?.getString("mode") != "receive"
+            DirectScreen(
+                sendMode = sendMode,
+                onBack = { nav.popBackStack() },
+                onOpenRemote = { connId -> nav.navigate(Routes.remote(connId)) },
+            )
         }
         composable(Routes.NETWORK) {
             NetworkScreen(

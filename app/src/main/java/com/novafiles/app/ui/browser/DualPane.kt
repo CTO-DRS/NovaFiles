@@ -449,6 +449,11 @@ private fun BrowserPane(
                 onDismiss = { vm.closeDialog() },
                 destructive = true,
             )
+            BrowserDialog.BatchRename -> BatchRenameSheet(
+                files = selection.map { File(it) }.sortedBy { it.name.lowercase() },
+                onDismiss = { vm.closeDialog() },
+                onApply = { plan -> vm.applyBatchRename(plan) },
+            )
             BrowserDialog.None -> {}
         }
 

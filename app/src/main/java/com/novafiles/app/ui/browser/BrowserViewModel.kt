@@ -12,6 +12,13 @@ import com.novafiles.app.core.fs.FileOps
 import com.novafiles.app.core.fs.FileType
 import com.novafiles.app.core.fs.LocalBrowser
 import com.novafiles.app.core.fs.SortMode
+import com.novafiles.app.core.ops.ConflictPolicy
+import com.novafiles.app.core.ops.OpKind
+import com.novafiles.app.core.ops.OpService
+import com.novafiles.app.core.ops.OpSpec
+import com.novafiles.app.core.rename.RenameEngine
+import com.novafiles.app.core.rename.RenameItem
+import com.novafiles.app.R
 import com.novafiles.app.data.db.FavoriteEntity
 import com.novafiles.app.data.prefs.ClipboardOp
 import kotlinx.coroutines.Dispatchers
@@ -32,6 +39,7 @@ sealed interface BrowserDialog {
     data class Rename(val file: File) : BrowserDialog
     data class Details(val file: File) : BrowserDialog
     data class ConfirmDelete(val count: Int) : BrowserDialog
+    data object BatchRename : BrowserDialog
     data object None : BrowserDialog
 }
 
@@ -181,33 +189,36 @@ class BrowserViewModel(
         }
     }
 
+    /**
+     * v0.12 — اللصق يذهب الآن إلى قائمة العمليات الخلفية بدل التنفيذ المباشر،
+     * فتستطيع متابعة التصفح أثناء نقل مجلدات ضخمة.
+     */
     fun pasteHere() {
         val op = clipboardOp.op ?: return
         val sources = clipboardOp.paths.map { File(it) }.filter { it.exists() }
         if (sources.isEmpty()) return
-        val target = File(_path.value)
-        runOp {
-            val res = if (op == ClipboardOp.COPY) FileOps.copyAll(sources, target)
-            else FileOps.moveAll(sources, target)
-            res.getOrThrow()
-            if (op == ClipboardOp.MOVE) clipboardOp.clear()
-            "paste:ok"
-        }
+        val kind = if (op == ClipboardOp.COPY) OpKind.COPY else OpKind.MOVE
+        if (op == ClipboardOp.MOVE) clipboardOp.clear()
+        clearSelection()
+        enqueueOps(kind, sources, File(_path.value))
     }
 
     // ----- العمليات -----
 
+    /**
+     * v0.12 — الحذف إلى السلة عبر قائمة العمليات الخلفية.
+     * تنظيف المفضلة يحدث فوراً (المسارات معلومة) لأنه رخيص ولا يحتاج انتظار النسخ.
+     */
     fun deleteSelection() {
         val sources = _selection.value.map { File(it) }.filter { it.exists() }
         clearSelection()
-        runOp {
-            FileOps.moveToTrash(sources, trashDir).getOrThrow()
-            // تنظيف أي مفضلة داخل مجلدات حُذفت
+        if (sources.isEmpty()) return
+        viewModelScope.launch {
             sources.filter { it.isDirectory }.forEach {
                 container.db.favoritesDao().removeUnder(it.absolutePath)
             }
-            "trash:ok"
         }
+        enqueueOps(OpKind.TRASH, sources, null)
     }
 
     fun deleteTrashItem(file: File) = runOp {
@@ -216,7 +227,6 @@ class BrowserViewModel(
     }
 
     fun restoreTrashItem(file: File) {
-        val name = file.name.substringAfter('_', file.name)
         val root = Environment.getExternalStorageDirectory()
         runOp {
             val res = FileOps.moveAll(listOf(file), root)
@@ -250,29 +260,71 @@ class BrowserViewModel(
 
     // ----- الأرشيفات ZIP -----
 
-    /** ضغط العناصر المحددة إلى ملف zip في المجلد الحالي */
+    /** ضغط العناصر المحددة — v0.12: عبر قائمة العمليات الخلفية */
     fun zipSelection() {
         val sources = _selection.value.map { File(it) }.filter { it.exists() }
         clearSelection()
         if (sources.isEmpty()) return
-        runOp {
-            val base = if (sources.size == 1) {
-                sources[0].nameWithoutExtension.ifEmpty { sources[0].name }
-            } else {
-                File(_path.value).name.ifEmpty { "Archive" }
-            }
-            val out = uniqueZipName(File(_path.value), "$base.zip")
-            ZipArchive.createZip(sources, out)
-            "zip:ok"
+        val base = if (sources.size == 1) {
+            sources[0].nameWithoutExtension.ifEmpty { sources[0].name }
+        } else {
+            File(_path.value).name.ifEmpty { "Archive" }
         }
+        val out = uniqueZipName(File(_path.value), "$base.zip")
+        enqueueOps(OpKind.ZIP, sources, out)
     }
 
-    /** استخراج أي أرشيف مدعوم (zip/7z/tar/rar/…) إلى مجلد باسمه في نفس الدليل */
-    fun extractArchive(archive: File) = runOp {
+    /** استخراج أي أرشيف مدعوم (zip/7z/tar/rar/…) — v0.12: عبر قائمة العمليات */
+    fun extractArchive(archive: File) {
         val dest = File(archive.parentFile, stripArchiveExt(archive.name).ifEmpty { "extracted" })
-        ArchiveEngine.extractAll(archive, dest)
-        "unzip:ok"
+        enqueueOps(OpKind.EXTRACT, listOf(archive), dest)
     }
+
+    /**
+     * v0.12 — إعادة تسمية جماعية عبر RenameEngine مع تراجع متاح.
+     */
+    fun applyBatchRename(plan: List<RenameItem>) = runOp {
+        val n = RenameEngine.apply(plan).getOrThrow()
+        lastRenamePlan = plan
+        "rename_batch:$n"
+    }
+
+    fun undoBatchRename() = runOp {
+        val plan = lastRenamePlan ?: return@runOp "rename_nothing"
+        RenameEngine.undo(plan).getOrThrow()
+        lastRenamePlan = null
+        "rename_undo:ok"
+    }
+
+    private var lastRenamePlan: List<RenameItem>? = null
+
+    // ----- قائمة العمليات الخلفية (v0.12) -----
+
+    val opRecords get() = container.ops.ops
+
+    private fun enqueueOps(kind: OpKind, sources: List<File>, target: File?) {
+        val count = sources.size
+        val title = appContext.getString(
+            when (kind) {
+                OpKind.COPY -> R.string.op_title_copy
+                OpKind.MOVE -> R.string.op_title_move
+                OpKind.TRASH -> R.string.op_title_trash
+                OpKind.ZIP -> R.string.op_title_zip
+                OpKind.EXTRACT -> R.string.op_title_extract
+            },
+            count,
+        )
+        container.ops.enqueue(
+            OpSpec(kind = kind, title = title, sources = sources, target = target, policy = ConflictPolicy.RENAME),
+        )
+        OpService.start(appContext)
+        _message.value = "queued:$count"
+    }
+
+    fun pauseOp(id: String) = container.ops.pause(id)
+    fun resumeOp(id: String) = container.ops.resume(id)
+    fun cancelOp(id: String) = container.ops.cancel(id)
+    fun clearFinishedOps() = container.ops.clearFinished()
 
     private fun uniqueZipName(dir: File, name: String): File {
         var f = File(dir, name)
