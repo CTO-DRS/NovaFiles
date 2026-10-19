@@ -40,6 +40,7 @@ import com.novafiles.app.ui.network.ConnectionFormScreen
 import com.novafiles.app.ui.network.NetworkScreen
 import com.novafiles.app.ui.network.RemoteBrowserScreen
 import com.novafiles.app.ui.search.SearchScreen
+import com.novafiles.app.ui.analyzer.AnalyzerScreen
 import com.novafiles.app.ui.ops.OpsScreen
 import com.novafiles.app.ui.settings.SettingsScreen
 import com.novafiles.app.ui.vault.VaultScreen
@@ -63,6 +64,7 @@ object Routes {
     const val REMOTE = "remote?connId={connId}"
     const val OPS = "ops"
     const val DIRECT = "direct?mode={mode}"
+    const val ANALYZER = "analyzer"
 
     fun editor(path: String) = "editor?path=${android.net.Uri.encode(path)}"
     fun viewer(path: String) = "viewer?path=${android.net.Uri.encode(path)}"
@@ -166,6 +168,7 @@ private fun NovaNavHost(nav: NavHostController) {
                 onOpenNetwork = { nav.navigate(Routes.NETWORK) },
                 onOpenOps = { nav.navigate(Routes.OPS) },
                 onOpenDirectSend = { nav.navigate(Routes.direct(sendMode = true)) },
+                onOpenAnalyzer = { nav.navigate(Routes.ANALYZER) },
             )
         }
         composable(Routes.SEARCH) {
@@ -194,6 +197,9 @@ private fun NovaNavHost(nav: NavHostController) {
                 },
             )
             OpsScreen(vm = vm, onBack = { nav.popBackStack() })
+        }
+        composable(Routes.ANALYZER) {
+            AnalyzerScreen(onBack = { nav.popBackStack() })
         }
         composable(
             Routes.DIRECT,
