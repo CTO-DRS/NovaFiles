@@ -90,6 +90,12 @@ class AppContainer(appContext: Context) {
 
     /** حمولة nova-direct:// قادمة من مسح QR — تُستهلك مرة واحدة في NovaRoot */
     var pendingDirectPayload: com.novafiles.app.core.wifip2p.DirectPayload? = null
+
+    /** v0.17 — هدف نقرة ودجت (vault / ops / open:<path>) — تستهلكها NovaRoot */
+    var pendingWidgetTarget: String? = null
+
+    /** v0.17 — مسار قادم من «فتح باستخدام NovaFiles» (ACTION_VIEW) — تستهلكه NovaRoot */
+    var pendingViewPath: String? = null
 }
 
 class NovaApp : Application() {

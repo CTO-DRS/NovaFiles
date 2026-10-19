@@ -42,6 +42,14 @@ class SettingsStore(private val context: Context) {
         val FTP_PORT = intPreferencesKey("ftp_port")
         val FTP_USER = stringPreferencesKey("ftp_user")
         val FTP_PASS = stringPreferencesKey("ftp_pass")
+
+        // v0.17 — الثيمات والإيماءات والارتباطات
+        val PALETTE = stringPreferencesKey("palette_id")
+        val FOLDER_ACCENTS = stringPreferencesKey("folder_accents")
+        val ICON_PACK = stringPreferencesKey("icon_pack_manifest")
+        val GESTURES = stringPreferencesKey("gesture_config")
+        val DOUBLE_TAP_NAV = booleanPreferencesKey("double_tap_navigate")
+        val OPEN_WITH_DEFAULTS = stringPreferencesKey("open_with_defaults")
     }
 
     val viewGrid: Flow<Boolean> = context.dataStore.data.map { it[Keys.VIEW_GRID] ?: false }
@@ -61,6 +69,21 @@ class SettingsStore(private val context: Context) {
     suspend fun setFtpPort(port: Int) = context.dataStore.edit { it[Keys.FTP_PORT] = port }
     suspend fun setFtpUser(user: String) = context.dataStore.edit { it[Keys.FTP_USER] = user }
     suspend fun setFtpPass(pass: String) = context.dataStore.edit { it[Keys.FTP_PASS] = pass }
+
+    // v0.17 — الثيمات والإيماءات والارتباطات
+    val paletteId: Flow<String> = context.dataStore.data.map { it[Keys.PALETTE] ?: "nova" }
+    val folderAccents: Flow<String> = context.dataStore.data.map { it[Keys.FOLDER_ACCENTS] ?: "" }
+    val iconPack: Flow<String> = context.dataStore.data.map { it[Keys.ICON_PACK] ?: "" }
+    val gestures: Flow<String> = context.dataStore.data.map { it[Keys.GESTURES] ?: "" }
+    val doubleTapNavigate: Flow<Boolean> = context.dataStore.data.map { it[Keys.DOUBLE_TAP_NAV] ?: false }
+    val openWithDefaults: Flow<String> = context.dataStore.data.map { it[Keys.OPEN_WITH_DEFAULTS] ?: "" }
+
+    suspend fun setPaletteId(id: String) = context.dataStore.edit { it[Keys.PALETTE] = id }
+    suspend fun setFolderAccents(raw: String) = context.dataStore.edit { it[Keys.FOLDER_ACCENTS] = raw }
+    suspend fun setIconPack(raw: String) = context.dataStore.edit { it[Keys.ICON_PACK] = raw }
+    suspend fun setGestures(raw: String) = context.dataStore.edit { it[Keys.GESTURES] = raw }
+    suspend fun setDoubleTapNavigate(on: Boolean) = context.dataStore.edit { it[Keys.DOUBLE_TAP_NAV] = on }
+    suspend fun setOpenWithDefaults(raw: String) = context.dataStore.edit { it[Keys.OPEN_WITH_DEFAULTS] = raw }
 
     /** وصول خام للتخزين (تستخدمه الخزنة لحفظ ملح وتجزئة PIN) */
     suspend fun peekRaw(): Preferences = context.dataStore.data.first()

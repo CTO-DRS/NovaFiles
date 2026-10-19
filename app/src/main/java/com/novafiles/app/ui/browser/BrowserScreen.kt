@@ -60,6 +60,9 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.novafiles.app.R
 import com.novafiles.app.core.fs.SortMode
+import com.novafiles.app.core.gesture.DoubleTapPolicy
+import com.novafiles.app.core.gesture.GestureConfig
+import com.novafiles.app.core.gesture.SwipeAction
 import com.novafiles.app.core.perms.StorageAccess
 import com.novafiles.app.novaContainer
 import com.novafiles.app.ui.ios.IOSAction
@@ -145,6 +148,27 @@ private fun SinglePaneBrowser(
     val scope = rememberCoroutineScope()
     var menuOpen by remember { mutableStateOf(false) }
     var sortOpen by remember { mutableStateOf(false) }
+
+    // v0.17 — إيماءات السحب القابلة للضبط + النقر المزدوج للتنقل
+    val gesturesRaw by context.novaContainer.settings.gestures.collectAsState("")
+    val gestureConfig = remember(gesturesRaw) { GestureConfig.parse(gesturesRaw) }
+    val doubleTapEnabled by context.novaContainer.settings.doubleTapNavigate.collectAsState(false)
+    val doubleTap = remember { DoubleTapPolicy() }
+    var pendingTapKey by remember { mutableStateOf<String?>(null) }
+
+    fun handleSwipeAction(action: SwipeAction, file: File) {
+        when (action) {
+            SwipeAction.FAVORITE -> vm.toggleFavorite(file)
+            SwipeAction.DETAILS -> vm.showDialog(BrowserDialog.Details(file))
+            SwipeAction.SHARE -> com.novafiles.app.util.Intents.share(context, file)
+            SwipeAction.COPY -> { vm.toggleSelect(file); vm.copySelection() }
+            SwipeAction.MOVE -> { vm.toggleSelect(file); vm.cutSelection() }
+            SwipeAction.COMPRESS -> { vm.toggleSelect(file); vm.zipSelection() }
+            SwipeAction.RENAME -> vm.showDialog(BrowserDialog.Rename(file))
+            SwipeAction.TRASH, SwipeAction.DELETE -> { vm.toggleSelect(file); vm.deleteSelection() }
+            SwipeAction.NONE -> {}
+        }
+    }
     var treeOpen by remember { mutableStateOf(false) }
     val quickQr by vm.quickQr.collectAsState()
     val opRecords by vm.opRecords.collectAsState()
@@ -330,18 +354,38 @@ private fun SinglePaneBrowser(
             } else {
                 LazyColumn(modifier = Modifier.fillMaxSize(), state = listState) {
                     items(items, key = { it.absolutePath }) { file ->
-                        ListFileItem(
-                            file = file,
-                            selected = selection.contains(file.absolutePath),
-                            favorite = favorites.contains(file.absolutePath),
-                            onTap = {
-                                if (selection.isNotEmpty()) vm.toggleSelect(file)
-                                else if (file.isDirectory) vm.load(file.absolutePath)
-                                else onOpenFile(file)
-                            },
-                            onLongTap = { vm.toggleSelect(file) },
-                            vm = vm,
-                        )
+                        // v0.17 — النقر المزدوج للتنقل على المجلدات (اختياري من الإعدادات)
+                        val rowSelected = selection.contains(file.absolutePath) ||
+                            (doubleTapEnabled && pendingTapKey == file.absolutePath)
+                        SwipeableRow(
+                            fileKey = file.absolutePath,
+                            config = gestureConfig,
+                            onAction = { handleSwipeAction(it, file) },
+                        ) {
+                            ListFileItem(
+                                file = file,
+                                selected = rowSelected,
+                                favorite = favorites.contains(file.absolutePath),
+                                onTap = {
+                                    if (selection.isNotEmpty()) {
+                                        vm.toggleSelect(file)
+                                    } else if (doubleTapEnabled && file.isDirectory) {
+                                        if (doubleTap.onTap(System.currentTimeMillis(), file.absolutePath)) {
+                                            pendingTapKey = null
+                                            vm.load(file.absolutePath)
+                                        } else {
+                                            pendingTapKey = file.absolutePath
+                                        }
+                                    } else if (file.isDirectory) {
+                                        vm.load(file.absolutePath)
+                                    } else {
+                                        onOpenFile(file)
+                                    }
+                                },
+                                onLongTap = { vm.toggleSelect(file) },
+                                vm = vm,
+                            )
+                        }
                     }
                 }
             }

@@ -120,6 +120,33 @@ fun NovaRoot() {
         }
     }
 
+    // v0.17 — نقرات الودجات: خزنة/عمليات/فتح مسار
+    LaunchedEffect(Unit) {
+        val target = context.novaContainer.pendingWidgetTarget ?: return@LaunchedEffect
+        context.novaContainer.pendingWidgetTarget = null
+        when {
+            target == com.novafiles.app.widget.WidgetBridge.TARGET_VAULT ->
+                nav.navigate(Routes.VAULT)
+            target == com.novafiles.app.widget.WidgetBridge.TARGET_TRANSFERS ->
+                nav.navigate(Routes.OPS)
+            target.startsWith(com.novafiles.app.widget.WidgetBridge.TARGET_OPEN_PATH) -> {
+                val path = target.removePrefix(com.novafiles.app.widget.WidgetBridge.TARGET_OPEN_PATH)
+                val f = java.io.File(path)
+                if (f.isDirectory) nav.navigate(Routes.BROWSER)
+                else if (f.exists()) openFile(nav, f)
+            }
+        }
+    }
+
+    // v0.17 — «فتح باستخدام NovaFiles» (ACTION_VIEW من تطبيق آخر)
+    LaunchedEffect(Unit) {
+        val raw = context.novaContainer.pendingViewPath ?: return@LaunchedEffect
+        context.novaContainer.pendingViewPath = null
+        val path = raw.removePrefix("file://")
+        val f = java.io.File(path)
+        if (f.exists()) openFile(nav, f)
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()

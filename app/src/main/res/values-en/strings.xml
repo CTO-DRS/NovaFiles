@@ -458,4 +458,57 @@
     <string name="cloud_delete_body">"%1$s" will be permanently deleted from the provider. This cannot be undone.</string>
     <string name="cloud_remove_title">Remove account</string>
     <string name="cloud_remove_body">"%1$s" will be signed out and its encrypted tokens wiped from this device. Your files in the cloud are unaffected.</string>
+    <!-- ═══ v0.17 — Widgets ═══ -->
+    <string name="widget_recent_title">Recent files</string>
+    <string name="widget_transfer_title">Transfer status</string>
+    <string name="widget_transfer_idle">No active transfers</string>
+    <string name="widget_transfer_summary">%1$d active • %2$d done • %3$d failed</string>
+    <string name="widget_vault_title">Vault</string>
+    <string name="widget_vault_ready">Ready &amp; protected</string>
+    <string name="widget_vault_not_setup">Not set up — open the app first</string>
+    <string name="widget_vault_hint">Tap to open (PIN required)</string>
+
+    <!-- ═══ v0.17 — Gestures ═══ -->
+    <string name="swipe_favorite">Favorite</string>
+    <string name="swipe_details">Details</string>
+    <string name="swipe_share">Share</string>
+    <string name="swipe_compress">Compress</string>
+    <string name="gesture_action_none">No action</string>
+    <string name="settings_gestures">Gestures</string>
+    <string name="gestures_enable_swipe">Row swipe actions</string>
+    <string name="gestures_swipe_right">Swipe-right action</string>
+    <string name="gestures_swipe_left">Swipe-left action</string>
+    <string name="gestures_double_tap">Double-tap to navigate</string>
+    <string name="gestures_double_tap_hint">First tap selects a folder, double tap enters it</string>
+    <string name="drag_drop_hint">Long-press and drag to send items to the other pane</string>
+
+    <!-- ═══ v0.17 — Theming ═══ -->
+    <string name="settings_accent">Accent color</string>
+    <string name="settings_accent_footer">12 contrast-tested palettes — iOS neutrals stay untouched</string>
+
+    <!-- ═══ v0.17 — Icon pack ═══ -->
+    <string name="settings_icon_pack">Icon pack</string>
+    <string name="icon_pack_import">Import pack</string>
+    <string name="icon_pack_hint">Plain-text novapack file</string>
+    <string name="icon_pack_clear">Clear current pack</string>
+    <string name="icon_pack_dialog_hint">Pack format: one line per extension as ext=icon_key, *= is the default. Limit 512 entries.</string>
+
+    <!-- ═══ v0.17 — Editor 2.0 ═══ -->
+    <string name="editor_preview">Preview</string>
+    <string name="editor_edit">Edit</string>
+    <string name="editor_highlight">Highlight</string>
+    <string name="editor_plain">Plain</string>
+    <string name="editor_binary">Binary file — cannot be shown as text</string>
+    <string name="editor_virtual_position">Line %1$d of %2$d</string>
+    <string name="editor_jump_to_line">Line no.</string>
+    <string name="editor_go">Go</string>
+
+    <!-- ═══ v0.17 — Common dialogs ═══ -->
+    <string name="dialog_save">Save</string>
+    <string name="dialog_cancel">Cancel</string>
+    <string name="action_done">Done</string>
+    <string name="folder_color_action">Folder color</string>
+    <string name="folder_color_title">Accent for this folder</string>
+    <string name="folder_color_hint">Folders inherit the nearest ancestor color — your pick applies to subfolders too</string>
+    <string name="folder_color_reset">Back to inheritance</string>
 </resources>

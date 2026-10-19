@@ -4,13 +4,17 @@ package com.novafiles.app.ui.browser
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -35,6 +39,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -52,6 +57,10 @@ import com.novafiles.app.core.qr.QrPayloads
 import com.novafiles.app.data.prefs.SettingsStore
 import com.novafiles.app.ui.ios.IOSAction
 import com.novafiles.app.ui.ios.IOSActionSheet
+import com.novafiles.app.core.theme.FolderAccentEngine
+import com.novafiles.app.core.theme.IconPackEngine
+import com.novafiles.app.core.theme.PaletteEngine
+import com.novafiles.app.novaContainer
 import com.novafiles.app.ui.ios.IOSAlertDialog
 import com.novafiles.app.ui.ios.IOSAlertTextField
 import com.novafiles.app.ui.ios.IOSGroupCard
@@ -197,6 +206,20 @@ internal fun ListFileItem(
 ) {
     val type = FileType.of(file)
     val context = LocalContext.current
+
+    // v0.17 — حزمة الأيقونات + لون المجلد الموروث
+    val packRaw by context.novaContainer.settings.iconPack.collectAsState("")
+    val accentsRaw by context.novaContainer.settings.folderAccents.collectAsState("")
+    val pack = remember(packRaw) { if (packRaw.isBlank()) null else IconPackEngine(packRaw) }
+    val accentEngine = remember(accentsRaw) { FolderAccentEngine.deserialize(accentsRaw) }
+    val folderAccentId = if (file.isDirectory) accentEngine.resolve(file.absolutePath) else null
+    val icon = pack?.resolve(file.name) { TypeIcons.builtinKey(type) }
+        ?.let { key -> TypeIcons.iconForKey(key, TypeIcons.icon(type)) }
+        ?: TypeIcons.icon(type)
+    val iconColor = folderAccentId
+        ?.let { id -> Color(PaletteEngine.family(PaletteEngine.preset(id), dark = false).accent) }
+        ?: TypeIcons.color(type)
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -223,9 +246,9 @@ internal fun ListFileItem(
                 )
             } else {
                 Icon(
-                    TypeIcons.icon(type),
+                    icon,
                     contentDescription = file.name,
-                    tint = TypeIcons.color(type),
+                    tint = iconColor,
                     modifier = Modifier.size(26.dp),
                 )
             }
@@ -341,6 +364,8 @@ internal fun ItemMenu(file: File, vm: BrowserViewModel, context: android.content
     val sRename = stringResource(R.string.action_rename)
     val sDetails = stringResource(R.string.action_details)
     val sDelete = stringResource(R.string.action_delete)
+    val sFolderColor = stringResource(R.string.folder_color_action)
+    var colorOpen by remember { mutableStateOf(false) }
     IOSActionSheet(
         visible = open,
         onDismiss = { open = false },
@@ -374,6 +399,9 @@ internal fun ItemMenu(file: File, vm: BrowserViewModel, context: android.content
             )
             add(IOSAction(sRename) { vm.showDialog(BrowserDialog.Rename(file)) })
             add(IOSAction(sDetails) { vm.showDialog(BrowserDialog.Details(file)) })
+            if (file.isDirectory) {
+                add(IOSAction(sFolderColor) { colorOpen = true })
+            }
             add(
                 IOSAction(sDelete, destructive = true) {
                     vm.toggleSelect(file)
@@ -436,6 +464,76 @@ internal fun DetailsDialog(file: File, onClose: () -> Unit) {
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+            }
+        },
+    )
+}
+
+/**
+ * v0.17 — حوار لون المجلد: 12 لوحة مختبرة للتباين، مع وراثة أقرب سلف.
+ * الحفظ عبر FolderAccentEngine في DataStore — يظهر فوراً في أيقونات المجلدات.
+ */
+@Composable
+internal fun FolderColorDialog(file: File, onClose: () -> Unit) {
+    val context = LocalContext.current
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    val accentsRaw by context.novaContainer.settings.folderAccents.collectAsState("")
+    val engine = remember(accentsRaw) { FolderAccentEngine.deserialize(accentsRaw) }
+    val current = engine.resolve(file.absolutePath)
+    IOSAlertDialog(
+        title = stringResource(R.string.folder_color_title),
+        confirmText = stringResource(R.string.action_done),
+        onConfirm = onClose,
+        dismissText = stringResource(R.string.action_cancel),
+        onDismiss = onClose,
+        content = {
+            Column {
+                Text(
+                    stringResource(R.string.folder_color_hint),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = LocalIOSPalette.current.secondaryLabel,
+                )
+                Spacer(Modifier.height(12.dp))
+                PaletteEngine.PRESETS.chunked(4).forEach { row ->
+                    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        row.forEach { preset ->
+                            val fam = PaletteEngine.family(preset, dark = false)
+                            val selected = preset.id == current
+                            Box(
+                                modifier = Modifier
+                                    .size(36.dp)
+                                    .clip(RoundedCornerShape(18.dp))
+                                    .background(Color(fam.accent))
+                                    .border(
+                                        width = if (selected) 3.dp else 0.dp,
+                                        color = LocalIOSPalette.current.label,
+                                        shape = RoundedCornerShape(18.dp),
+                                    )
+                                    .clickable {
+                                        scope.launch {
+                                            val fresh = FolderAccentEngine.deserialize(
+                                                context.novaContainer.settings.folderAccents.first(),
+                                            )
+                                            fresh.set(file.absolutePath, preset.id)
+                                            context.novaContainer.settings.setFolderAccents(fresh.serialize())
+                                            onClose()
+                                        }
+                                    },
+                            )
+                        }
+                    }
+                }
+                Spacer(Modifier.height(8.dp))
+                TextButton(onClick = {
+                    scope.launch {
+                        val fresh = FolderAccentEngine.deserialize(
+                            context.novaContainer.settings.folderAccents.first(),
+                        )
+                        fresh.unset(file.absolutePath)
+                        context.novaContainer.settings.setFolderAccents(fresh.serialize())
+                        onClose()
+                    }
+                }) { Text(stringResource(R.string.folder_color_reset)) }
             }
         },
     )
