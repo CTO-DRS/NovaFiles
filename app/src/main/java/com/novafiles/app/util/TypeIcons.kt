@@ -43,4 +43,35 @@ object TypeIcons {
         FileType.DOC, FileType.TEXT -> Color(0xFF5C8AE6)
         FileType.OTHER -> Color(0xFF8E9AAF)
     }
+
+    // ─── v0.17 — دعم حزم الأيقونات ───
+
+    /** المفتاح المدمج لنوع الملف — يعاد من الحزمة إن لم تجد امتداداً أدق */
+    fun builtinKey(type: FileType): String = when (type) {
+        FileType.FOLDER -> "badge_folder"
+        FileType.IMAGE -> "badge_image"
+        FileType.VIDEO -> "badge_video"
+        FileType.AUDIO -> "badge_audio"
+        FileType.PDF -> "badge_pdf"
+        FileType.ARCHIVE -> "badge_archive"
+        FileType.APK -> "badge_apk"
+        FileType.CODE -> "badge_code"
+        FileType.DOC, FileType.TEXT -> "badge_doc"
+        FileType.OTHER -> "badge_file"
+    }
+
+    /** مفتاح حزمة → أيقونة، مع الرجوع للأيقونة الافتراضية للمفاتيح المجهولة */
+    fun iconForKey(key: String, fallback: ImageVector): ImageVector = when (key) {
+        "badge_folder" -> Icons.Filled.Folder
+        "badge_image" -> Icons.Filled.Image
+        "badge_video" -> Icons.Filled.Movie
+        "badge_audio" -> Icons.Filled.MusicNote
+        "badge_pdf" -> Icons.Filled.PictureAsPdf
+        "badge_archive" -> Icons.Filled.FolderZip
+        "badge_apk" -> Icons.Filled.Android
+        "badge_code" -> Icons.Filled.Code
+        "badge_doc" -> Icons.Filled.Description
+        "badge_file" -> Icons.Filled.InsertDriveFile
+        else -> fallback
+    }
 }

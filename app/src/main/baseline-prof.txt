@@ -1,0 +1,35 @@
+# v0.17 — Baseline Profile يدوي: مسار بدء التطبيق بلا JIT
+# HSPL<ClassName>;<MethodSignature> — تغطية واسعة للفئات الحرجة
+HSPLcom/novafiles/app/NovaApp;->onCreate()V
+HSPLcom/novafiles/app/NovaApp;-><init>()V
+HSPLcom/novafiles/app/AppContainer;-><init>(Landroid/content/Context;)V
+HSPLcom/novafiles/app/MainActivity;->onCreate(Landroid/os/Bundle;)V
+HSPLcom/novafiles/app/MainActivity;->onNewIntent(Landroid/content/Intent;)V
+HSPLcom/novafiles/app/MainActivity;->captureDirectPayload(Landroid/content/Intent;Lcom/novafiles/app/AppContainer;)V
+HSPLcom/novafiles/app/MainActivity;->captureOAuthRedirect(Landroid/content/Intent;Lcom/novafiles/app/AppContainer;)V
+HSPLcom/novafiles/app/MainActivity;->captureWidgetTap(Landroid/content/Intent;Lcom/novafiles/app/AppContainer;)V
+HSPLcom/novafiles/app/MainActivity;->captureViewIntent(Landroid/content/Intent;Lcom/novafiles/app/AppContainer;)V
+Lcom/novafiles/app/NovaApp;
+Lcom/novafiles/app/AppContainer;
+Lcom/novafiles/app/MainActivity;
+HSPLcom/novafiles/app/ui/theme/NovaTheme;-><init>()V
+HSPLcom/novafiles/app/ui/theme/NovaThemeKt;->NovaTheme(Lcom/novafiles/app/data/prefs/ThemeMode;Ljava/lang/String;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;II)V
+HSPLcom/novafiles/app/ui/theme/NovaThemeKt;->iosPaletteFor(Ljava/lang/String;Z)Lcom/novafiles/app/ui/ios/IOSPalette;
+HSPLcom/novafiles/app/core/theme/PaletteEngine;->family(Lcom/novafiles/app/core/theme/PalettePreset;Z)Lcom/novafiles/app/core/theme/AccentFamily;
+HSPLcom/novafiles/app/core/theme/PaletteEngine;->preset(Ljava/lang/String;)Lcom/novafiles/app/core/theme/PalettePreset;
+HSPLcom/novafiles/app/ui/nav/NovaRoot;-><init>()V
+HSPLcom/novafiles/app/ui/nav/NovaNavHostKt;->NovaRoot(Landroidx/compose/runtime/Composer;I)V
+HSPLcom/novafiles/app/ui/nav/NovaNavHostKt;->NovaNavHost(Landroidx/navigation/NavHostController;Landroidx/compose/runtime/Composer;I)V
+HSPLcom/novafiles/app/ui/nav/NovaNavHostKt;->openFile(Landroidx/navigation/NavHostController;Ljava/io/File;)V
+Lcom/novafiles/app/ui/theme/**;
+Lcom/novafiles/app/ui/nav/**;
+Lcom/novafiles/app/ui/ios/**;
+HSPLcom/novafiles/app/data/prefs/SettingsStore;-><init>(Landroid/content/Context;)V
+HSPLcom/novafiles/app/data/prefs/SettingsStore;-><clinit>()V
+Lcom/novafiles/app/data/prefs/**;
+HSPLcom/novafiles/app/core/fs/FileType;->of(Ljava/io/File;)Lcom/novafiles/app/core/fs/FileType;
+HSPLcom/novafiles/app/core/fs/FileType;->ofName(Ljava/lang/String;)Lcom/novafiles/app/core/fs/FileType;
+Lcom/novafiles/app/core/fs/**;
+HSPLcom/novafiles/app/core/ops/OpQueue;-><init>(Lkotlinx/coroutines/CoroutineScope;Ljava/io/File;Lcom/novafiles/app/core/ops/OpListener;Lkotlinx/coroutines/CoroutineDispatcher;)V
+Lcom/novafiles/app/core/ops/**;
+Lcom/novafiles/app/data/db/**;

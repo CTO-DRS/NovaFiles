@@ -458,4 +458,57 @@
     <string name="cloud_delete_body">سيُحذف «%1$s» نهائياً من المزوّد. لا يمكن التراجع.</string>
     <string name="cloud_remove_title">إزالة الحساب</string>
     <string name="cloud_remove_body">سيُفصل «%1$s» وستُحذف توكناته المشفرة من الجهاز. ملفاتك في السحابة لا تتأثر.</string>
+    <!-- ═══ v0.17 — الودجات ═══ -->
+    <string name="widget_recent_title">الملفات الأخيرة</string>
+    <string name="widget_transfer_title">حالة النقل</string>
+    <string name="widget_transfer_idle">لا عمليات نقل نشطة الآن</string>
+    <string name="widget_transfer_summary">نشطة %1$d • مكتملة %2$d • فاشلة %3$d</string>
+    <string name="widget_vault_title">الخزنة</string>
+    <string name="widget_vault_ready">مهيأة ومحمية</string>
+    <string name="widget_vault_not_setup">غير مهيأة — افتح التطبيق للإعداد</string>
+    <string name="widget_vault_hint">اضغط للفتح (يستوجب الرمز)</string>
+
+    <!-- ═══ v0.17 — الإيماءات ═══ -->
+    <string name="swipe_favorite">تفضيل</string>
+    <string name="swipe_details">تفاصيل</string>
+    <string name="swipe_share">مشاركة</string>
+    <string name="swipe_compress">ضغط</string>
+    <string name="gesture_action_none">بلا إجراء</string>
+    <string name="settings_gestures">الإيماءات</string>
+    <string name="gestures_enable_swipe">السحب الجانبي على الصفوف</string>
+    <string name="gestures_swipe_right">إجراء السحب لليمين</string>
+    <string name="gestures_swipe_left">إجراء السحب لليسار</string>
+    <string name="gestures_double_tap">النقر المزدوج للتنقل</string>
+    <string name="gestures_double_tap_hint">نقرة تختار المجلد ونقرتان تدخلانه</string>
+    <string name="drag_drop_hint">اضغط مطولاً واسحب لإرسال العنصر للوحة الأخرى</string>
+
+    <!-- ═══ v0.17 — الثيمات ═══ -->
+    <string name="settings_accent">اللون المميز</string>
+    <string name="settings_accent_footer">12 لوحة مختبرة للتباين — تبقى الخلفيات والرماديات بأسلوب iOS</string>
+
+    <!-- ═══ v0.17 — حزمة الأيقونات ═══ -->
+    <string name="settings_icon_pack">حزمة الأيقونات</string>
+    <string name="icon_pack_import">استيراد حزمة</string>
+    <string name="icon_pack_hint">ملف novapack نصي</string>
+    <string name="icon_pack_clear">مسح الحزمة الحالية</string>
+    <string name="icon_pack_dialog_hint">صيغة الحزمة: سطر لكل امتداد بصيغة ext=icon_key، و*= الافتراضي. الحد 512 إدخالاً.</string>
+
+    <!-- ═══ v0.17 — المحرر 2.0 ═══ -->
+    <string name="editor_preview">معاينة</string>
+    <string name="editor_edit">تحرير</string>
+    <string name="editor_highlight">تلوين</string>
+    <string name="editor_plain">نص</string>
+    <string name="editor_binary">ملف ثنائي — لا يمكن عرضه كنص</string>
+    <string name="editor_virtual_position">سطر %1$d من %2$d</string>
+    <string name="editor_jump_to_line">رقم السطر</string>
+    <string name="editor_go">انطلاق</string>
+
+    <!-- ═══ v0.17 — حوارات عامة ═══ -->
+    <string name="dialog_save">حفظ</string>
+    <string name="dialog_cancel">إلغاء</string>
+    <string name="action_done">تم</string>
+    <string name="folder_color_action">لون المجلد</string>
+    <string name="folder_color_title">لون مميز لهذا المجلد</string>
+    <string name="folder_color_hint">يرث المجلد لون أقرب سلف له — الاختيار هنا يسري على مجلداته الفرعية أيضاً</string>
+    <string name="folder_color_reset">الرجوع للوراثة</string>
 </resources>

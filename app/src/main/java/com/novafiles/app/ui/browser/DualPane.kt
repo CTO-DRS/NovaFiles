@@ -6,6 +6,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -61,14 +63,31 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.toSize
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.novafiles.app.R
 import com.novafiles.app.core.fs.SortMode
+import com.novafiles.app.core.gesture.DragDropResolver
+import com.novafiles.app.core.gesture.DragPayload
+import com.novafiles.app.core.gesture.DropOp
+import com.novafiles.app.core.gesture.GestureConfig
+import com.novafiles.app.core.gesture.PaneId
+import com.novafiles.app.core.gesture.SwipeAction
 import com.novafiles.app.core.perms.StorageAccess
 import com.novafiles.app.novaContainer
 import com.novafiles.app.ui.ios.IOSAction
@@ -124,6 +143,28 @@ internal fun DualPaneBrowser(
     var hasAccess by remember { mutableStateOf(StorageAccess.hasAccess(context)) }
     val activity = context as? androidx.appcompat.app.AppCompatActivity
 
+    // ═══ v0.17 — جلسة السحب عبر اللوحتين ═══
+    var dragSession by remember { mutableStateOf<DragSession?>(null) }
+    var dragPos by remember { mutableStateOf(Offset.Zero) }
+    var boundsA by remember { mutableStateOf(Rect.Zero) }
+    var boundsB by remember { mutableStateOf(Rect.Zero) }
+
+    fun endDrag() {
+        val s = dragSession ?: return
+        dragSession = null
+        val target = when {
+            s.sourceVm === vmB && boundsA.contains(dragPos) ->
+                com.novafiles.app.core.gesture.DropTarget(vmA.path.value, PaneId.PRIMARY)
+            s.sourceVm === vmA && boundsB.contains(dragPos) ->
+                com.novafiles.app.core.gesture.DropTarget(vmB.path.value, PaneId.SECONDARY)
+            else -> null
+        }
+        val decision = DragDropResolver.resolve(s.payload, target, s.sourceVm.path.value)
+        if (decision.op != DropOp.NONE && decision.paths.isNotEmpty() && target != null) {
+            s.sourceVm.sendSelectionTo(File(target.dirPath), move = decision.op == DropOp.MOVE)
+        }
+    }
+
     // تحميل أولي للوحتين
     LaunchedEffect(Unit) {
         vmA.load(vmA.path.value)
@@ -173,6 +214,17 @@ internal fun DualPaneBrowser(
                     onOpenFtp = onOpenFtp,
                     onOpenNetwork = onOpenNetwork,
                     modifier = Modifier.weight(1f),
+                    dropTargetActive = dragSession != null && dragSession?.sourceVm !== vmA,
+                    onPaneBounds = { boundsA = it },
+                    onDragStart = { paths, pos ->
+                        dragPos = pos
+                        dragSession = DragSession(
+                            DragPayload(paths.map { it.absolutePath }, PaneId.PRIMARY),
+                            vmA,
+                        )
+                    },
+                    onDragMove = { dragPos = it },
+                    onDragEnd = { endDrag() },
                 )
                 // خط شعري فاصل بين اللوحتين
                 Box(
@@ -191,14 +243,58 @@ internal fun DualPaneBrowser(
                     onOpenFtp = onOpenFtp,
                     onOpenNetwork = onOpenNetwork,
                     modifier = Modifier.weight(1f),
+                    dropTargetActive = dragSession != null && dragSession?.sourceVm !== vmB,
+                    onPaneBounds = { boundsB = it },
+                    onDragStart = { paths, pos ->
+                        dragPos = pos
+                        dragSession = DragSession(
+                            DragPayload(paths.map { it.absolutePath }, PaneId.SECONDARY),
+                            vmB,
+                        )
+                    },
+                    onDragMove = { dragPos = it },
+                    onDragEnd = { endDrag() },
                 )
             }
         }
+
+        // v0.17 — شبح السحب العائم فوق كل شيء
+        dragSession?.let { s ->
+            val ghostOffset = IntOffset(
+                (dragPos.x - 60f).toInt().coerceAtLeast(0),
+                (dragPos.y - 30f).toInt().coerceAtLeast(0),
+            )
+            Box(
+                modifier = Modifier
+                    .offset { ghostOffset }
+                    .clip(androidx.compose.foundation.shape.RoundedCornerShape(10.dp))
+                    .background(palette.accent.copy(alpha = 0.92f))
+                    .padding(horizontal = 12.dp, vertical = 6.dp),
+            ) {
+                Text(
+                    s.label,
+                    color = Color.White,
+                    fontSize = 12.sp,
+                    maxLines = 1,
+                )
+            }
+        }
+
         SnackbarHost(
             hostState = snackbar,
             modifier = Modifier.align(Alignment.BottomCenter),
         )
     }
+}
+
+/** v0.17 — جلسة سحب نشطة بين اللوحتين */
+internal class DragSession(
+    val payload: DragPayload,
+    val sourceVm: BrowserViewModel,
+) {
+    val label: String
+        get() = payload.paths.firstOrNull()
+            ?.substringAfterLast('/', "") ?: ""
 }
 
 /**
@@ -217,6 +313,12 @@ private fun BrowserPane(
     onOpenFtp: () -> Unit = {},
     onOpenNetwork: () -> Unit = {},
     modifier: Modifier = Modifier,
+    // v0.17 — السحب عبر اللوحتين
+    dropTargetActive: Boolean = false,
+    onPaneBounds: (Rect) -> Unit = {},
+    onDragStart: (List<File>, Offset) -> Unit = { _, _ -> },
+    onDragMove: (Offset) -> Unit = {},
+    onDragEnd: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val path by vm.path.collectAsState()
@@ -242,11 +344,34 @@ private fun BrowserPane(
     val quickQr by vm.quickQr.collectAsState()
     val focusInteraction = remember { MutableInteractionSource() }
 
+    // v0.17 — إيماءات السحب القابلة للضبط داخل اللوحة
+    val gesturesRaw by context.novaContainer.settings.gestures.collectAsState("")
+    val gestureConfig = remember(gesturesRaw) { GestureConfig.parse(gesturesRaw) }
+
+    fun handleSwipeAction(action: SwipeAction, file: File) {
+        when (action) {
+            SwipeAction.FAVORITE -> vm.toggleFavorite(file)
+            SwipeAction.DETAILS -> vm.showDialog(BrowserDialog.Details(file))
+            SwipeAction.SHARE -> com.novafiles.app.util.Intents.share(context, file)
+            SwipeAction.COPY -> { vm.toggleSelect(file); vm.copySelection() }
+            SwipeAction.MOVE -> { vm.toggleSelect(file); vm.cutSelection() }
+            SwipeAction.COMPRESS -> { vm.toggleSelect(file); vm.zipSelection() }
+            SwipeAction.RENAME -> vm.showDialog(BrowserDialog.Rename(file))
+            SwipeAction.TRASH, SwipeAction.DELETE -> { vm.toggleSelect(file); vm.deleteSelection() }
+            SwipeAction.NONE -> {}
+        }
+    }
+
     LaunchedEffect(Unit) { vm.load(path) }
 
     val contentModifier = Modifier
         .fillMaxSize()
-        .alpha(if (focused) 1f else 0.72f)
+        .alpha(if (focused) 1f else if (dropTargetActive) 0.95f else 0.72f)
+        .onGloballyPositioned { coords ->
+            onPaneBounds(
+                Rect(offset = coords.positionInWindow(), size = coords.size.toSize()),
+            )
+        }
 
     Box(modifier = modifier) {
         Box(modifier = contentModifier) {
@@ -405,19 +530,58 @@ private fun BrowserPane(
                             state = listState,
                         ) {
                             items(items, key = { it.absolutePath }) { file ->
-                                ListFileItem(
-                                    file = file,
-                                    selected = selection.contains(file.absolutePath),
-                                    favorite = favorites.contains(file.absolutePath),
-                                    onTap = {
-                                        onFocus()
-                                        if (selection.isNotEmpty()) vm.toggleSelect(file)
-                                        else if (file.isDirectory) vm.load(file.absolutePath)
-                                        else onOpenFile(file)
-                                    },
-                                    onLongTap = { onFocus(); vm.toggleSelect(file) },
-                                    vm = vm,
-                                )
+                                var itemCoords by remember { mutableStateOf<LayoutCoordinates?>(null) }
+                                SwipeableRow(
+                                    fileKey = file.absolutePath,
+                                    config = gestureConfig,
+                                    onAction = { handleSwipeAction(it, file) },
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .onGloballyPositioned { itemCoords = it }
+                                            .pointerInput(file.absolutePath, selection) {
+                                                detectDragGesturesAfterLongPress(
+                                                    onDragStart = { startOffset ->
+                                                        onFocus()
+                                                        if (!selection.contains(file.absolutePath)) {
+                                                            vm.toggleSelect(file)
+                                                        }
+                                                        val paths =
+                                                            if (vm.selection.value.contains(file.absolutePath)) {
+                                                                vm.selection.value.mapNotNull { p -> File(p) }
+                                                            } else listOf(file)
+                                                        onDragStart(
+                                                            paths,
+                                                            itemCoords?.localToWindow(startOffset) ?: startOffset,
+                                                        )
+                                                    },
+                                                    onDrag = { change, _ ->
+                                                        onDragMove(
+                                                            itemCoords?.localToWindow(change.position) ?: change.position,
+                                                        )
+                                                        change.consume()
+                                                    },
+                                                    onDragEnd = { onDragEnd() },
+                                                    onDragCancel = { onDragEnd() },
+                                                )
+                                            },
+                                    ) {
+                                        ListFileItem(
+                                            file = file,
+                                            selected = selection.contains(file.absolutePath),
+                                            favorite = favorites.contains(file.absolutePath),
+                                            onTap = {
+                                                onFocus()
+                                                if (selection.isNotEmpty()) vm.toggleSelect(file)
+                                                else if (file.isDirectory) vm.load(file.absolutePath)
+                                                else onOpenFile(file)
+                                            },
+                                            onLongTap = { onFocus(); vm.toggleSelect(file) },
+                                            vm = vm,
+                                        )
+                                    }
+                                }
                             }
                         }
                     }

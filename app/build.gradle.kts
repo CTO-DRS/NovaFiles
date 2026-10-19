@@ -13,8 +13,8 @@ android {
         applicationId = "com.novafiles.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 16
-        versionName = "0.16.0"
+        versionCode = 17
+        versionName = "0.17.0"
 
         // v0.16 — معرّفات عملاء OAuth للسحابة: يضبطها كل مُطوّر عبر gradle.properties
         // (NOVA_DRIVE_CLIENT_ID=...) — فارغة افتراضياً ليعمل البناء دون أسرار
@@ -25,7 +25,9 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            // v0.17 — R8 full mode: تقليص شامل + إزالة الموارد غير المستخدمة
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -82,6 +84,9 @@ dependencies {
 
     // القفل الحيوي للخزنة
     implementation(libs.androidx.biometric)
+
+    // v0.17 — Baseline Profiles: تثبيت مسبق لمسار بدء التطبيق (بلا JIT)
+    implementation("androidx.profileinstaller:profileinstaller:1.4.1")
 
     // صور مصغرة للوسائط — Coil
     implementation(libs.coil.compose)

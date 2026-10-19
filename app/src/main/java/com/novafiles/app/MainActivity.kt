@@ -31,11 +31,16 @@ class MainActivity : AppCompatActivity() {
         val container = novaContainer
         captureDirectPayload(intent, container)
         captureOAuthRedirect(intent, container)
+        captureWidgetTap(intent, container)
+        captureViewIntent(intent, container)
 
         setContent {
             val theme by container.settings.themeMode
                 .map { runCatching { ThemeMode.valueOf(it) }.getOrDefault(ThemeMode.SYSTEM) }
                 .collectAsState(ThemeMode.SYSTEM)
+
+            // v0.17 — الإعداد اللوني المختار (12 لوحة)
+            val paletteId by container.settings.paletteId.collectAsState("nova")
 
             val darkTheme = when (theme) {
                 ThemeMode.SYSTEM -> isSystemInDarkTheme()
@@ -53,7 +58,7 @@ class MainActivity : AppCompatActivity() {
                 }
             }
 
-            NovaTheme(themeMode = theme) {
+            NovaTheme(themeMode = theme, paletteId = paletteId) {
                 NovaRoot()
             }
         }
@@ -63,6 +68,8 @@ class MainActivity : AppCompatActivity() {
         super.onNewIntent(intent)
         captureDirectPayload(intent, novaContainer)
         captureOAuthRedirect(intent, novaContainer)
+        captureWidgetTap(intent, novaContainer)
+        captureViewIntent(intent, novaContainer)
     }
 
     /**
@@ -84,5 +91,26 @@ class MainActivity : AppCompatActivity() {
         val data: Uri = intent?.data ?: return
         if (data.scheme != "com.novafiles.app" || !data.toString().contains("/oauth")) return
         container.pendingOAuthRedirect = data.toString()
+    }
+
+    /**
+     * v0.17 — نقرة ودجت: نحفظ الهدف وتستهلكه NovaRoot بالتنقل المناسب.
+     */
+    private fun captureWidgetTap(intent: Intent?, container: AppContainer) {
+        if (intent?.action != com.novafiles.app.widget.WidgetBridge.ACTION_WIDGET) return
+        val target = intent.getStringExtra(com.novafiles.app.widget.WidgetBridge.EXTRA_TARGET) ?: return
+        container.pendingWidgetTarget = target
+    }
+
+    /**
+     * v0.17 — «فتح باستخدام NovaFiles»: مسار ملف قادم عبر ACTION_VIEW.
+     * نحفظه وتستهلكه NovaRoot بفتح العارض المناسب حسب نوع الملف.
+     */
+    private fun captureViewIntent(intent: Intent?, container: AppContainer) {
+        if (intent?.action != Intent.ACTION_VIEW) return
+        val data: Uri = intent.data ?: return
+        if (data.scheme == "nova-direct" || data.scheme == "com.novafiles.app") return
+        // نمرر المسار كما هو — محتوى المحلي فقط (file:// أو content:// عبر المسار المباشر)
+        container.pendingViewPath = data.toString()
     }
 }
