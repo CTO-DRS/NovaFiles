@@ -514,4 +514,16 @@
     <string name="folder_color_title">Accent for this folder</string>
     <string name="folder_color_hint">Folders inherit the nearest ancestor color — your pick applies to subfolders too</string>
     <string name="folder_color_reset">Back to inheritance</string>
+
+    <!-- v0.19 — Recents + vault moved into Settings -->
+    <string name="nav_recents">Recents</string>
+    <string name="recents_empty">No recent files</string>
+    <string name="recents_empty_hint">Files you open or edit will show up here</string>
+    <string name="time_now">now</string>
+    <string name="time_minutes">%1$d min ago</string>
+    <string name="time_hours">%1$d h ago</string>
+    <string name="time_yesterday">Yesterday</string>
+    <string name="time_days">%1$d d ago</string>
+    <string name="settings_security">Security</string>
+    <string name="vault_row_hint">Encrypted folders &amp; biometric protection</string>
 </resources>

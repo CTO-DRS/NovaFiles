@@ -514,4 +514,16 @@
     <string name="folder_color_title">لون مميز لهذا المجلد</string>
     <string name="folder_color_hint">يرث المجلد لون أقرب سلف له — الاختيار هنا يسري على مجلداته الفرعية أيضاً</string>
     <string name="folder_color_reset">الرجوع للوراثة</string>
+
+    <!-- v0.19 — الأخيرة + نقل الخزنة إلى الإعدادات -->
+    <string name="nav_recents">الأخيرة</string>
+    <string name="recents_empty">لا ملفات حديثة</string>
+    <string name="recents_empty_hint">الملفات التي تفتحها أو تعدّلها ستظهر هنا</string>
+    <string name="time_now">الآن</string>
+    <string name="time_minutes">منذ %1$d د</string>
+    <string name="time_hours">منذ %1$d س</string>
+    <string name="time_yesterday">أمس</string>
+    <string name="time_days">منذ %1$d أيام</string>
+    <string name="settings_security">الأمان</string>
+    <string name="vault_row_hint">المجلدات المشفرة والحماية البيومترية</string>
 </resources>
