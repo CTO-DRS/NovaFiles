@@ -1,6 +1,8 @@
 package com.novafiles.app
 
 import android.app.Activity
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -11,6 +13,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import com.novafiles.app.core.wifip2p.DirectPayloadCodec
 import com.novafiles.app.data.prefs.ThemeMode
 import com.novafiles.app.ui.nav.NovaRoot
 import com.novafiles.app.ui.theme.NovaTheme
@@ -26,6 +29,7 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         val container = novaContainer
+        captureDirectPayload(intent, container)
 
         setContent {
             val theme by container.settings.themeMode
@@ -52,5 +56,21 @@ class MainActivity : AppCompatActivity() {
                 NovaRoot()
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        captureDirectPayload(intent, novaContainer)
+    }
+
+    /**
+     * v0.12 — مصافحة Wi-Fi Direct: مسح رمز nova-direct:// من كاميرا النظام
+     * يحفظ الحمولة؛ NovaRoot تستقبلها وتنشئ اتصالاً وتفتح المتصفح البعيد.
+     */
+    private fun captureDirectPayload(intent: Intent?, container: AppContainer) {
+        val data: Uri = intent?.data ?: return
+        if (data.scheme != "nova-direct") return
+        val payload = DirectPayloadCodec.decode(data.toString()) ?: return
+        container.pendingDirectPayload = payload
     }
 }

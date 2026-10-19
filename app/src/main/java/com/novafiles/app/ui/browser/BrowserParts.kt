@@ -164,6 +164,13 @@ suspend fun showBrowserMessage(snackbar: SnackbarHostState, context: android.con
         msg == "mkdir:ok" || msg == "rename:ok" || msg == "vault:ok" ->
             snackbar.showSnackbar(context.getString(R.string.op_done))
         msg == "move:ok" -> snackbar.showSnackbar(context.getString(R.string.op_done))
+        msg.startsWith("queued:") -> snackbar.showSnackbar(
+            context.getString(R.string.ops_queued_n, msg.substringAfter(":").toInt()),
+        )
+        msg.startsWith("rename_batch:") -> snackbar.showSnackbar(
+            context.getString(R.string.batch_done_n, msg.substringAfter(":").toInt()),
+        )
+        msg == "rename_undo:ok" -> snackbar.showSnackbar(context.getString(R.string.batch_undo_done))
         msg == "zip:ok" -> snackbar.showSnackbar(context.getString(R.string.archive_created))
         msg == "unzip:ok" -> snackbar.showSnackbar(context.getString(R.string.archive_done_brief))
         msg.startsWith("copied:") -> snackbar.showSnackbar(

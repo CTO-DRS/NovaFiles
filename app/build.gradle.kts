@@ -13,8 +13,8 @@ android {
         applicationId = "com.novafiles.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 11
-        versionName = "0.11.0"
+        versionCode = 12
+        versionName = "0.12.0"
     }
 
     buildTypes {
@@ -81,6 +81,7 @@ dependencies {
 
     // كوروتينات
     implementation(libs.kotlinx.coroutines.android)
+    testImplementation(libs.kotlinx.coroutines.test)
 
     // عميل الشبكة: FTP (Apache Commons Net) و SMB2/3 (SMBJ) و SFTP (sshj)
     implementation(libs.commons.net)

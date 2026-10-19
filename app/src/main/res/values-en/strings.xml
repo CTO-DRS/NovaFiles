@@ -246,4 +246,82 @@
     <!-- ═══ RAR errors ═══ -->
     <string name="error_rar_encrypted">Password-protected RAR — encrypted archives are not supported</string>
     <string name="error_rar5_unsupported">RAR5 archive with an unsupported compression method or dictionary size</string>
+
+    <!-- ══════════ v0.12 — Background operations queue ══════════ -->
+    <string name="ops_title">Background Operations</string>
+    <string name="ops_empty">No running or past operations</string>
+    <string name="ops_menu_entry">Background operations</string>
+    <string name="ops_queued_n">Queued to background: %1$d items — keep working freely</string>
+    <string name="ops_pause">Pause</string>
+    <string name="ops_resume">Resume</string>
+    <string name="ops_clear_finished">Clear finished</string>
+    <string name="ops_error">Failure reason: %1$s</string>
+    <string name="ops_status_queued">Waiting…</string>
+    <string name="ops_status_running">Running…</string>
+    <string name="ops_status_paused">Paused</string>
+    <string name="ops_status_done">Completed</string>
+    <string name="ops_status_failed">Failed</string>
+    <string name="ops_status_cancelled">Cancelled</string>
+    <string name="op_title_copy">Copy %1$d items</string>
+    <string name="op_title_move">Move %1$d items</string>
+    <string name="op_title_trash">Trash %1$d items</string>
+    <string name="op_title_zip">Compress %1$d items</string>
+    <string name="op_title_extract">Extract archive</string>
+    <string name="op_running_generic">Working…</string>
+    <string name="ops_active_count">Active operations: %1$d</string>
+    <string name="ops_notif_channel">Background operations</string>
+    <string name="ops_notif_channel_desc">Shown while copy/move/compress operations run in the background</string>
+    <string name="ops_notif_title">NovaFiles — operations in progress</string>
+
+    <!-- ══════════ v0.12 — Batch rename ══════════ -->
+    <string name="batch_action">Batch rename</string>
+    <string name="batch_title">Batch Rename — %1$d items</string>
+    <string name="batch_subtitle">Ready: %1$d of %2$d — conflicts are highlighted in red</string>
+    <string name="batch_prefix">Prefix</string>
+    <string name="batch_suffix">Suffix</string>
+    <string name="batch_base">New base name</string>
+    <string name="batch_counter">Numbering</string>
+    <string name="batch_find">Find</string>
+    <string name="batch_replace">Replace with</string>
+    <string name="batch_regex">Regex</string>
+    <string name="batch_date">Insert date</string>
+    <string name="case_keep">Keep</string>
+    <string name="case_lower">lower</string>
+    <string name="case_upper">UPPER</string>
+    <string name="case_capitalize">Capitalize</string>
+    <string name="batch_preview">Live preview</string>
+    <string name="batch_unchanged">No change</string>
+    <string name="batch_exists">Name exists</string>
+    <string name="batch_duplicate">Duplicate in batch</string>
+    <string name="batch_invalid">Invalid name</string>
+    <string name="batch_apply">Apply to %1$d items</string>
+    <string name="batch_done_n">Renamed %1$d items</string>
+    <string name="batch_undo">Undo</string>
+    <string name="batch_undo_done">Original names restored</string>
+
+    <!-- ══════════ v0.12 — Wi-Fi Direct transfer ══════════ -->
+    <string name="direct_menu_entry">Direct transfer (Wi-Fi Direct)</string>
+    <string name="direct_send_title">Direct Send</string>
+    <string name="direct_receive_title">Direct Receive</string>
+    <string name="direct_subtitle">Device-to-device without a router</string>
+    <string name="direct_discovering">Searching for nearby devices…</string>
+    <string name="direct_peers">Nearby devices</string>
+    <string name="direct_no_peers_title">No devices yet</string>
+    <string name="direct_no_peers_body_send">Open NovaFiles on the other device and choose \"Direct transfer → Receive\", or make sure Wi-Fi Direct is enabled on both</string>
+    <string name="direct_no_peers_body_receive">Ask the sender to search for devices and pick yours — a pairing request will appear on your screen</string>
+    <string name="direct_pairing">Pairing — accept the request on the other device…</string>
+    <string name="direct_connected_send">Connected — the share server is running over Wi-Fi Direct</string>
+    <string name="direct_qr_hint">Scan the QR from the receiving device (or copy the link from it) to browse and transfer your files</string>
+    <string name="direct_qr_title">Handshake Code</string>
+    <string name="direct_qr_hint2">The code works only inside the current Wi-Fi Direct link</string>
+    <string name="direct_connected_receive">Paired — this device is ready to receive</string>
+    <string name="direct_owner_address">Group address: %1$s</string>
+    <string name="direct_receive_steps">Paste the sender link from the other device (nova-direct://) to open its file browser directly</string>
+    <string name="direct_paste_button">Enter sender link</string>
+    <string name="direct_paste_from_clipboard">Paste from clipboard</string>
+    <string name="direct_paste_title">Sender link</string>
+    <string name="direct_paste_hint">nova-direct://…</string>
+    <string name="direct_open_link">Open connection</string>
+    <string name="direct_failed">Connection failed: %1$s</string>
+    <string name="direct_footer">Direct transfer works between two devices over Wi-Fi Direct without any external network — the embedded FTP server carries the data</string>
 </resources>
