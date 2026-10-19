@@ -83,6 +83,7 @@ fun BrowserScreen(
     onOpenNetwork: () -> Unit = {},
     onOpenOps: () -> Unit = {},
     onOpenDirectSend: () -> Unit = {},
+    onOpenAnalyzer: () -> Unit = {},
 ) {
     val widthDp = LocalConfiguration.current.screenWidthDp
     if (shouldUseDualPane(widthDp)) {
@@ -99,6 +100,7 @@ fun BrowserScreen(
             onOpenNetwork = onOpenNetwork,
             onOpenOps = onOpenOps,
             onOpenDirectSend = onOpenDirectSend,
+            onOpenAnalyzer = onOpenAnalyzer,
         )
     }
 }
@@ -111,6 +113,7 @@ private fun SinglePaneBrowser(
     onOpenNetwork: () -> Unit,
     onOpenOps: () -> Unit,
     onOpenDirectSend: () -> Unit,
+    onOpenAnalyzer: () -> Unit = {},
 ) {
     val context = LocalContext.current
     val vm: BrowserViewModel = viewModel(
@@ -437,6 +440,10 @@ private fun SinglePaneBrowser(
             IOSAction(stringResource(R.string.menu_network)) {
                 menuOpen = false
                 onOpenNetwork()
+            },
+            IOSAction(stringResource(R.string.analyzer_title)) {
+                menuOpen = false
+                onOpenAnalyzer()
             },
             IOSAction(stringResource(R.string.qr_show)) {
                 menuOpen = false

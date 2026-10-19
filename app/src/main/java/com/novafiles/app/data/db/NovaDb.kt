@@ -140,6 +140,10 @@ interface FileIndexDao {
     /** كل الصفوف (للترشيح اليدوي عند البحث بلا نص) */
     @Query("SELECT * FROM file_index ORDER BY modified DESC LIMIT :limit")
     suspend fun recent(limit: Int): List<FileIndexEntity>
+
+    /** لقطة كاملة لتحليل التخزين (v0.14) — بلا حد عملياً حتى MAX_SCAN_FILES */
+    @Query("SELECT * FROM file_index")
+    suspend fun all(): List<FileIndexEntity>
 }
 
 @Database(
