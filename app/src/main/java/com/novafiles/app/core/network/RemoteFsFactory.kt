@@ -10,6 +10,7 @@ object RemoteFsFactory {
     fun defaultPort(protocol: String): Int = when {
         protocol.equals("SMB", true) -> 445
         protocol.equals("SFTP", true) -> 22
+        protocol.equals("WEBDAV", true) -> 443
         else -> 21
     }
 
@@ -31,6 +32,19 @@ object RemoteFsFactory {
                     username = c.username,
                     password = c.password,
                     knownHosts = knownHosts,
+                )
+                "WEBDAV" -> WebDavFs(
+                    host = c.host,
+                    port = if (c.port > 0) c.port else 443,
+                    basePath = c.share,          // المسار الأساسي مثل /remote.php/dav/files/user
+                    username = c.username,
+                    password = c.password,
+                    // HTTPS يُستنتج من المنفذ 443؛ يمكن إجباره بكتابة المخطط في المضيف
+                    https = when {
+                        c.host.startsWith("https://", true) -> true
+                        c.host.startsWith("http://", true) -> false
+                        else -> null
+                    },
                 )
                 else -> FtpFs(
                     host = c.host,

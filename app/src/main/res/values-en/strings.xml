@@ -158,8 +158,8 @@
     <string name="net_more">Connection options</string>
     <string name="net_saved_header">Saved connections</string>
     <string name="net_empty_title">No saved connections</string>
-    <string name="net_empty_body">Add a connection to an FTP server or an SMB share (Windows/Samba/NAS) to reach your files over the network</string>
-    <string name="net_footer">Connections are stored on your device only — FTP and SMB2/SMB3 supported</string>
+    <string name="net_empty_body">Add a connection to an FTP server, an SMB share or a WebDAV server (Nextcloud/ownCloud) to reach your files over the network</string>
+    <string name="net_footer">Connections are stored on your device only — FTP, SMB2/SMB3, SFTP and WebDAV supported</string>
     <string name="net_connect">Connect</string>
     <string name="net_edit">Edit</string>
     <string name="net_delete_confirm">Delete connection?</string>
@@ -180,6 +180,8 @@
     <string name="net_smb_footer">Example: server “192.168.1.10” and share “Public” — for temporary Windows shares try your PC name like Users</string>
     <string name="net_ftp_footer">Default port is 21 — leave the username empty for anonymous login</string>
     <string name="net_sftp_footer">Default port is 22 — the server key fingerprint is saved on first successful connection and further connections are rejected if it changes (MITM protection)</string>
+    <string name="net_webdav_path">Base path</string>
+    <string name="net_webdav_footer">WebDAV (Nextcloud/ownCloud/any DAV server) — default port 443 over HTTPS; base path like /remote.php/dav/files/username, leave empty for server root. Prefix the host with http:// to force unencrypted</string>
     <string name="net_credentials_footer">Credentials are stored on your device only and used when connecting</string>
     <string name="net_test">Test connection</string>
     <string name="net_testing">Testing…</string>

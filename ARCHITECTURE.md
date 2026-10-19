@@ -70,6 +70,18 @@ Kotlin خالص بلا Android: خط أنابيب (فصل امتداد ← بح�
 ### `core/wifip2p/DirectCore.kt` — نواة Wi-Fi Direct (v0.12)
 نقي بالكامل: `DirectPayloadCodec` يرمّز مصافحة `nova-direct://host:port?name=&files=&user=&pass=` بترميز URL يدعم العربية يدوياً (بلا java.net)، و`DirectStateReducer` يحوّل أحداث P2P (جيران/اتصال/انفصال/فشل) إلى حالة واجهة واحدة. البروتوكول المعتمد: المرسل يطلب ملكية المجموعة (ownerIntent=15) ويستضيف خادم FTP المدمج على 192.168.49.1، والمستقبل يتصل كعضو ويعرف عنوان المالك دائماً. الغلاف الرقيق `WifiDirectManager` يحتوي استدعاءات WifiP2pManager فقط — 9 اختبارات JVM.
 
+### `core/network/WebDavFs.kt` + `DavParser.kt` — عميل WebDAV (v0.13)
+`WebDavFs` يطبّق `RemoteFs` فوق OkHttp (PROPFIND Depth 0/1، GET مع Range، PUT مع If-Match/If-None-Match، MKCOL، DELETE متسامح مع 404، MOVE/COPY مع Destination مطلق وOverwrite: F) بمصادقة Basic استباقية UTF-8. ترميز المسارات مقطعاً مقطعاً RFC 3986، والقدرات الخاصة مكشوفة: `listDav` (مع ETag المجموعة) و`statDav` و`readRange` (للاستئناف) و`copyServerSide/moveServerSide`. المحلل `DavParser` SAX خالص بلا اعتماديات: يطابق الأسماء المحلية فقط (يتسامح مع بادئات المساحات)، يفك href المطلق والمرمز، يجرب RFC 1123 ثم ISO 8601، ويمنع DOCTYPE (XXE). الاستثناءات متعاقد عليها: `DavConflictException` (412) و`DavUnauthorizedException` (401) — الطبقة العليا تطبق سياساتها عليهما.
+
+### `core/provider/` — تجريد StorageProvider (v0.13)
+`StorageProvider` واجهة SDK موثقة: معرف + مخطط + displayUrl + **قدرات معلنة** (`ProviderCapability`) + عمليات موحدة (list/stat/readTo/writeFrom/mkdir/delete/rename/move/copy) وقراءة مدى اختيارية `readRangeTo` — غير المدعوم يلغّم `UnsupportedCapabilityException` بدل الفشل الصامت. مهايئان: `LocalStorageProvider` (جذر محصّن بـ canonicalPath ضد الهروب، وفرز مجلدات-أولاً موحد) و`RemoteFsProvider` (يلف كل بروتوكولات RemoteFs ويكشف قدرات WebDavFs ديناميكياً). `DavListingCache` LRU (accessOrder) مع إعادة تحقق ETag: إصابة ذاكرة = طلب Depth:0 رخيص، والخوادم بلا ETag تثق بالنسخة حتى `invalidate`.
+
+### `core/transfer/TransferManager.kt` — مدير النقل v2 (v0.13)
+تجمّع عمال متوازٍ فوق `CoroutineScope` محقون (العدّ بالوظائف الحية لا بالحالة — الحالة تُضبط غير متزامنة داخل العامل). **جسر التعليق**: المصدر الحاجب يجري في كوروتين ابن يدفع الدلتا عبر قناة UNLIMITED (`trySend`) بينما يستنزفها العامل في سياقه المعلق — فتعمل بوابة الإيقاف وحد السماحية والسرعة و`ensureActive()` بين القطع بلا تجميد النسخ. الاستئناف: `ResumeJournal` يفصل ملف البيانات `.nfpart` عن سجل الحالة `.nfjournal` (حجم + ETag + مسار بترميز base64 — صفر تعارض فواصل مع العربية) وتحقق ثلاثي قبل الاستئناف. قيود الشبكة: فاحص محقون + قناة CONFLATED `netWake` لاستيقاظ حدثي بلا اقتراع. `RateLimiter` دلو رموز مع `delay` افتراضي الزمن. النواة كلها JVM — 18 اختباراً حتمياً.
+
+### `core/security/CredentialVault.kt` — خزنة الاعتماد (v0.13)
+واجهة `CredentialVault` (save/load/delete/ids) بتنفيذين: `AesGcmVault` — AES-256-GCM بـ IV عشوائي 12B لكل عملية وصيغة `NFCV1:iv:cipher` فوق مخزن نصي محقون، وفك فاشل يعيد `null` آمناً (بصمة GCM ترفض المفتاح الخاطئ والعبث) — و`InMemoryVault` للاختبارات. طبقة أندرويد `KeystoreVault` تولّد المفتاح داخل AndroidKeyStore (256-bit، GCM، بلا تصدير) وتكيّف SharedPreferences إلى `MutableMap`. بديل مباشر لمكتبة security-crypto المُهلكة — 8 اختبارات JVM.
+
 ### `core/vault/VaultManager.kt` — التشفير
 - مفتاح AES-256 يولَّد داخل **Android Keystore** بلا تصدير (مدمج بالعتاد حيث يُتاح)
 - صيغة الملف `.nvf`: `NVF1` + IV عشوائي 12B + GCM ciphertext (مصادقة مدمجة ترفض العبث)

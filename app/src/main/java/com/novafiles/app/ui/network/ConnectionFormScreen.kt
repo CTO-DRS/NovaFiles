@@ -78,6 +78,7 @@ fun ConnectionFormScreen(
 
     val isSmb = protocol.equals("SMB", true)
     val isSftp = protocol.equals("SFTP", true)
+    val isWebdav = protocol.equals("WEBDAV", true)
 
     var loaded by remember { mutableStateOf(false) }
     var testing by remember { mutableStateOf(false) }
@@ -122,7 +123,6 @@ fun ConnectionFormScreen(
         if (isSmb && share.isBlank()) return context.getString(R.string.net_need_share)
         return null
     }
-
     fun runTest() {
         val v = validate()
         if (v != null) {
@@ -183,10 +183,11 @@ fun ConnectionFormScreen(
             IOSGroupHeader(stringResource(R.string.net_protocol_section))
             IOSGroupCard {
                 IOSSegmented(
-                    options = listOf("FTP", "SFTP", "SMB"),
+                    options = listOf("FTP", "SFTP", "SMB", "WebDAV"),
                     selected = when {
                         isSmb -> 2
                         isSftp -> 1
+                        isWebdav -> 3
                         else -> 0
                     },
                     onSelect = { idx ->
@@ -194,6 +195,7 @@ fun ConnectionFormScreen(
                             protocol = when (idx) {
                                 1 -> "SFTP"
                                 2 -> "SMB"
+                                3 -> "WEBDAV"
                                 else -> "FTP"
                             }
                             port = RemoteFsFactory.defaultPort(protocol).toString()
@@ -259,11 +261,26 @@ fun ConnectionFormScreen(
                         },
                     )
                 }
+                if (isWebdav) {
+                    IOSListRow(
+                        title = stringResource(R.string.net_webdav_path),
+                        showSeparator = false,
+                        trailing = {
+                            IOSMiniField(
+                                value = share,
+                                onValueChange = { share = it.take(120) },
+                                hint = "/remote.php/dav/files/user",
+                                modifier = Modifier.width(180.dp),
+                            )
+                        },
+                    )
+                }
             }
             IOSGroupFooter(
                 when {
                     isSmb -> stringResource(R.string.net_smb_footer)
                     isSftp -> stringResource(R.string.net_sftp_footer)
+                    isWebdav -> stringResource(R.string.net_webdav_footer)
                     else -> stringResource(R.string.net_ftp_footer)
                 }
             )
