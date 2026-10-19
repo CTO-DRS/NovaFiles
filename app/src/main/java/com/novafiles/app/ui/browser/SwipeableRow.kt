@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.DriveFileMove
 import androidx.compose.material.icons.filled.Delete
@@ -28,6 +29,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
@@ -50,7 +53,13 @@ import kotlinx.coroutines.launch
  * تغليف شفاف: المحتوى الأصلي يبقى كما هو، والخلفية تكشف أيقونة الإجراء
  * أثناء السحب. عند الإفلات فوق العتبة يُطلق الإجراء المقابل للاتجاه.
  * القرار نفسه يأتي من [SwipeActionResolver] الخالص (مُختبر على JVM).
+ *
+ * v0.18 — الحاوية مقصوصة بزوايا البطاقة المستديرة (18dp) حتى تظهر
+ * خلفية الإجراء بنفس شكل البطاقة، والخلفية الافتراضية شفافة لأن
+ * البطاقة نفسها ترسم خلفيتها.
  */
+private val SwipeRowShape = RoundedCornerShape(18.dp)
+
 @Composable
 internal fun SwipeableRow(
     fileKey: String,
@@ -68,13 +77,14 @@ internal fun SwipeableRow(
         modifier = Modifier
             .fillMaxWidth()
             .onSizeChanged { rowSize = it }
+            .clip(SwipeRowShape)
             .background(
                 when {
                     offsetX.value > SwipeActionResolver.MIN_DISTANCE_DP ->
                         palette.accent.copy(alpha = 0.16f)
                     offsetX.value < -SwipeActionResolver.MIN_DISTANCE_DP ->
                         palette.orange.copy(alpha = 0.16f)
-                    else -> MaterialTheme.colorScheme.surface
+                    else -> Color.Transparent
                 },
             ),
     ) {

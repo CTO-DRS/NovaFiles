@@ -11,6 +11,9 @@
     <string name="storage_access_body">NovaFiles needs the "All files access" permission to browse and manage your files. It stays on your device only — nothing is sent to the internet.</string>
     <string name="storage_access_grant">Grant access</string>
 
+    <string name="empty_folder_hint">Tap + to create a folder or paste files here</string>
+    <string name="root_internal">Internal storage</string>
+    <string name="root_device">This device</string>
     <string name="empty_folder">This folder is empty</string>
     <string name="empty_favorites">No favorites yet — add them from any file menu</string>
     <string name="empty_trash">Trash is empty</string>

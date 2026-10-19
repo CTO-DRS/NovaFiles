@@ -21,11 +21,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -43,8 +42,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.novafiles.app.R
 import com.novafiles.app.core.archive.ArchiveEngine
@@ -195,6 +197,11 @@ suspend fun showBrowserMessage(snackbar: SnackbarHostState, context: android.con
     }
 }
 
+/** زوايا بطاقة الصف/الشبكة الموحدة — v0.18 */
+private val ItemCardShape = RoundedCornerShape(18.dp)
+private val IconTileShape = RoundedCornerShape(14.dp)
+private val GridTileShape = RoundedCornerShape(18.dp)
+
 @Composable
 internal fun ListFileItem(
     file: File,
@@ -206,6 +213,7 @@ internal fun ListFileItem(
 ) {
     val type = FileType.of(file)
     val context = LocalContext.current
+    val p = LocalIOSPalette.current
 
     // v0.17 — حزمة الأيقونات + لون المجلد الموروث
     val packRaw by context.novaContainer.settings.iconPack.collectAsState("")
@@ -220,21 +228,49 @@ internal fun ListFileItem(
         ?.let { id -> Color(PaletteEngine.family(PaletteEngine.preset(id), dark = false).accent) }
         ?: TypeIcons.color(type)
 
+    // v0.18 — كل عنصر بطاقة مستديرة: خلفية مرتفعة + بلاطة أيقونة ملوّنة
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .clip(ItemCardShape)
+            .background(
+                if (selected) p.accent.copy(alpha = 0.12f) else p.cardBg,
+                shape = ItemCardShape,
+            )
+            .then(
+                if (selected) {
+                    Modifier.border(1.5.dp, p.accent.copy(alpha = 0.55f), ItemCardShape)
+                } else {
+                    Modifier
+                },
+            )
             .combinedClickable(onClick = onTap, onLongClick = onLongTap)
-            .padding(horizontal = 8.dp, vertical = 6.dp),
+            .padding(horizontal = 12.dp, vertical = 9.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         if (selected) {
-            Checkbox(checked = true, onCheckedChange = { onLongTap() })
+            // حلقة تحديد دائرية بدل مربع الاختيار — أنعم وأكثر انسجاماً
+            Box(
+                modifier = Modifier
+                    .size(24.dp)
+                    .clip(CircleShape)
+                    .background(p.accent),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    Icons.Filled.Check,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(15.dp),
+                )
+            }
+            Spacer(Modifier.width(10.dp))
         }
         Box(
             modifier = Modifier
-                .size(42.dp)
-                .clip(RoundedCornerShape(10.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant),
+                .size(46.dp)
+                .clip(IconTileShape)
+                .background(iconColor.copy(alpha = 0.15f)),
             contentAlignment = Alignment.Center,
         ) {
             if (type == FileType.IMAGE && file.exists()) {
@@ -255,21 +291,27 @@ internal fun ListFileItem(
         }
         Spacer(Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
-            Text(file.name, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Text(
+                file.name,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                style = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Medium),
+            )
             Text(
                 if (file.isDirectory) stringResource(R.string.items_count, LocalBrowser.itemCount(file))
                 else "${LocalBrowser.humanSize(file.length())} • ${LocalBrowser.formatDate(file.lastModified())}",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = TextStyle(fontSize = 12.sp),
+                color = p.secondaryLabel,
                 maxLines = 1,
             )
         }
         if (favorite) {
+            Spacer(Modifier.width(6.dp))
             Icon(
                 Icons.Filled.Star,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.tertiary,
-                modifier = Modifier.size(18.dp),
+                tint = p.orange,
+                modifier = Modifier.size(17.dp),
             )
         }
         ItemMenu(file = file, vm = vm, context = context)
@@ -287,71 +329,131 @@ internal fun GridFileItem(
 ) {
     val type = FileType.of(file)
     val context = LocalContext.current
-    Column(
-        modifier = Modifier
-            .combinedClickable(onClick = onTap, onLongClick = onLongTap)
-            .padding(4.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        Box(
+    val p = LocalIOSPalette.current
+    val iconColor = TypeIcons.color(type)
+
+    // v0.18 — بطاقة شبكة: بلاطة كبيرة 68dp داخل بطاقة مستديرة والاسم تحتها
+    Box {
+        Column(
             modifier = Modifier
-                .size(64.dp)
-                .clip(RoundedCornerShape(14.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant),
-            contentAlignment = Alignment.Center,
+                .fillMaxWidth()
+                .clip(ItemCardShape)
+                .background(
+                    if (selected) p.accent.copy(alpha = 0.12f) else p.cardBg,
+                    shape = ItemCardShape,
+                )
+                .then(
+                    if (selected) {
+                        Modifier.border(1.5.dp, p.accent.copy(alpha = 0.55f), ItemCardShape)
+                    } else {
+                        Modifier
+                    },
+                )
+                .combinedClickable(onClick = onTap, onLongClick = onLongTap)
+                .padding(horizontal = 8.dp, vertical = 12.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            if (type == FileType.IMAGE && file.exists()) {
-                AsyncImage(
-                    model = file,
-                    contentDescription = file.name,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize(),
-                )
-            } else {
-                Icon(
-                    TypeIcons.icon(type),
-                    contentDescription = file.name,
-                    tint = TypeIcons.color(type),
-                    modifier = Modifier.size(34.dp),
-                )
-            }
-            if (selected) {
-                Box(
-                    modifier = Modifier
-                        .size(22.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text("✓", color = MaterialTheme.colorScheme.onPrimary, style = MaterialTheme.typography.labelSmall)
+            Box(
+                modifier = Modifier
+                    .size(68.dp)
+                    .clip(GridTileShape)
+                    .background(iconColor.copy(alpha = 0.14f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                if (type == FileType.IMAGE && file.exists()) {
+                    AsyncImage(
+                        model = file,
+                        contentDescription = file.name,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize(),
+                    )
+                } else {
+                    Icon(
+                        TypeIcons.icon(type),
+                        contentDescription = file.name,
+                        tint = iconColor,
+                        modifier = Modifier.size(34.dp),
+                    )
+                }
+                if (selected) {
+                    Box(
+                        modifier = Modifier
+                            .padding(3.dp)
+                            .size(20.dp)
+                            .align(Alignment.TopEnd)
+                            .clip(CircleShape)
+                            .background(p.accent),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            Icons.Filled.Check,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(13.dp),
+                        )
+                    }
                 }
             }
-        }
-        Text(
-            file.name,
-            style = MaterialTheme.typography.labelMedium,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(top = 4.dp),
-        )
-        if (!file.isDirectory) {
             Text(
-                LocalBrowser.humanSize(file.length()),
-                style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                file.name,
+                style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.Medium),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.padding(top = 8.dp),
             )
+            if (!file.isDirectory) {
+                Text(
+                    LocalBrowser.humanSize(file.length()),
+                    style = TextStyle(fontSize = 11.sp),
+                    color = p.secondaryLabel,
+                )
+            }
         }
-        ItemMenu(file = file, vm = vm, context = context, compact = true)
+        // قائمة العنصر — شريحة دائرية صغيرة في الزاوية العلوية
+        ItemMenu(
+            file = file,
+            vm = vm,
+            context = context,
+            compact = true,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(4.dp),
+        )
     }
 }
 
 /** ورقة إجراءات iOS لكل عنصر (تعمل من لقطة الطبقة العليا) */
 @Composable
-internal fun ItemMenu(file: File, vm: BrowserViewModel, context: android.content.Context, compact: Boolean = false) {
+internal fun ItemMenu(
+    file: File,
+    vm: BrowserViewModel,
+    context: android.content.Context,
+    compact: Boolean = false,
+    modifier: Modifier = Modifier,
+) {
     var open by remember { mutableStateOf(false) }
     val qrScope = androidx.compose.runtime.rememberCoroutineScope()
-    IconButton(onClick = { open = true }, modifier = Modifier.size(if (compact) 30.dp else 40.dp)) {
-        Icon(Icons.Filled.MoreVert, contentDescription = null, modifier = Modifier.size(if (compact) 18.dp else 22.dp))
+    val p = LocalIOSPalette.current
+    // v0.18 — في القائمة: زر شفاف هادئ؛ في الشبكة: شريحة دائرية صغيرة
+    Box(
+        modifier = modifier
+            .size(if (compact) 26.dp else 38.dp)
+            .then(
+                if (compact) {
+                    Modifier.clip(CircleShape).background(p.fill)
+                } else {
+                    Modifier
+                },
+            )
+            .clickable(onClick = { open = true }),
+        contentAlignment = Alignment.Center,
+    ) {
+        Icon(
+            Icons.Filled.MoreVert,
+            contentDescription = null,
+            tint = if (compact) p.secondaryLabel else p.secondaryLabel,
+            modifier = Modifier.size(if (compact) 15.dp else 20.dp),
+        )
     }
     val isFav = vm.favoritesPaths.collectAsState().value.contains(file.absolutePath)
     val isExtractable = !file.isDirectory && ArchiveEngine.supports(file.name)

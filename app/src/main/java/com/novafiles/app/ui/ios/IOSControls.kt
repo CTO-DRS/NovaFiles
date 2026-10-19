@@ -102,7 +102,7 @@ private fun CompositionTextSelection(
     )
 }
 
-/** مجموعة قائمة iOS المجمّعة (Inset Grouped Section) — بطاقة بيضاء بحواف دائرية */
+/** مجموعة قائمة iOS المجمّعة (Inset Grouped Section) — بطاقة بحواف دائرية ناعمة */
 @Composable
 fun IOSGroupCard(
     modifier: Modifier = Modifier,
@@ -113,7 +113,7 @@ fun IOSGroupCard(
         modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 6.dp)
-            .background(p.cardBg, RoundedCornerShape(12.dp)),
+            .background(p.cardBg, RoundedCornerShape(16.dp)),
     ) {
         content()
     }

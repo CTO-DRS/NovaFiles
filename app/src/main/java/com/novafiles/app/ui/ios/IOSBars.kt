@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material3.Icon
@@ -28,6 +29,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -41,12 +44,17 @@ import com.novafiles.app.R
 
 /**
  * ══════════════════════════════════════════════════════════
- *  الشريط العلوي بنمط iOS الأصيل (Large-Title Navigation Bar)
- *  ─ عنوان كبير 34sp يتقلّص إلى شريط مضغوط 44dp عند التمرير
- *  ─ خط فصل شعري + خلفية شبه شفافة عند التقلّص (تمويه iOS)
+ *  الشريط العلوي بنمط iOS (Large-Title Navigation Bar) — v0.18
+ *  ─ عنوان كبير يتقلّص إلى شريط مضغوط عند التمرير
+ *  ─ v0.18: الشريط المضغوط يكتسب زوايا سفلية دائرية + ظلاً ناعماً
+ *    (مظهر «الورقة العائمة»)، والمسار يُعرض في شارة مستديرة
  *  ─ سهم رجوع ‹ يتطابق تلقائياً مع الاتجاه RTL
  * ══════════════════════════════════════════════════════════
  */
+
+/** زوايا أسفل الشريط المضغوط — مظهر الورقة العائمة */
+private val NavCollapsedShape = RoundedCornerShape(bottomStart = 20.dp, bottomEnd = 20.dp)
+
 @Composable
 fun IOSNavBar(
     title: String,
@@ -66,7 +74,7 @@ fun IOSNavBar(
     }
     val progress by animateFloatAsState(
         targetValue = if (collapsed) 1f else 0f,
-        animationSpec = tween(160),
+        animationSpec = tween(180),
         label = "iosNavCollapse",
     )
     // خلفية الشريط: موسّع = خلفية الشاشة، مضغوط = خلفية الشريط الضبابية
@@ -75,15 +83,29 @@ fun IOSNavBar(
         else -> lerp(p.groupedBg, p.barBg, progress)
     }
     val largeBlock by animateDpAsState(
-        targetValue = if (collapsed) 0.dp else if (subtitle != null) 58.dp else 46.dp,
-        animationSpec = tween(160),
+        targetValue = if (collapsed) 0.dp else if (subtitle != null) 64.dp else 48.dp,
+        animationSpec = tween(180),
         label = "iosNavLarge",
     )
 
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .background(bgColor)
+            // v0.18 — ظل ناعم يظهر مع التقلّص فقط (الورقة العائمة)
+            .then(
+                if (transparent) Modifier
+                else Modifier.shadow(
+                    elevation = 10.dp * progress,
+                    shape = NavCollapsedShape,
+                    clip = false,
+                    ambientColor = Color.Black,
+                    spotColor = Color.Black,
+                ),
+            )
+            .background(
+                bgColor,
+                shape = if (transparent) RoundedCornerShape(0.dp) else NavCollapsedShape,
+            )
             .windowInsetsPadding(WindowInsets.statusBars),
     ) {
         // ---- الصف المضغوط 44dp: سهم الرجوع + العنوان في المنتصف + الإجراءات ----
@@ -100,19 +122,19 @@ fun IOSNavBar(
                 maxLines = 1,
                 modifier = Modifier
                     .align(Alignment.Center)
-                    .padding(horizontal = 72.dp)
+                    .padding(horizontal = 84.dp)
                     .alpha(progress),
             )
             Row(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 6.dp),
+                    .padding(horizontal = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 if (onBack != null) {
                     Box(
                         modifier = Modifier
-                            .size(36.dp)
+                            .size(40.dp)
                             .clickable(onClick = onBack),
                         contentAlignment = Alignment.Center,
                     ) {
@@ -142,17 +164,26 @@ fun IOSNavBar(
                 Column(modifier = Modifier.weight(1f)) {
                     TextiOS(
                         text = title,
-                        style = TextStyle(fontSize = 34.sp, fontWeight = FontWeight.Bold),
+                        style = TextStyle(fontSize = 32.sp, fontWeight = FontWeight.Bold),
                         color = if (transparent) Color.White else p.label,
                         maxLines = 1,
                     )
-                    if (subtitle != null) {
-                        TextiOS(
-                            text = subtitle,
-                            style = TextStyle(fontSize = 12.sp),
-                            color = p.secondaryLabel,
-                            maxLines = 1,
-                        )
+                    if (!subtitle.isNullOrEmpty()) {
+                        Spacer(Modifier.height(6.dp))
+                        // v0.18 — شارة المسار المستديرة بدل النص الخام
+                        Box(
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .background(p.fill)
+                                .padding(horizontal = 8.dp, vertical = 3.dp),
+                        ) {
+                            TextiOS(
+                                text = subtitle,
+                                style = TextStyle(fontSize = 11.sp, fontWeight = FontWeight.Medium),
+                                color = p.secondaryLabel,
+                                maxLines = 1,
+                            )
+                        }
                     }
                 }
             }
@@ -163,6 +194,7 @@ fun IOSNavBar(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
                     .height(0.5.dp)
                     .alpha(progress)
                     .background(p.separator),
@@ -171,7 +203,7 @@ fun IOSNavBar(
     }
 }
 
-/** زر أيقونة في الشريط العلوي iOS — أزرق تلقائياً */
+/** زر أيقونة في الشريط العلوي iOS — أزرق تلقائياً، هدف لمس 40dp */
 @Composable
 fun IOSNavIconButton(
     icon: ImageVector,
@@ -182,7 +214,7 @@ fun IOSNavIconButton(
     val p = LocalIOSPalette.current
     Box(
         modifier = Modifier
-            .size(38.dp)
+            .size(40.dp)
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
@@ -216,10 +248,10 @@ fun IOSNavTextButton(
 
 /**
  * ══════════════════════════════════════════════════════════
- *  شريط التبويبات السفلي بنمط iOS الأصيل (Tab Bar)
- *  ─ ارتفاع 49dp + مسافة شريط التنقل للنظام
- *  ─ أيقونات 25dp مع تسميات 10sp — الأزرق للنشِط والرمادي للبقية
- *  ─ خط فصل شعري علوي + خلفية شبه شفافة (تمويه iOS)
+ *  شريط التبويبات السفلي بنمط iOS (Tab Bar) — v0.18
+ *  ─ v0.18: زوايا علوية دائرية 22dp + ظل عائم + كبسولة تمييز
+ *    خلف أيقونة التبويب النشط (روح iPadOS الحديثة)
+ *  ─ أيقونات 24dp مع تسميات 10sp — accent للنشِط والرمادي للبقية
  * ══════════════════════════════════════════════════════════
  */
 data class IOSBarItem(
@@ -228,6 +260,9 @@ data class IOSBarItem(
     val icon: ImageVector,
 )
 
+/** زوايا أعلى شريط التبويبات */
+private val BottomBarShape = RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp)
+
 @Composable
 fun IOSBottomBar(
     items: List<IOSBarItem>,
@@ -235,10 +270,22 @@ fun IOSBottomBar(
     onSelect: (String) -> Unit,
 ) {
     val p = LocalIOSPalette.current
-    Column(modifier = Modifier.fillMaxWidth().background(p.tabBarBg)) {
-        // الخط الشعري العلوي
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(
+                elevation = 16.dp,
+                shape = BottomBarShape,
+                clip = false,
+                ambientColor = Color.Black,
+                spotColor = Color.Black,
+            )
+            .background(p.tabBarBg, shape = BottomBarShape),
+    ) {
+        // الخط الشعري العلوي داخل الزوايا الدائرية
         Box(
             modifier = Modifier
+                .padding(horizontal = 18.dp)
                 .fillMaxWidth()
                 .height(0.5.dp)
                 .background(p.separator),
@@ -246,7 +293,7 @@ fun IOSBottomBar(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(49.dp),
+                .height(54.dp),
         ) {
             items.forEach { item ->
                 val active = item.key == selected
@@ -257,17 +304,26 @@ fun IOSBottomBar(
                         .clickable { onSelect(item.key) },
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    Spacer(Modifier.height(5.dp))
-                    Icon(
-                        imageVector = item.icon,
-                        contentDescription = item.label,
-                        tint = if (active) p.accent else p.secondaryLabel,
-                        modifier = Modifier.size(25.dp),
-                    )
+                    Spacer(Modifier.height(7.dp))
+                    // v0.18 — كبسولة تمييز خلف الأيقونة النشطة
+                    Box(
+                        modifier = Modifier
+                            .size(width = 46.dp, height = 27.dp)
+                            .clip(RoundedCornerShape(14.dp))
+                            .background(if (active) p.accent.copy(alpha = 0.16f) else Color.Transparent),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(
+                            imageVector = item.icon,
+                            contentDescription = item.label,
+                            tint = if (active) p.accent else p.secondaryLabel,
+                            modifier = Modifier.size(23.dp),
+                        )
+                    }
                     Spacer(Modifier.height(1.dp))
                     TextiOS(
                         text = item.label,
-                        style = TextStyle(fontSize = 10.sp),
+                        style = TextStyle(fontSize = 10.sp, fontWeight = if (active) FontWeight.SemiBold else FontWeight.Normal),
                         color = if (active) p.accent else p.secondaryLabel,
                         maxLines = 1,
                     )
