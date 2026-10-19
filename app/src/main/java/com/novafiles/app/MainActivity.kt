@@ -30,6 +30,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         val container = novaContainer
         captureDirectPayload(intent, container)
+        captureOAuthRedirect(intent, container)
 
         setContent {
             val theme by container.settings.themeMode
@@ -61,6 +62,7 @@ class MainActivity : AppCompatActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         captureDirectPayload(intent, novaContainer)
+        captureOAuthRedirect(intent, novaContainer)
     }
 
     /**
@@ -72,5 +74,15 @@ class MainActivity : AppCompatActivity() {
         if (data.scheme != "nova-direct") return
         val payload = DirectPayloadCodec.decode(data.toString()) ?: return
         container.pendingDirectPayload = payload
+    }
+
+    /**
+     * v0.16 — عودة OAuth: المتصفح يعيد التوجيه إلى com.novafiles.app:/oauth?...
+     * نحفظ الرابط؛ شاشة الحسابات السحابية تستقبله وتكمل تبادل الرمز بـ PKCE.
+     */
+    private fun captureOAuthRedirect(intent: Intent?, container: AppContainer) {
+        val data: Uri = intent?.data ?: return
+        if (data.scheme != "com.novafiles.app" || !data.toString().contains("/oauth")) return
+        container.pendingOAuthRedirect = data.toString()
     }
 }

@@ -146,9 +146,80 @@ interface FileIndexDao {
     suspend fun all(): List<FileIndexEntity>
 }
 
+// ═══════════════ v0.16 — الحسابات السحابية ودفترة مزامنة الكاميرا ═══════════════
+
+/** حساب سحابي مُوثَّق (Drive/Dropbox/OneDrive) — التوكنات مشفرة في Keystore لا هنا */
+@Entity(tableName = "cloud_accounts")
+data class CloudAccountEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    /** drive | dropbox | onedrive */
+    val provider: String,
+    /** اسم الحساب/البريد المعروض من الخدمة */
+    val displayName: String,
+    /** مجلد مزامنة الكاميرا الهدف */
+    val targetFolder: String = "/NovaFiles-Camera",
+    /** FLAT | YEAR_MONTH */
+    val naming: String = "YEAR_MONTH",
+    /** مزامنة الكاميرا مفعلة لهذا الحساب؟ */
+    val syncEnabled: Boolean = false,
+    val lastSyncAt: Long = 0L,
+    val createdAt: Long = System.currentTimeMillis(),
+    val lastUsedAt: Long = 0L,
+)
+
+@Dao
+interface CloudAccountsDao {
+    @Query("SELECT * FROM cloud_accounts ORDER BY lastUsedAt DESC, id DESC")
+    fun observeAll(): Flow<List<CloudAccountEntity>>
+
+    @Query("SELECT * FROM cloud_accounts WHERE id = :id")
+    suspend fun byId(id: Long): CloudAccountEntity?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsert(a: CloudAccountEntity): Long
+
+    @Query("UPDATE cloud_accounts SET lastSyncAt = :ts WHERE id = :id")
+    suspend fun touchSync(id: Long, ts: Long)
+
+    @Query("UPDATE cloud_accounts SET lastUsedAt = :ts WHERE id = :id")
+    suspend fun touchUsed(id: Long, ts: Long)
+
+    @Query("DELETE FROM cloud_accounts WHERE id = :id")
+    suspend fun remove(id: Long)
+}
+
+/** دفترة مزامنة الكاميرا — exact-once: سجل لكل عنصر وسائط بهوية محتواه */
+@Entity(tableName = "sync_ledger")
+data class SyncLedgerEntity(
+    @PrimaryKey val key: String,
+    val contentHash: String,
+    val size: Long,
+    val remotePath: String,
+    val remoteRef: String?,
+    val uploadedAt: Long,
+)
+
+@Dao
+interface SyncLedgerDao {
+    @Query("SELECT * FROM sync_ledger WHERE `key` = :key")
+    suspend fun byKey(key: String): SyncLedgerEntity?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun put(record: SyncLedgerEntity)
+
+    @Query("SELECT * FROM sync_ledger")
+    suspend fun all(): List<SyncLedgerEntity>
+
+    @Query("DELETE FROM sync_ledger WHERE `key` = :key")
+    suspend fun remove(key: String)
+
+    @Query("SELECT COUNT(*) FROM sync_ledger")
+    suspend fun count(): Int
+}
+
 @Database(
-    entities = [FavoriteEntity::class, TagEntity::class, FileIndexEntity::class, FileIndexFtsEntity::class, ConnectionEntity::class],
-    version = 3,
+    entities = [FavoriteEntity::class, TagEntity::class, FileIndexEntity::class, FileIndexFtsEntity::class, ConnectionEntity::class, CloudAccountEntity::class, SyncLedgerEntity::class],
+    version = 4,
     exportSchema = false,
 )
 abstract class NovaDb : RoomDatabase() {
@@ -156,4 +227,6 @@ abstract class NovaDb : RoomDatabase() {
     abstract fun tagsDao(): TagsDao
     abstract fun fileIndexDao(): FileIndexDao
     abstract fun connectionsDao(): ConnectionsDao
+    abstract fun cloudAccountsDao(): CloudAccountsDao
+    abstract fun syncLedgerDao(): SyncLedgerDao
 }

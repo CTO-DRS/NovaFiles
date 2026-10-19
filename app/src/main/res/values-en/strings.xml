@@ -36,6 +36,7 @@
     <string name="action_restore">Restore</string>
     <string name="action_save">Save</string>
     <string name="action_cancel">Cancel</string>
+    <string name="action_create">Create</string>
     <string name="action_ok">OK</string>
     <string name="action_lock">Lock vault</string>
     <string name="action_pick_file_encrypt">Pick a file to encrypt</string>
@@ -428,4 +429,33 @@
     <string name="junk_confirm_title">Confirm cleanup</string>
     <string name="junk_confirm_text">%1$d items will be moved to Trash. Nothing is ever deleted silently.</string>
     <string name="junk_age_hint">Files newer than %1$d days are protected from scanning</string>
+    <!-- v0.16 — Cloud accounts & camera sync -->
+    <string name="cloud_title">Cloud Accounts</string>
+    <string name="cloud_add">Add account</string>
+    <string name="cloud_empty">No cloud accounts yet — add Drive, Dropbox or OneDrive with secure sign-in (OAuth)</string>
+    <string name="cloud_added">%1$s added successfully</string>
+    <string name="cloud_pick_provider">Pick a cloud provider</string>
+    <string name="cloud_no_client_id">Developer setup: %1$s needs your own OAuth client ID. Register it via gradle.properties (see README) then rebuild.</string>
+    <string name="cloud_needs_client_id">Needs client ID (developer setup)</string>
+    <string name="cloud_setup_required">Setup required</string>
+    <string name="cloud_removed">Account removed and its encrypted tokens wiped</string>
+    <string name="cloud_sync_no_client">Sync unavailable: client ID missing or account signed out</string>
+    <string name="cloud_sync_blocked">Sync now: default constraints are Wi-Fi + charging — plug in or join Wi-Fi</string>
+    <string name="cloud_sync_partial">Uploaded %1$d, failed %2$d — failures retry next round</string>
+    <string name="cloud_sync_done">Uploaded %1$d new, skipped %2$d already synced</string>
+    <string name="cloud_sync_on">Camera sync → %1$s (last: %2$s)</string>
+    <string name="cloud_sync_off">Camera sync off</string>
+    <string name="cloud_browse">Browse</string>
+    <string name="cloud_sync_now">Sync now</string>
+    <string name="cloud_section_row">Cloud accounts</string>
+    <string name="cloud_section_sub">Drive, Dropbox, OneDrive — automatic camera sync</string>
+    <string name="cloud_transferring">Transferring: %1$s</string>
+    <string name="cloud_error">Cloud error</string>
+    <string name="cloud_downloaded">Downloaded %1$s to Download/NovaFiles</string>
+    <string name="cloud_item_folder">Cloud folder</string>
+    <string name="cloud_long_press_hint">Long press to manage</string>
+    <string name="cloud_delete_title">Delete from cloud</string>
+    <string name="cloud_delete_body">"%1$s" will be permanently deleted from the provider. This cannot be undone.</string>
+    <string name="cloud_remove_title">Remove account</string>
+    <string name="cloud_remove_body">"%1$s" will be signed out and its encrypted tokens wiped from this device. Your files in the cloud are unaffected.</string>
 </resources>

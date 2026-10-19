@@ -64,6 +64,30 @@ class AppContainer(appContext: Context) {
     /** v0.12 — مدير Wi-Fi Direct (اكتشاف + اقتران + استضافة FTP عبر P2P) */
     val direct: WifiDirectManager by lazy { WifiDirectManager(ctx, appScope) }
 
+    /** v0.16 — الحسابات السحابية: OAuth PKCE + توكنات مشفرة + مزوّدات موحدة */
+    val cloudAccounts: com.novafiles.app.core.cloud.CloudAccountManager by lazy {
+        com.novafiles.app.core.cloud.CloudAccountManager(ctx, db)
+    }
+
+    /** v0.16 — مزامنة الكاميرا: MediaStore + قيود Wi-Fi/شحن + دفترة exact-once */
+    val cameraSync: com.novafiles.app.core.cloud.CameraSyncManager by lazy {
+        com.novafiles.app.core.cloud.CameraSyncManager(ctx, db, cloudAccounts, ::cloudClientId)
+    }
+
+    /** معرّف عميل OAuth لكل مزوّد — يضبطه المُطوّر عبر gradle.properties */
+    fun cloudClientId(provider: String): String = when (provider) {
+        "drive" -> com.novafiles.app.BuildConfig.DRIVE_CLIENT_ID
+        "dropbox" -> com.novafiles.app.BuildConfig.DROPBOX_CLIENT_ID
+        "onedrive" -> com.novafiles.app.BuildConfig.ONEDRIVE_CLIENT_ID
+        else -> ""
+    }
+
+    /** v0.16 — جلسة تفويض OAuth قيد الدوران (بين شاشة الإضافة ونشاط العودة) */
+    var pendingCloudAuth: com.novafiles.app.core.cloud.CloudAccountManager.PendingAuth? = null
+
+    /** v0.16 — رابط عودة OAuth من المتصفح — تستهلكه شاشة الحسابات */
+    var pendingOAuthRedirect: String? = null
+
     /** حمولة nova-direct:// قادمة من مسح QR — تُستهلك مرة واحدة في NovaRoot */
     var pendingDirectPayload: com.novafiles.app.core.wifip2p.DirectPayload? = null
 }
@@ -81,3 +105,6 @@ class NovaApp : Application() {
 /** وصول سريع لحاوية التبعيات من داخل Composables */
 val Context.novaContainer: AppContainer
     get() = (applicationContext as NovaApp).container
+
+/** v0.16 — معرّف عميل OAuth من أي سياق */
+fun Context.cloudClientId(provider: String): String = novaContainer.cloudClientId(provider)
