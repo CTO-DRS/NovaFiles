@@ -19,6 +19,9 @@
     <!-- القفل الحيوي (بصمة/وجه) للخزنة المشفرة -->
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
 
+    <!-- v0.15: التقاط صورة تسلل اختيارية عند فشل دخول الخزنة -->
+    <uses-permission android:name="android.permission.CAMERA" />
+
     <!-- المشاركة عبر WiFi: خدمة أمامية + إشعار -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
@@ -52,6 +55,20 @@
                 <data android:scheme="nova-direct" />
             </intent-filter>
         </activity>
+
+        <!-- v0.15: وضع التنكّر — أيقونة حاسبة في القاذف، تُفعّل من إعدادات الخزنة -->
+        <activity-alias
+            android:name="com.novafiles.app.LauncherCalc"
+            android:enabled="false"
+            android:exported="true"
+            android:icon="@drawable/ic_calc_decoy"
+            android:label="@string/calc_alias_label"
+            android:targetActivity=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity-alias>
 
         <!-- مشاركة الملفات عبر WiFi — خادم FTP كخدمة أمامية -->
         <service

@@ -12,6 +12,8 @@ import com.novafiles.app.core.ops.OpQueue
 import com.novafiles.app.core.wifip2p.WifiDirectManager
 import com.novafiles.app.core.ops.OpDirs
 import com.novafiles.app.core.vault.VaultManager
+import com.novafiles.app.core.vault2.AutoHidePolicy
+import com.novafiles.app.core.vault2.Vault2Manager
 import androidx.room.Room
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -36,6 +38,12 @@ class AppContainer(appContext: Context) {
     val settings: SettingsStore by lazy { SettingsStore(ctx) }
 
     val vault: VaultManager by lazy { VaultManager(ctx, settings) }
+
+    /** v0.15 — الخزنة 2.0: مجلدات مشفرة + استرجاع + تنكّر + سجل تسلل + مسح آمن */
+    val vault2: Vault2Manager by lazy { Vault2Manager(ctx, settings) }
+
+    /** v0.15 — سياسة الإخفاء التلقائي (30 ثانية بعد مغادرة التطبيق) */
+    val autoHide = AutoHidePolicy()
 
     /** بصمات مفاتيح مضيفي SFTP (نمط الثقة بأول استخدام) */
     val knownHosts: KnownHostStore by lazy { PrefsKnownHostStore(ctx) }

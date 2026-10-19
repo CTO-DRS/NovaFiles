@@ -43,7 +43,7 @@ import com.novafiles.app.ui.search.SearchScreen
 import com.novafiles.app.ui.analyzer.AnalyzerScreen
 import com.novafiles.app.ui.ops.OpsScreen
 import com.novafiles.app.ui.settings.SettingsScreen
-import com.novafiles.app.ui.vault.VaultScreen
+import com.novafiles.app.ui.vault.Vault2Screen
 import com.novafiles.app.ui.viewer.ImageViewerScreen
 import androidx.lifecycle.viewmodel.initializer
 import java.io.File
@@ -178,7 +178,7 @@ private fun NovaNavHost(nav: NavHostController) {
             FavoritesScreen(onOpenFile = { openFile(nav, it) })
         }
         composable(Routes.VAULT) {
-            VaultScreen()
+            Vault2Screen()
         }
         composable(Routes.SETTINGS) {
             SettingsScreen()

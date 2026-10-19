@@ -56,7 +56,10 @@ class BrowserViewModel(
 ) : ViewModel() {
 
     private val trashDir = File(Environment.getExternalStorageDirectory(), ".NovaFilesTrash")
-    val vaultDir = container.vault.vaultDir
+
+    /** v0.15: مجلد الخزنة 2.0 — يظهر في متصفح «الملفات المخفية» كأي مجلد */
+    val vaultDir: File
+        get() = container.vault2.vaultRoot()
 
     // ----- الحالة -----
     private val _path = MutableStateFlow(Environment.getExternalStorageDirectory()?.absolutePath ?: "/storage/emulated/0")
@@ -254,7 +257,14 @@ class BrowserViewModel(
     }
 
     fun encryptIntoVault(file: File) = runOp {
-        container.vault.encryptIntoVault(file).getOrThrow()
+        // v0.15: استيراد مباشر إلى الخزنة 2.0 — تشفير متدفق ثم حذف الأصل
+        val repository = container.vault2.openRepository()
+        repository.use {
+            file.inputStream().use { input ->
+                it.importFile("", file.name, input)
+            }
+        }
+        file.delete()
         "vault:ok"
     }
 
