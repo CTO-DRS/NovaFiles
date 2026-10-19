@@ -13,8 +13,14 @@ android {
         applicationId = "com.novafiles.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 15
-        versionName = "0.15.0"
+        versionCode = 16
+        versionName = "0.16.0"
+
+        // v0.16 — معرّفات عملاء OAuth للسحابة: يضبطها كل مُطوّر عبر gradle.properties
+        // (NOVA_DRIVE_CLIENT_ID=...) — فارغة افتراضياً ليعمل البناء دون أسرار
+        buildConfigField("String", "DRIVE_CLIENT_ID", "\"${project.findProperty("NOVA_DRIVE_CLIENT_ID") ?: ""}\"")
+        buildConfigField("String", "DROPBOX_CLIENT_ID", "\"${project.findProperty("NOVA_DROPBOX_CLIENT_ID") ?: ""}\"")
+        buildConfigField("String", "ONEDRIVE_CLIENT_ID", "\"${project.findProperty("NOVA_ONEDRIVE_CLIENT_ID") ?: ""}\"")
     }
 
     buildTypes {
@@ -35,6 +41,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     packaging {
         resources {

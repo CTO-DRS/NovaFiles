@@ -16,6 +16,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cloud
+import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.Dns
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.VpnKey
@@ -63,6 +64,7 @@ fun NetworkScreen(
     onConnect: (ConnectionEntity) -> Unit,
     onEdit: (ConnectionEntity) -> Unit,
     onAdd: () -> Unit,
+    onCloud: () -> Unit,
 ) {
     val p = LocalIOSPalette.current
     val context = LocalContext.current
@@ -79,6 +81,33 @@ fun NetworkScreen(
 
         Column(modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
             Spacer(Modifier.height(4.dp))
+
+            // ═══ v0.16 — الحسابات السحابية (Drive/Dropbox/OneDrive عبر OAuth) ═══
+            IOSGroupHeader(stringResource(R.string.cloud_title))
+            IOSGroupCard {
+                IOSListRow(
+                    title = stringResource(R.string.cloud_section_row),
+                    subtitle = stringResource(R.string.cloud_section_sub),
+                    showChevron = true,
+                    showSeparator = false,
+                    onClick = onCloud,
+                    leading = {
+                        Box(
+                            modifier = Modifier
+                                .size(30.dp)
+                                .background(Color(0x1F1FA463), RoundedCornerShape(7.dp)),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(
+                                Icons.Filled.CloudDone,
+                                contentDescription = null,
+                                tint = Color(0xFF1FA463),
+                                modifier = Modifier.size(18.dp),
+                            )
+                        }
+                    },
+                )
+            }
 
             if (connections.isEmpty()) {
                 // ═══ حالة فارغة ═══

@@ -54,6 +54,13 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="nova-direct" />
             </intent-filter>
+            <!-- v0.16: عودة OAuth من المتصفح (Drive/Dropbox/OneDrive) -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="com.novafiles.app" />
+            </intent-filter>
         </activity>
 
         <!-- v0.15: وضع التنكّر — أيقونة حاسبة في القاذف، تُفعّل من إعدادات الخزنة -->

@@ -65,6 +65,10 @@ object Routes {
     const val OPS = "ops"
     const val DIRECT = "direct?mode={mode}"
     const val ANALYZER = "analyzer"
+    const val CLOUD = "cloud"
+    const val CLOUD_BROWSER = "cloudbrowser?accountId={accountId}"
+
+    fun cloudBrowser(accountId: Long) = "cloudbrowser?accountId=$accountId"
 
     fun editor(path: String) = "editor?path=${android.net.Uri.encode(path)}"
     fun viewer(path: String) = "viewer?path=${android.net.Uri.encode(path)}"
@@ -201,6 +205,23 @@ private fun NovaNavHost(nav: NavHostController) {
         composable(Routes.ANALYZER) {
             AnalyzerScreen(onBack = { nav.popBackStack() })
         }
+        composable(Routes.CLOUD) {
+            com.novafiles.app.ui.cloud.CloudScreen(
+                onBack = { nav.popBackStack() },
+                onBrowse = { accountId -> nav.navigate(Routes.cloudBrowser(accountId)) },
+            )
+        }
+        composable(
+            Routes.CLOUD_BROWSER,
+            arguments = listOf(navArgument("accountId") {
+                type = NavType.LongType
+            }),
+        ) { entry ->
+            com.novafiles.app.ui.cloud.CloudBrowserScreen(
+                accountId = entry.arguments?.getLong("accountId") ?: 0L,
+                onBack = { nav.popBackStack() },
+            )
+        }
         composable(
             Routes.DIRECT,
             arguments = listOf(navArgument("mode") {
@@ -221,6 +242,7 @@ private fun NovaNavHost(nav: NavHostController) {
                 onConnect = { nav.navigate(Routes.remote(it.id)) },
                 onEdit = { nav.navigate(Routes.connForm(it.id)) },
                 onAdd = { nav.navigate(Routes.connForm(0L)) },
+                onCloud = { nav.navigate(Routes.CLOUD) },
             )
         }
         composable(

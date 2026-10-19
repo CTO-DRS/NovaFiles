@@ -36,6 +36,7 @@
     <string name="action_restore">استعادة</string>
     <string name="action_save">حفظ</string>
     <string name="action_cancel">إلغاء</string>
+    <string name="action_create">إنشاء</string>
     <string name="action_ok">موافق</string>
     <string name="action_lock">قفل الخزنة</string>
     <string name="action_pick_file_encrypt">اختر ملفاً لتشفيره</string>
@@ -428,4 +429,33 @@
     <string name="junk_confirm_title">تأكيد التنظيف</string>
     <string name="junk_confirm_text">سيُنقل %1$d عنصر إلى المهملات. لا يُحذف أي شيء بصمت أبداً.</string>
     <string name="junk_age_hint">الملفات الأحدث من %1$d أيام محمية من الفحص</string>
+    <!-- v0.16 — الحسابات السحابية ومزامنة الكاميرا -->
+    <string name="cloud_title">الحسابات السحابية</string>
+    <string name="cloud_add">إضافة حساب</string>
+    <string name="cloud_empty">لا حسابات سحابية بعد — أضف Drive أو Dropbox أو OneDrive عبر تسجيل دخول آمن (OAuth)</string>
+    <string name="cloud_added">تمت إضافة %1$s بنجاح</string>
+    <string name="cloud_pick_provider">اختر مزوّد السحابة</string>
+    <string name="cloud_no_client_id">خيارات المطوّر: %1$s يحتاج معرّف عميل OAuth خاصاً بك. سجّله عبر gradle.properties (راجع README) ثم أعد البناء.</string>
+    <string name="cloud_needs_client_id">يحتاج معرّف عميل (خيارات المطوّر)</string>
+    <string name="cloud_setup_required">إعداد مطلوب</string>
+    <string name="cloud_removed">أُزيل الحساب ومسحت توكناته المشفرة</string>
+    <string name="cloud_sync_no_client">تعذّرت المزامنة: معرّف عميل غير مضبوط أو حساب مفكوك</string>
+    <string name="cloud_sync_blocked">المزامنة الآن: القيود الافتراضية هي Wi-Fi + الشحن — وصل الشاحن أو فعّل شبكة Wi-Fi</string>
+    <string name="cloud_sync_partial">رُفع %1$d وفشل %2$d — ستعاد الفاشلة في الجولة القادمة</string>
+    <string name="cloud_sync_done">رُفع %1$d جديد وتخطّي %2$d مُزامَن سابقاً</string>
+    <string name="cloud_sync_on">مزامنة الكاميرا → %1$s (آخر مزامنة: %2$s)</string>
+    <string name="cloud_sync_off">مزامنة الكاميرا متوقفة</string>
+    <string name="cloud_browse">تصفح</string>
+    <string name="cloud_sync_now">مزامنة الآن</string>
+    <string name="cloud_section_row">الحسابات السحابية</string>
+    <string name="cloud_section_sub">Drive وDropbox وOneDrive — مزامنة كاميرا تلقائية</string>
+    <string name="cloud_transferring">جارٍ النقل: %1$s</string>
+    <string name="cloud_error">خطأ سحابي</string>
+    <string name="cloud_downloaded">حُمّل %1$s إلى Download/NovaFiles</string>
+    <string name="cloud_item_folder">مجلد سحابي</string>
+    <string name="cloud_long_press_hint">اضغط مطولاً للإدارة</string>
+    <string name="cloud_delete_title">حذف من السحابة</string>
+    <string name="cloud_delete_body">سيُحذف «%1$s» نهائياً من المزوّد. لا يمكن التراجع.</string>
+    <string name="cloud_remove_title">إزالة الحساب</string>
+    <string name="cloud_remove_body">سيُفصل «%1$s» وستُحذف توكناته المشفرة من الجهاز. ملفاتك في السحابة لا تتأثر.</string>
 </resources>
