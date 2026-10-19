@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- v0.15 — أيقونة وضع التنكّر: حاسبة بسيطة تبدو تطبيق حاسبة حقيقياً -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- خلفية مستديرة داكنة -->
+    <path
+        android:fillColor="#1C1C1E"
+        android:pathData="M22,4h64a18,18 0 0 1 18,18v64a18,18 0 0 1 -18,18h-64a18,18 0 0 1 -18,-18v-64a18,18 0 0 1 18,-18z" />
+    <!-- شاشة الحاسبة -->
+    <path
+        android:fillColor="#2C2C2E"
+        android:pathData="M28,22h52a4,4 0 0 1 4,4v12a4,4 0 0 1 -4,4h-52a4,4 0 0 1 -4,-4v-12a4,4 0 0 1 4,-4z" />
+    <!-- أرقام الشاشة -->
+    <path
+        android:fillColor="#FFD60A"
+        android:pathData="M62,29h16v3h-16z" />
+    <!-- أزرار 3x4 -->
+    <path
+        android:fillColor="#48484A"
+        android:pathData="M24,50h12v10h-12z M42,50h12v10h-12z M60,50h12v10h-12z" />
+    <path
+        android:fillColor="#FF9F0A"
+        android:pathData="M78,50h8v10h-8z" />
+    <path
+        android:fillColor="#48484A"
+        android:pathData="M24,66h12v10h-12z M42,66h12v10h-12z M60,66h12v10h-12z" />
+    <path
+        android:fillColor="#FF9F0A"
+        android:pathData="M78,66h8v10h-8z" />
+    <path
+        android:fillColor="#48484A"
+        android:pathData="M24,82h12v8h-12z M42,82h12v8h-12z M60,82h12v8h-12z" />
+    <path
+        android:fillColor="#FF9F0A"
+        android:pathData="M78,82h8v8h-8z" />
+</vector>
