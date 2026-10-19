@@ -11,6 +11,9 @@
     <string name="storage_access_body">يحتاج NovaFiles إلى صلاحية «كل الملفات» لتصفح ملفاتك وإدارتها. هذه الصلاحية تُستخدم على جهازك فقط ولا نرسل شيئاً للإنترنت.</string>
     <string name="storage_access_grant">منح الصلاحية</string>
 
+    <string name="empty_folder_hint">أنشئ مجلداً جديداً من زر + أو الصق ملفات هنا</string>
+    <string name="root_internal">الذاكرة الداخلية</string>
+    <string name="root_device">الجهاز</string>
     <string name="empty_folder">المجلد فارغ</string>
     <string name="empty_favorites">لا توجد عناصر في المفضلة بعد — أضفها من قائمة أي ملف</string>
     <string name="empty_trash">سلة المحذوفات فارغة</string>

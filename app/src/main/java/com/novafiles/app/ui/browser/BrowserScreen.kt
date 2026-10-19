@@ -6,10 +6,13 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -26,6 +29,7 @@ import androidx.compose.material.icons.filled.ContentCut
 import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DriveFileRenameOutline
+import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.FolderZip
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.MoreVert
@@ -35,6 +39,7 @@ import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material.icons.filled.ViewList
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -59,7 +64,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.novafiles.app.R
+import com.novafiles.app.core.fs.PathDisplay
 import com.novafiles.app.core.fs.SortMode
+import com.novafiles.app.core.fs.StorageRoot
 import com.novafiles.app.core.gesture.DoubleTapPolicy
 import com.novafiles.app.core.gesture.GestureConfig
 import com.novafiles.app.core.gesture.SwipeAction
@@ -226,16 +233,21 @@ private fun SinglePaneBrowser(
                 } else {
                     listState.firstVisibleItemIndex > 0 || listState.firstVisibleItemScrollOffset > 12
                 }
+                // v0.18 — عنوان ودّي للجذور («الذاكرة الداخلية» بدل «0»)
+                // ومسار مضغوط كشارة تحت العنوان
+                val root = StorageRoot.of(path)
+                val displayTitle = when (root) {
+                    StorageRoot.INTERNAL -> stringResource(R.string.root_internal)
+                    StorageRoot.DEVICE -> stringResource(R.string.root_device)
+                    null -> File(path).name.ifEmpty { "NovaFiles" }
+                }
+                val compactSub = PathDisplay.compactPath(path)
                 IOSNavBar(
-                    title = File(path).name.ifEmpty { "NovaFiles" },
-                    subtitle = path,
+                    title = displayTitle,
+                    subtitle = compactSub,
                     collapsed = scrolled,
                     onBack = if (File(path).parentFile != null) ({ vm.up() }) else null,
                     actions = {
-                        IOSNavIconButton(
-                            Icons.Filled.AccountTree,
-                            contentDescription = stringResource(R.string.tree_open),
-                        ) { treeOpen = true }
                         if (hasClipboard) {
                             IOSNavIconButton(
                                 Icons.Filled.ContentPaste,
@@ -325,16 +337,38 @@ private fun SinglePaneBrowser(
                     CircularProgressIndicator()
                 }
             } else if (items.isEmpty()) {
+                // v0.18 — حالة فارغة مصممة: أيقونة هادئة + عنوان + تلميح
+                val palette = LocalIOSPalette.current
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(stringResource(R.string.empty_folder), color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            Icons.Filled.FolderOpen,
+                            contentDescription = null,
+                            tint = palette.secondaryLabel.copy(alpha = 0.45f),
+                            modifier = Modifier.size(64.dp),
+                        )
+                        Spacer(Modifier.height(14.dp))
+                        Text(
+                            stringResource(R.string.empty_folder),
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            stringResource(R.string.empty_folder_hint),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = palette.secondaryLabel.copy(alpha = 0.8f),
+                        )
+                    }
                 }
             } else if (viewGrid) {
                 LazyVerticalGrid(
-                    columns = GridCells.Adaptive(minSize = 96.dp),
-                    modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp),
+                    columns = GridCells.Adaptive(minSize = 104.dp),
+                    modifier = Modifier.fillMaxSize(),
                     state = gridState,
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
                     items(items, key = { it.absolutePath }) { file ->
                         GridFileItem(
@@ -352,7 +386,13 @@ private fun SinglePaneBrowser(
                     }
                 }
             } else {
-                LazyColumn(modifier = Modifier.fillMaxSize(), state = listState) {
+                // v0.18 — قائمة بطاقات: هوامش داخلية 12dp وفراغ 6dp بين البطاقات
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    state = listState,
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
                     items(items, key = { it.absolutePath }) { file ->
                         // v0.17 — النقر المزدوج للتنقل على المجلدات (اختياري من الإعدادات)
                         val rowSelected = selection.contains(file.absolutePath) ||
@@ -463,6 +503,10 @@ private fun SinglePaneBrowser(
         onDismiss = { menuOpen = false },
         cancelText = stringResource(R.string.action_cancel),
         actions = listOf(
+            IOSAction(stringResource(R.string.tree_open)) {
+                menuOpen = false
+                treeOpen = true
+            },
             IOSAction(stringResource(R.string.action_new_folder)) { vm.showDialog(BrowserDialog.NewFolder) },
             IOSAction(stringResource(R.string.action_refresh)) { vm.refresh() },
             IOSAction(

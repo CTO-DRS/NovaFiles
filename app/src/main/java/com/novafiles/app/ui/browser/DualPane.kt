@@ -9,6 +9,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -502,11 +503,12 @@ private fun BrowserPane(
                         }
 
                         viewGrid -> LazyVerticalGrid(
-                            columns = GridCells.Adaptive(minSize = 96.dp),
-                            modifier = Modifier.fillMaxSize().padding(horizontal = 8.dp),
+                            columns = GridCells.Adaptive(minSize = 104.dp),
+                            modifier = Modifier.fillMaxSize(),
                             state = gridState,
-                            verticalArrangement = Arrangement.spacedBy(8.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp),
+                            verticalArrangement = Arrangement.spacedBy(10.dp),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
                         ) {
                             items(items, key = { it.absolutePath }) { file ->
                                 GridFileItem(
@@ -528,6 +530,9 @@ private fun BrowserPane(
                         else -> LazyColumn(
                             modifier = Modifier.fillMaxSize(),
                             state = listState,
+                            // v0.18 — قائمة بطاقات: هوامش وفراغات متسقة مع الشاشة الأحادية
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp),
+                            verticalArrangement = Arrangement.spacedBy(6.dp),
                         ) {
                             items(items, key = { it.absolutePath }) { file ->
                                 var itemCoords by remember { mutableStateOf<LayoutCoordinates?>(null) }
