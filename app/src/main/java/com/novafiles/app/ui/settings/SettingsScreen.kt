@@ -21,6 +21,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -62,9 +64,10 @@ import java.io.File
  * الإعدادات بنمط إعدادات iOS تماماً:
  * عنوان كبير، قوائم مجمّعة بحواف دائرية، فاصل شعري داخلي،
  * وعلامة ✓ زرقاء للخيار المحدد (اللغة والسمة).
+ * v0.19 — قسم «الأمان»: بوابة الخزنة بعد نقلها من الشريط السفلي.
  */
 @Composable
-fun SettingsScreen() {
+fun SettingsScreen(onOpenVault: () -> Unit = {}) {
     val context = LocalContext.current
     val container = context.novaContainer
     val scope = rememberCoroutineScope()
@@ -247,6 +250,35 @@ fun SettingsScreen() {
                     },
                 )
             }
+        }
+
+        // ----- الأمان: الخزنة (v0.19) -----
+        IOSGroupHeader(stringResource(R.string.settings_security))
+        IOSGroupCard {
+            IOSListRow(
+                title = stringResource(R.string.nav_vault),
+                subtitle = stringResource(R.string.vault_row_hint),
+                showChevron = true,
+                showSeparator = false,
+                onClick = onOpenVault,
+                leading = {
+                    // بلاطة أيقونة بأسلوب إعدادات iOS
+                    Box(
+                        modifier = Modifier
+                            .size(30.dp)
+                            .clip(androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
+                            .background(LocalIOSPalette.current.accent.copy(alpha = 0.16f)),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        androidx.compose.material3.Icon(
+                            Icons.Filled.Lock,
+                            contentDescription = null,
+                            tint = LocalIOSPalette.current.accent,
+                            modifier = Modifier.size(17.dp),
+                        )
+                    }
+                },
+            )
         }
 
         // ----- الصيانة -----

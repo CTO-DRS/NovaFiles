@@ -1,5 +1,6 @@
 package com.novafiles.app.ui.ios
 
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -128,7 +129,7 @@ fun IOSNavBar(
             Row(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 4.dp),
+                    .padding(horizontal = 6.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 if (onBack != null) {
@@ -248,10 +249,10 @@ fun IOSNavTextButton(
 
 /**
  * ══════════════════════════════════════════════════════════
- *  شريط التبويبات السفلي بنمط iOS (Tab Bar) — v0.18
- *  ─ v0.18: زوايا علوية دائرية 22dp + ظل عائم + كبسولة تمييز
- *    خلف أيقونة التبويب النشط (روح iPadOS الحديثة)
- *  ─ أيقونات 24dp مع تسميات 10sp — accent للنشِط والرمادي للبقية
+ *  شريط التبويبات السفلي بنمط iOS (Tab Bar) — v0.19
+ *  ─ زوايا علوية دائرية 22dp + ظل عائم + كبسولة تمييز نشطة
+ *  ─ v0.19: صف 58dp، كبسولة 52×28dp، أيقونات 24dp، تسميات 11sp،
+ *    وانتقال لوني ناعم عند تبديل التبويب (روح iPadOS)
  * ══════════════════════════════════════════════════════════
  */
 data class IOSBarItem(
@@ -293,10 +294,21 @@ fun IOSBottomBar(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(54.dp),
+                .height(58.dp),
         ) {
             items.forEach { item ->
                 val active = item.key == selected
+                // v0.19 — انتقال لوني ناعم بدل القفز الحاد
+                val tint by animateColorAsState(
+                    targetValue = if (active) p.accent else p.secondaryLabel,
+                    animationSpec = tween(180),
+                    label = "tabTint",
+                )
+                val pillAlpha by animateFloatAsState(
+                    targetValue = if (active) 1f else 0f,
+                    animationSpec = tween(180),
+                    label = "tabPill",
+                )
                 Column(
                     modifier = Modifier
                         .weight(1f)
@@ -305,26 +317,26 @@ fun IOSBottomBar(
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Spacer(Modifier.height(7.dp))
-                    // v0.18 — كبسولة تمييز خلف الأيقونة النشطة
+                    // كبسولة تمييز خلف الأيقونة النشطة — تظهر وتختفي بنعومة
                     Box(
                         modifier = Modifier
-                            .size(width = 46.dp, height = 27.dp)
+                            .size(width = 52.dp, height = 28.dp)
                             .clip(RoundedCornerShape(14.dp))
-                            .background(if (active) p.accent.copy(alpha = 0.16f) else Color.Transparent),
+                            .background(p.accent.copy(alpha = 0.16f * pillAlpha)),
                         contentAlignment = Alignment.Center,
                     ) {
                         Icon(
                             imageVector = item.icon,
                             contentDescription = item.label,
-                            tint = if (active) p.accent else p.secondaryLabel,
-                            modifier = Modifier.size(23.dp),
+                            tint = tint,
+                            modifier = Modifier.size(24.dp),
                         )
                     }
-                    Spacer(Modifier.height(1.dp))
+                    Spacer(Modifier.height(2.dp))
                     TextiOS(
                         text = item.label,
-                        style = TextStyle(fontSize = 10.sp, fontWeight = if (active) FontWeight.SemiBold else FontWeight.Normal),
-                        color = if (active) p.accent else p.secondaryLabel,
+                        style = TextStyle(fontSize = 11.sp, fontWeight = if (active) FontWeight.SemiBold else FontWeight.Normal),
+                        color = tint,
                         maxLines = 1,
                     )
                 }

@@ -87,7 +87,8 @@ import kotlinx.coroutines.launch
  * الحالات: SETUP (أول تشغيل) → LOCKED → UNLOCKED (متصفح).
  */
 @Composable
-fun Vault2Screen() {
+// v0.19 — onBack: زر الرجوع لأن الخزنة صارت شاشة فرعية تُفتح من الإعدادات
+fun Vault2Screen(onBack: (() -> Unit)? = null) {
     val context = LocalContext.current
     val container = context.novaContainer
     val scope = rememberCoroutineScope()
@@ -168,6 +169,7 @@ fun Vault2Screen() {
             if (phase == Phase.UNLOCKED) {
                 IOSNavBar(
                     title = stringResource(R.string.nav_vault),
+                    onBack = onBack,
                     actions = {
                         IOSNavIconButton(Icons.Filled.CreateNewFolder, contentDescription = stringResource(R.string.action_new_folder)) {
                             scope.launch {

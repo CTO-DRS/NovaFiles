@@ -264,10 +264,7 @@ private fun SinglePaneBrowser(
                         IOSNavIconButton(Icons.Filled.MoreVert, contentDescription = null) {
                             menuOpen = true
                         }
-                        IOSNavIconButton(
-                            Icons.Filled.Add,
-                            contentDescription = stringResource(R.string.action_new_folder),
-                        ) { vm.showDialog(BrowserDialog.NewFolder) }
+                        // v0.19 — زر «+» حُذف من الشريط لتخفيفه (مجلد جديد متاح في ورقة «المزيد»)
                     },
                 )
             } else {

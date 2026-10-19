@@ -6,7 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Folder
-import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
@@ -37,6 +37,7 @@ import com.novafiles.app.ui.editor.EditorScreen
 import com.novafiles.app.ui.favorites.FavoritesScreen
 import com.novafiles.app.ui.ftp.FtpScreen
 import com.novafiles.app.ui.network.ConnectionFormScreen
+import com.novafiles.app.ui.recents.RecentScreen
 import com.novafiles.app.ui.network.NetworkScreen
 import com.novafiles.app.ui.network.RemoteBrowserScreen
 import com.novafiles.app.ui.search.SearchScreen
@@ -52,7 +53,8 @@ import java.io.File
 object Routes {
     const val BROWSER = "browser"
     const val FAVORITES = "favorites"
-    const val VAULT = "vault"
+    const val VAULT = "vault"          // v0.19 — صار شاشة فرعية تُفتح من الإعدادات
+    const val RECENTS = "recents"      // v0.19 — تبويب «الأخيرة» في الشريط السفلي
     const val SEARCH = "search"
     const val SETTINGS = "settings"
     const val EDITOR = "editor?path={path}"
@@ -80,11 +82,12 @@ object Routes {
 
 private data class Tab(val route: String, val labelRes: Int, val icon: androidx.compose.ui.graphics.vector.ImageVector)
 
+// v0.19 — الخزنة انتقلت إلى الإعدادات، ومكانها تبويب «الأخيرة»
 private val tabs = listOf(
     Tab(Routes.BROWSER, R.string.nav_browser, Icons.Filled.Folder),
     Tab(Routes.SEARCH, R.string.nav_search, Icons.Filled.Search),
     Tab(Routes.FAVORITES, R.string.nav_favorites, Icons.Filled.Star),
-    Tab(Routes.VAULT, R.string.nav_vault, Icons.Filled.Lock),
+    Tab(Routes.RECENTS, R.string.nav_recents, Icons.Filled.History),
     Tab(Routes.SETTINGS, R.string.nav_settings, Icons.Filled.Settings),
 )
 
@@ -208,11 +211,15 @@ private fun NovaNavHost(nav: NavHostController) {
         composable(Routes.FAVORITES) {
             FavoritesScreen(onOpenFile = { openFile(nav, it) })
         }
+        composable(Routes.RECENTS) {
+            RecentScreen(onOpenFile = { openFile(nav, it) })
+        }
+        // v0.19 — الخزنة شاشة فرعية تُفتح من الإعدادات (مع زر رجوع)
         composable(Routes.VAULT) {
-            Vault2Screen()
+            Vault2Screen(onBack = { nav.popBackStack() })
         }
         composable(Routes.SETTINGS) {
-            SettingsScreen()
+            SettingsScreen(onOpenVault = { nav.navigate(Routes.VAULT) })
         }
         composable(Routes.FTP) {
             FtpScreen(onBack = { nav.popBackStack() })
