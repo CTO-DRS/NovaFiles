@@ -54,6 +54,7 @@ import com.novafiles.app.ui.ios.IOSCheckMark
 import com.novafiles.app.ui.ios.IOSGroupCard
 import com.novafiles.app.ui.ios.IOSGroupFooter
 import com.novafiles.app.ui.ios.IOSGroupHeader
+import com.novafiles.app.ui.ios.rememberBottomBarClearance
 import com.novafiles.app.ui.ios.IOSListRow
 import com.novafiles.app.ui.ios.IOSNavBar
 import com.novafiles.app.ui.ios.LocalIOSPalette
@@ -90,7 +91,8 @@ fun SettingsScreen(onOpenVault: () -> Unit = {}) {
         modifier = Modifier
             .fillMaxSize()
             .background(LocalIOSPalette.current.groupedBg)
-            .verticalScroll(scrollState),
+            .verticalScroll(scrollState)
+            .padding(bottom = rememberBottomBarClearance()),
     ) {
         IOSNavBar(
             title = stringResource(R.string.settings_title),

@@ -6,6 +6,7 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -38,11 +39,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.novafiles.app.R
@@ -273,16 +276,31 @@ data class IOSBarItem(
 /** زوايا الكبسولة العائمة لشريط التبويبات */
 private val BottomBarShape = RoundedCornerShape(26.dp)
 
+/**
+ * v0.21 — المساحة التي يحتلها الشريط السفلي العائم فوق المحتوى:
+ * صف التبويبات 58 + حشوة الكبسولة 12 + الهامش السفلي 4 = 74dp،
+ * يُضاف إليها ارتفاع مساحة أزرار النظام (navigationBars).
+ * تستعملها شاشات التبويبات كحشوة سفلية للمحتوى كي يمرّ آخر عنصر
+ * فوق الشريط الزجاجي الشفاف ولا يختفي تحته.
+ */
+@Composable
+fun rememberBottomBarClearance(): Dp {
+    val density = LocalDensity.current
+    val navPx = WindowInsets.navigationBars.getBottom(density)
+    return with(density) { navPx.toDp() } + 74.dp
+}
+
 @Composable
 fun IOSBottomBar(
     items: List<IOSBarItem>,
     selected: String,
     onSelect: (String) -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val p = LocalIOSPalette.current
     val haptic = LocalHapticFeedback.current
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             // v0.20 — يطفو فوق مساحة أزرار التنقل للنظام
             .windowInsetsPadding(WindowInsets.navigationBars)
@@ -292,13 +310,17 @@ fun IOSBottomBar(
             modifier = Modifier
                 .fillMaxWidth()
                 .shadow(
-                    elevation = 18.dp,
+                    elevation = 14.dp,
                     shape = BottomBarShape,
                     clip = false,
                     ambientColor = Color.Black,
                     spotColor = Color.Black,
                 )
-                .background(p.tabBarBg, shape = BottomBarShape)
+                // v0.21 — زجاج iOS: خلفية شبه شفافة يظهر المحتوى من خلالها
+                // (تُحلّ المساحة السوداء الميتة: المحتوى يمرّ خلف الشريط فعلياً)
+                .background(p.tabBarBg.copy(alpha = 0.78f), shape = BottomBarShape)
+                // حدّ شعري رفيع يبرز حواف الكبسولة على السطح الشفاف
+                .border(0.5.dp, p.separator.copy(alpha = 0.6f), BottomBarShape)
                 .padding(vertical = 6.dp),
         ) {
             BoxWithConstraints(

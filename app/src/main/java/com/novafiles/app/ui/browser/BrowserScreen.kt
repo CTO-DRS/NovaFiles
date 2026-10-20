@@ -76,6 +76,7 @@ import com.novafiles.app.ui.ios.IOSAction
 import com.novafiles.app.ui.ios.IOSActionSheet
 import com.novafiles.app.ui.ios.IOSAlertDialog
 import com.novafiles.app.ui.ios.IOSNavBar
+import com.novafiles.app.ui.ios.rememberBottomBarClearance
 import com.novafiles.app.ui.ios.IOSNavIconButton
 import com.novafiles.app.ui.ios.LocalIOSPalette
 import java.io.File
@@ -363,7 +364,7 @@ private fun SinglePaneBrowser(
                     columns = GridCells.Adaptive(minSize = 104.dp),
                     modifier = Modifier.fillMaxSize(),
                     state = gridState,
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp),
+                    contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 10.dp, bottom = 10.dp + rememberBottomBarClearance()),
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
@@ -387,7 +388,7 @@ private fun SinglePaneBrowser(
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     state = listState,
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp),
+                    contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 10.dp, bottom = 10.dp + rememberBottomBarClearance()),
                     verticalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
                     items(items, key = { it.absolutePath }) { file ->
