@@ -2,7 +2,6 @@ package com.novafiles.app.ui.nav
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Folder
@@ -18,6 +17,7 @@ import androidx.compose.material.icons.outlined.Star
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -161,15 +161,15 @@ fun NovaRoot() {
         if (f.exists()) openFile(nav, f)
     }
 
-    Column(
+    // v0.21 — تراكب: المحتوى يمتد بكامل الشاشة خلف الشريط الزجاجي الشفاف
+    // (تُلغى المساحة السوداء الميتة التي كانت فوق الشريط وتحته عند التكديس)
+    Box(
         modifier = Modifier
             .fillMaxSize()
             .background(palette.groupedBg),
     ) {
-        Box(modifier = Modifier.weight(1f)) {
-            NovaNavHost(nav = nav)
-        }
-        // ═══ شريط التبويبات السفلي بنمط iOS ═══
+        NovaNavHost(nav = nav)
+        // ═══ شريط التبويبات السفلي العائم الشفاف فوق المحتوى ═══
         if (showBottomBar) {
             IOSBottomBar(
                 items = tabs.map { tab ->
@@ -182,6 +182,7 @@ fun NovaRoot() {
                 },
                 selected = currentRoute ?: Routes.BROWSER,
                 onSelect = { route -> nav.navigateTop(route) },
+                modifier = Modifier.align(Alignment.BottomCenter),
             )
         }
     }

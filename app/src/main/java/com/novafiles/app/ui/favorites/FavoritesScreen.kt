@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -41,6 +42,7 @@ import com.novafiles.app.core.fs.LocalBrowser
 import com.novafiles.app.novaContainer
 import com.novafiles.app.ui.ios.IOSNavBar
 import com.novafiles.app.ui.ios.LocalIOSPalette
+import com.novafiles.app.ui.ios.rememberBottomBarClearance
 import com.novafiles.app.util.TypeIcons
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.rememberCoroutineScope
@@ -71,7 +73,10 @@ fun FavoritesScreen(onOpenFile: (File) -> Unit) {
                 )
             }
         } else {
-            LazyColumn(modifier = Modifier.fillMaxSize()) {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(top = 10.dp, bottom = 10.dp + rememberBottomBarClearance()),
+            ) {
                 items(favorites, key = { it.path }) { fav ->
                     val file = File(fav.path)
                     val type = FileType.of(file)

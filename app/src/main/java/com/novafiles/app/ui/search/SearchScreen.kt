@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -55,6 +56,7 @@ import com.novafiles.app.ui.ios.IOSAction
 import com.novafiles.app.ui.ios.IOSActionSheet
 import com.novafiles.app.ui.ios.IOSMiniField
 import com.novafiles.app.ui.ios.IOSNavIconButton
+import com.novafiles.app.ui.ios.rememberBottomBarClearance
 import com.novafiles.app.ui.ios.IOSNavBar
 import com.novafiles.app.ui.ios.IOSSearchField
 import com.novafiles.app.ui.ios.LocalIOSPalette
@@ -217,7 +219,10 @@ fun SearchScreen(onOpenFile: (File) -> Unit) {
                         modifier = Modifier.padding(horizontal = 12.dp),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
-                    LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(bottom = rememberBottomBarClearance()),
+                    ) {
                         items(s.files, key = { it.absolutePath }) { file ->
                             SearchResultRow(file = file, onTap = { onOpenFile(file) })
                         }

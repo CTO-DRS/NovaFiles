@@ -50,6 +50,7 @@ import com.novafiles.app.data.db.FavoriteEntity
 import com.novafiles.app.novaContainer
 import com.novafiles.app.ui.ios.IOSNavBar
 import com.novafiles.app.ui.ios.LocalIOSPalette
+import com.novafiles.app.ui.ios.rememberBottomBarClearance
 import com.novafiles.app.util.TypeIcons
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -122,7 +123,7 @@ fun RecentScreen(onOpenFile: (File) -> Unit) {
             }
             else -> LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                contentPadding = PaddingValues(horizontal = 12.dp, vertical = 10.dp),
+                contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 10.dp, bottom = 10.dp + rememberBottomBarClearance()),
                 verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
                 items(files, key = { it.path }) { rf ->
