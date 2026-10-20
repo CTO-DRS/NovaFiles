@@ -47,6 +47,7 @@ import com.novafiles.app.ui.network.NetworkScreen
 import com.novafiles.app.ui.network.RemoteBrowserScreen
 import com.novafiles.app.ui.search.SearchScreen
 import com.novafiles.app.ui.analyzer.AnalyzerScreen
+import com.novafiles.app.ui.apps.AppsScreen
 import com.novafiles.app.ui.ops.OpsScreen
 import com.novafiles.app.ui.settings.SettingsScreen
 import com.novafiles.app.ui.vault.Vault2Screen
@@ -70,6 +71,7 @@ object Routes {
     const val CONN_FORM = "connform?connId={connId}"
     const val REMOTE = "remote?connId={connId}"
     const val OPS = "ops"
+    const val APPS = "apps"            // v0.22 — مدير التطبيقات
     const val DIRECT = "direct?mode={mode}"
     const val ANALYZER = "analyzer"
     const val CLOUD = "cloud"
@@ -216,6 +218,7 @@ private fun NovaNavHost(nav: NavHostController) {
                 onOpenOps = { nav.navigate(Routes.OPS) },
                 onOpenDirectSend = { nav.navigate(Routes.direct(sendMode = true)) },
                 onOpenAnalyzer = { nav.navigate(Routes.ANALYZER) },
+                onOpenApps = { nav.navigate(Routes.APPS) },
             )
         }
         composable(Routes.SEARCH) {
@@ -236,6 +239,9 @@ private fun NovaNavHost(nav: NavHostController) {
         }
         composable(Routes.FTP) {
             FtpScreen(onBack = { nav.popBackStack() })
+        }
+        composable(Routes.APPS) {
+            AppsScreen(onBack = { nav.popBackStack() })
         }
         composable(Routes.OPS) {
             // شاشة العمليات — نفس قائمة OpQueue عبر الحاوية المشتركة

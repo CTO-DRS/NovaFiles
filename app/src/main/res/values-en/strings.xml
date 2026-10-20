@@ -526,4 +526,24 @@
     <string name="time_days">%1$d d ago</string>
     <string name="settings_security">Security</string>
     <string name="vault_row_hint">Encrypted folders &amp; biometric protection</string>
+    <!-- v0.22 — App Manager -->
+    <string name="apps_title">App Manager</string>
+    <string name="apps_summary">%1$d items · %2$s</string>
+    <string name="apps_filter_all">All</string>
+    <string name="apps_filter_user">User</string>
+    <string name="apps_filter_system">System</string>
+    <string name="apps_filter_apk">APK files</string>
+    <string name="apps_empty">No apps</string>
+    <string name="apps_empty_hint">No installed apps were found on this device</string>
+    <string name="apps_apk_empty">No APK files in storage</string>
+    <string name="apps_apk_empty_hint">Downloaded installer files will appear here to clean up or reinstall</string>
+    <string name="apps_action_open">Open</string>
+    <string name="apps_action_backup">Back up APK</string>
+    <string name="apps_action_share">Share APK</string>
+    <string name="apps_action_info">App info</string>
+    <string name="apps_action_uninstall">Uninstall</string>
+    <string name="apps_action_install">Install</string>
+    <string name="apps_action_delete">Delete file</string>
+    <string name="apps_backup_done">Backup saved to Downloads/NovaFiles-APKs</string>
+    <string name="apps_backup_fail">Could not copy APK</string>
 </resources>
