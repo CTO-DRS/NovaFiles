@@ -1,6 +1,9 @@
 package com.novafiles.app.core.analyzer
 
+import com.novafiles.app.core.checksum.ChecksumEngine
 import java.io.File
+import java.io.FileInputStream
+import java.security.MessageDigest
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 
@@ -24,6 +27,9 @@ enum class JunkCategory {
 
     /** بقايا تنزيلات: .nfpart و .nfjournal و .crdownload و .partial و .tmp القديمة */
     LEFTOVER_PARTIALS,
+
+    /** v0.29 — مكررات المحتوى: بصمة محتوى لا اسم (النسخ الزائدة فقط — المرجعية محفوظة) */
+    CONTENT_DUPLICATES,
 }
 
 /** عنصر مخلف مكتشف */
@@ -31,6 +37,8 @@ data class JunkItem(
     val path: String,
     val size: Long,
     val category: JunkCategory,
+    /** v0.29 — عدد النسخ في مجموعة المحتوى المكرر (×N) — 1 لغير مكررات المحتوى */
+    val copies: Int = 1,
 )
 
 /** تقرير المخلفات مجمّعاً بالفئة */
@@ -47,6 +55,8 @@ data class JunkReport(
 class JunkScanner(
     /** بوابات خارجية للأنظمة الافتراضية (مثلاً: استثناء ملفات تحت المستندات المرئية) */
     private val skipPaths: Set<String> = emptySet(),
+    /** v0.29 — محرك البصمات للمكررات عبر الأنواع (قابل للحقن للاختبار) */
+    private val checksumEngine: ChecksumEngine = ChecksumEngine(),
 ) {
 
     /**
@@ -64,6 +74,8 @@ class JunkScanner(
         val minAgeMs = minAgeDays * 86_400_000L
         val visited = HashSet<String>()
         var progress = 0
+        // v0.29 — مرشحو مكررات المحتوى: كل ملف عادي زارته الشجرة (بلا تصنيف مسبق)
+        val dupCandidates = ArrayList<File>()
 
         // مسح تكراري كامل للشجرة (DFS صريح بلا تكرار عكسي — أمان العمق)
         val stack = ArrayDeque<File>()
@@ -89,16 +101,25 @@ class JunkScanner(
                 } else {
                     val name = f.name
                     val age = nowMs - f.lastModified()
+                    var classified = false
                     when {
-                        f.extension.lowercase() == "apk" && age >= minAgeMs ->
+                        f.extension.lowercase() == "apk" && age >= minAgeMs -> {
                             items.add(JunkItem(f.absolutePath, f.length(), JunkCategory.ORPHAN_APKS))
+                            classified = true
+                        }
 
-                        isPartialLeftover(name) && age >= minAgeMs ->
+                        isPartialLeftover(name) && age >= minAgeMs -> {
                             items.add(JunkItem(f.absolutePath, f.length(), JunkCategory.LEFTOVER_PARTIALS))
+                            classified = true
+                        }
 
-                        isThumbFile(name) && age >= minAgeMs ->
+                        isThumbFile(name) && age >= minAgeMs -> {
                             items.add(JunkItem(f.absolutePath, f.length(), JunkCategory.STALE_THUMBS))
+                            classified = true
+                        }
                     }
+                    // v0.29 — غير المصنّف كنفاية يدخل مرشحي مكررات المحتوى
+                    if (!classified) dupCandidates.add(f)
                     progress++
                     if (progress % 256 == 0) onProgress(progress)
                 }
@@ -120,7 +141,95 @@ class JunkScanner(
         }
         for (d in roots) items.add(JunkItem(d.absolutePath, 0L, JunkCategory.EMPTY_DIRS))
 
+        // v0.29 — مكررات المحتوى عبر الأنواع: حجم ← هاش جزئي رأس/ذيل 4KB ← MD5 كامل.
+        // النفايات المصنّفة أعلاه لا تتضاعف — لا تدخل المرشحين أصلاً.
+        findContentDuplicates(dupCandidates, items)
+
         return JunkReport(items)
+    }
+
+    /**
+     * كشف مكررات المحتوى: بصمة المحتوى لا الاسم (تعبر الأنواع — نسخة صورة بامتداد مختلف
+     * تُكتشف إن كان المحتوى مطابقاً). ثلاث مراحل توفيراً للقراءة:
+     * 1) تجميع بالحجم — الوحيد بحجمه لا يُقرأ أبداً
+     * 2) هاش جزئي (رأس 4KB + ذيل 4KB) — يُسقط معظم المشابهين بالحجم دون قراءة كاملة
+     * 3) MD5 كامل عبر محرك v0.29 — الحسم النهائي
+     *
+     * الناتج: النسخ الزائدة فقط (المرجعية = أصغر مسار محفوظة)، مع عدّاد ×N،
+     * والمجموعات مرتبة بالبايتات المهدورة تنازلياً.
+     */
+    private suspend fun findContentDuplicates(candidates: List<File>, out: MutableList<JunkItem>) {
+        currentCoroutineContext().ensureActive()
+        // المرحلة 1 — تجميع بالحجم (الملفات المفردة والمصفرة لا قيمة لها)
+        val bySize = HashMap<Long, MutableList<File>>()
+        for (f in candidates) {
+            if (f.length() <= 0L) continue // فارغة/غير قابلة للقياس — مستثناة
+            bySize.getOrPut(f.length()) { ArrayList() }.add(f)
+        }
+        val sameSize = bySize.values.filter { it.size > 1 }
+        if (sameSize.isEmpty()) return
+
+        // المرحلة 2 — هاش جزئي رأس/ذيل 4KB (MD5 على العينة)
+        val partialGroups = HashMap<Long, MutableList<File>>() // مفتاح: hash جزئي مدمج بالحجم
+        for (group in sameSize) {
+            for (f in group) {
+                val sample = partialSampleHash(f) ?: continue
+                partialGroups.getOrPut(sample * 31L + f.length()) { ArrayList() }.add(f)
+            }
+        }
+        val survivors = partialGroups.values.filter { it.size > 1 }.flatten()
+        if (survivors.isEmpty()) return
+
+        // المرحلة 3 — MD5 كامل عبر محرك البصمات (إلغاء تعاوني بين الملفات)
+        val full = HashMap<String, MutableList<File>>()
+        for (f in survivors) {
+            currentCoroutineContext().ensureActive()
+            val hex = checksumEngine.hashFile(f, com.novafiles.app.core.checksum.ChecksumAlgorithm.MD5)?.hex ?: continue
+            full.getOrPut(hex) { ArrayList() }.add(f)
+        }
+
+        // النسخ الزائدة فقط — المرجعية (أصغر مسار) محفوظة، المجموعات بالهدر تنازلياً
+        val groups = full.values.filter { it.size > 1 }
+            .sortedByDescending { g -> g.first().length() * (g.size - 1) }
+        for (g in groups) {
+            val size = g.first().length()
+            val ordered = g.sortedBy { it.absolutePath }
+            for (extra in ordered.drop(1)) {
+                out.add(JunkItem(extra.absolutePath, size, JunkCategory.CONTENT_DUPLICATES, copies = g.size))
+            }
+        }
+    }
+
+    /** بصمة عينة رأس/ذيل 4KB — null عند تعذر القراءة */
+    private fun partialSampleHash(f: File): Long? {
+        return try {
+            val md = MessageDigest.getInstance("MD5")
+            FileInputStream(f).use { input ->
+                val head = ByteArray(SAMPLE_BYTES)
+                val nHead = input.read(head)
+                if (nHead > 0) md.update(head, 0, nHead)
+                if (f.length() > SAMPLE_BYTES) {
+                    val tailStart = f.length() - SAMPLE_BYTES
+                    if (input.skip(tailStart) == tailStart) {
+                        val tail = ByteArray(SAMPLE_BYTES)
+                        var nTail = 0
+                        while (nTail < SAMPLE_BYTES) {
+                            val n = input.read(tail, nTail, SAMPLE_BYTES - nTail)
+                            if (n < 0) break
+                            nTail += n
+                        }
+                        if (nTail > 0) md.update(tail, 0, nTail)
+                    }
+                }
+            }
+            // طيّ 16 بايت MD5 إلى Long ثابت للمقارنة (يظل مؤهلاً كمرشح فقط — لا حسم)
+            val d = md.digest()
+            var acc = 0L
+            for (b in d) acc = acc * 31L + b
+            acc
+        } catch (_: Exception) {
+            null
+        }
     }
 
     /** يضيف كل الملفات تحت دليل (أياً كان عمقه) كعناصر فئة معينة — للأدلة المعروفة أنها نفاية */
@@ -138,6 +247,9 @@ class JunkScanner(
     }
 
     companion object {
+        /** حجم عينة الهاش الجزئي (رأس 4KB + ذيل 4KB) */
+        internal const val SAMPLE_BYTES = 4 * 1024
+
         /** أنماط أدلة المصغرات الشائعة (أندرويد + تطبيقات الطرف الثالث) */
         private val THUMB_DIRS = setOf(".thumbnails", "thumbnails", ".thumbs", "picsart-thumbs")
 

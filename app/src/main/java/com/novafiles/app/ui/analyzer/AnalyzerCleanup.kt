@@ -294,6 +294,7 @@ internal fun JunkTab() {
                 JunkCategory.STALE_THUMBS to R.string.junk_stale_thumbs,
                 JunkCategory.ORPHAN_APKS to R.string.junk_orphan_apks,
                 JunkCategory.EMPTY_DIRS to R.string.junk_empty_dirs,
+                JunkCategory.CONTENT_DUPLICATES to R.string.junk_content_dups,
             )
             for ((cat, res) in cats) {
                 val items = rep.byCategory(cat)
@@ -321,7 +322,13 @@ internal fun JunkTab() {
                                     val isSel = item.path in selected
                                     IOSListRow(
                                         title = item.path,
-                                        subtitle = if (item.size > 0) Format.bytes(item.size) else null,
+                                        subtitle = when {
+                                            item.category == JunkCategory.CONTENT_DUPLICATES ->
+                                                (if (item.size > 0) Format.bytes(item.size) + " · " else "") +
+                                                    "×${item.copies}"
+                                            item.size > 0 -> Format.bytes(item.size)
+                                            else -> null
+                                        },
                                         onClick = {
                                             selected = if (isSel) selected - item.path else selected + item.path
                                         },
