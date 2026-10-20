@@ -40,6 +40,7 @@ import com.novafiles.app.ui.browser.BrowserScreen
 import com.novafiles.app.ui.direct.DirectScreen
 import com.novafiles.app.ui.editor.EditorScreen
 import com.novafiles.app.ui.favorites.FavoritesScreen
+import com.novafiles.app.ui.dav.DavScreen
 import com.novafiles.app.ui.ftp.FtpScreen
 import com.novafiles.app.ui.network.ConnectionFormScreen
 import com.novafiles.app.ui.recents.RecentScreen
@@ -67,6 +68,7 @@ object Routes {
     const val VIEWER = "viewer?path={path}"
     const val ARCHIVE = "archive?path={path}"
     const val FTP = "ftp"
+    const val DAV = "dav"          // v0.27 — خادم WebDAV المدمج
     const val NETWORK = "network"
     const val CONN_FORM = "connform?connId={connId}"
     const val REMOTE = "remote?connId={connId}"
@@ -214,6 +216,7 @@ private fun NovaNavHost(nav: NavHostController) {
                 onOpenFile = { openFile(nav, it) },
                 onOpenSearchFor = { /* يُفتح من شريط التنقل مباشرة */ },
                 onOpenFtp = { nav.navigate(Routes.FTP) },
+                onOpenDav = { nav.navigate(Routes.DAV) },
                 onOpenNetwork = { nav.navigate(Routes.NETWORK) },
                 onOpenOps = { nav.navigate(Routes.OPS) },
                 onOpenDirectSend = { nav.navigate(Routes.direct(sendMode = true)) },
@@ -239,6 +242,9 @@ private fun NovaNavHost(nav: NavHostController) {
         }
         composable(Routes.FTP) {
             FtpScreen(onBack = { nav.popBackStack() })
+        }
+        composable(Routes.DAV) {
+            DavScreen(onBack = { nav.popBackStack() })
         }
         composable(Routes.APPS) {
             AppsScreen(onBack = { nav.popBackStack() })

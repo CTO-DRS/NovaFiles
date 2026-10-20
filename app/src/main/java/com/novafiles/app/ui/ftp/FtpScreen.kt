@@ -52,6 +52,8 @@ import com.novafiles.app.core.ftp.localIpv4
 import com.novafiles.app.core.perms.StorageAccess
 import com.novafiles.app.core.qr.QrPayloads
 import com.novafiles.app.data.prefs.SettingsStore
+import com.novafiles.app.ui.dav.NetLogSection
+import com.novafiles.app.ui.dav.SessionsRow
 import com.novafiles.app.ui.ios.IOSAlertDialog
 import com.novafiles.app.ui.ios.IOSFilledButton
 import com.novafiles.app.ui.ios.IOSGroupCard
@@ -85,6 +87,8 @@ fun FtpScreen(onBack: () -> Unit) {
     var port by remember { mutableStateOf("2121") }
     var user by remember { mutableStateOf("nova") }
     var pass by remember { mutableStateOf("nova") }
+    var speedOn by remember { mutableStateOf(false) }
+    var speedKb by remember { mutableStateOf("") }
     var alertText by remember { mutableStateOf<String?>(null) }
     var copied by remember { mutableStateOf(false) }
     var qrOpen by remember { mutableStateOf(false) }
@@ -94,6 +98,9 @@ fun FtpScreen(onBack: () -> Unit) {
         port = prefs.ftpPort.first().toString()
         user = prefs.ftpUser.first()
         pass = prefs.ftpPass.first()
+        val kb = prefs.ftpSpeedKb.first()
+        speedOn = kb > 0
+        speedKb = if (kb > 0) kb.toString() else ""
     }
 
     // إعادة حساب العنوان المحلي عند تغيّر الحالة
@@ -119,15 +126,24 @@ fun FtpScreen(onBack: () -> Unit) {
                 alertText = context.getString(R.string.ftp_need_credentials)
                 return
             }
+            val kb = speedKb.toIntOrNull() ?: 0
+            if (speedOn && kb <= 0) {
+                alertText = context.getString(R.string.ftp_speed_bad)
+                return
+            }
             scope.launch {
                 prefs.setFtpPort(portNum)
                 prefs.setFtpUser(user.trim())
                 prefs.setFtpPass(pass.trim())
+                prefs.setFtpSpeedKb(if (speedOn) kb else 0)
             }
             if (Build.VERSION.SDK_INT >= 33) {
                 notifLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
-            FtpServerService.start(context, "/storage/emulated/0", portNum, user.trim(), pass.trim())
+            FtpServerService.start(
+                context, "/storage/emulated/0", portNum, user.trim(), pass.trim(),
+                speedBps = if (speedOn) kb * 1024L else 0,
+            )
         } else {
             FtpServerService.stop(context)
         }
@@ -204,6 +220,13 @@ fun FtpScreen(onBack: () -> Unit) {
                     showSeparator = false,
                     trailing = { IOSSwitch(checked = running, onCheckedChange = { toggle(it) }) },
                 )
+            }
+
+            // ═══ v0.27 — الاتصالات النشطة (أثناء العمل) ═══
+            if (running) {
+                IOSGroupCard {
+                    SessionsRow(count = shareState.sessions, showSeparator = false)
+                }
             }
 
             // ═══ بطاقة الرابط (أثناء العمل) ═══
@@ -317,6 +340,32 @@ fun FtpScreen(onBack: () -> Unit) {
             }
             IOSGroupFooter(stringResource(R.string.ftp_settings_footer))
 
+            // ═══ v0.27 — حد السرعة ═══
+            IOSGroupHeader(stringResource(R.string.ftp_speed_section))
+            IOSGroupCard {
+                val fieldsAlpha = if (running) 0.4f else 1f
+                IOSListRow(
+                    title = stringResource(R.string.ftp_speed_switch),
+                    subtitle = stringResource(R.string.ftp_speed_hint),
+                    showSeparator = speedOn,
+                    trailing = { IOSSwitch(checked = speedOn, onCheckedChange = { if (!running) speedOn = it }) },
+                )
+                if (speedOn) {
+                    IOSListRow(
+                        title = stringResource(R.string.ftp_speed_kb),
+                        showSeparator = false,
+                        trailing = {
+                            IOSMiniField(
+                                value = speedKb,
+                                onValueChange = { if (!running) speedKb = it.filter { ch -> ch.isDigit() }.take(6) },
+                                hint = "1024",
+                                modifier = Modifier.width(110.dp).alpha(fieldsAlpha),
+                            )
+                        },
+                    )
+                }
+            }
+
             // ═══ زر النسخ البديل وزر QR أثناء العمل ═══
             if (running && shareState.url != null) {
                 IOSFilledButton(
@@ -342,6 +391,10 @@ fun FtpScreen(onBack: () -> Unit) {
                 }
             }
             IOSGroupFooter(stringResource(R.string.ftp_security_note))
+
+            // ═══ v0.27 — سجل الاتصال ═══
+            NetLogSection(log = FtpServerService.connLog, showClear = true)
+
             Spacer(Modifier.height(16.dp))
         }
     }

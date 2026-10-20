@@ -209,6 +209,57 @@
     <string name="ftp_notification_title">NovaFiles — المشاركة تعمل</string>
     <string name="ftp_notification_text">يمكن الوصول لملفاتك من المتصفح أو مستكشف الملفات</string>
     <string name="menu_wifi_share">مشاركة عبر WiFi</string>
+    <!-- v0.27 — تحسينات خادم FTP -->
+    <string name="ftp_sessions_row">الاتصالات النشطة</string>
+    <string name="ftp_sessions_hint">عدد الأجهزة المتصلة بالخادم الآن</string>
+    <string name="ftp_speed_section">حد السرعة</string>
+    <string name="ftp_speed_switch">تحديد سرعة النقل</string>
+    <string name="ftp_speed_hint">اقصر عرض النطاق الكلي لكل ثانية ليبقى الاتصال سلساً</string>
+    <string name="ftp_speed_kb">الحد (كيلوبايت/ث)</string>
+    <string name="ftp_speed_bad">أدخل حداً موجباً بالكيلوبايت في الثانية أو عطّل الحد</string>
+    <string name="ftp_log_section">سجل الاتصال</string>
+    <string name="ftp_log_empty">لا أحداث بعد — ستظهر الجلسات والنقل هنا فور اتصال أي جهاز</string>
+    <string name="ftp_log_clear">مسح السجل</string>
+    <string name="netlog_connect">اتصال</string>
+    <string name="netlog_login">تسجيل دخول</string>
+    <string name="netlog_login_failed">دخول فاشل</string>
+    <string name="netlog_disconnect">انقطاع</string>
+    <string name="netlog_download">تنزيل</string>
+    <string name="netlog_upload">رفع</string>
+    <string name="netlog_mkdir">إنشاء مجلد</string>
+    <string name="netlog_delete">حذف</string>
+    <string name="netlog_move">نقل</string>
+    <string name="netlog_error">خطأ</string>
+    <!-- v0.27 — خادم WebDAV المدمج -->
+    <string name="dav_title">خادم WebDAV</string>
+    <string name="dav_share_switch">خادم WebDAV</string>
+    <string name="dav_share_hint">شارك ملفاتك مع مستكشف Windows وFinder وأي عميل WebDAV</string>
+    <string name="dav_status_running">الخادم يعمل</string>
+    <string name="dav_status_stopped">الخادم متوقف</string>
+    <string name="dav_status_hint">شغّل الخادم ليظهر رابط الوصول هنا</string>
+    <string name="dav_copy_url">نسخ رابط الوصول</string>
+    <string name="dav_root_label">المجلد المشترك: %1$s</string>
+    <string name="dav_settings_section">إعدادات الخادم</string>
+    <string name="dav_port">المنفذ</string>
+    <string name="dav_username">اسم المستخدم</string>
+    <string name="dav_password">كلمة المرور</string>
+    <string name="dav_settings_footer">تنطبق التعديلات عند التشغيل القادم — أوقف الخادم لتغييرها</string>
+    <string name="dav_howto_header">كيف تتصل؟</string>
+    <string name="dav_howto_1">تأكد أن الجهازين على نفس شبكة WiFi</string>
+    <string name="dav_howto_2">في Windows: «هذا الكمبيوتر» ← «تعيين محرك شبكة» ثم أدخل الرابط</string>
+    <string name="dav_howto_3">في Mac: Finder ← «الاتصال بالخادم» (⌘K) ثم أدخل الرابط</string>
+    <string name="dav_howto_4">في لينكس: Nautilus ← «الاتصال بالخادم» واختر WebDAV</string>
+    <string name="dav_howto_5">من أي متصفح: افتح الرابط مباشرة لتتصفح المجلدات وتنزيل الملفات</string>
+    <string name="dav_security_note">تنبيه: البيانات تُنقل دون تشفير داخل شبكتك المحلية — أوقف الخادم بعد الانتهاء ولا تستخدمه على شبكات عامة.</string>
+    <string name="dav_need_storage">امنح صلاحية «كل الملفات» أولًا من تبويب الملفات لتتمكن من مشاركة تخزينك</string>
+    <string name="dav_bad_port">المنفذ يجب أن يكون رقماً بين 1024 و 65535</string>
+    <string name="dav_need_credentials">أدخل اسم مستخدم وكلمة مرور غير فارغين</string>
+    <string name="dav_alert_title">خادم WebDAV</string>
+    <string name="dav_notif_channel">مشاركة WebDAV</string>
+    <string name="dav_notif_channel_desc">يظهر أثناء عمل خادم WebDAV</string>
+    <string name="dav_notification_title">NovaFiles — خادم WebDAV يعمل</string>
+    <string name="dav_notification_text">ملفاتك متاحة الآن عبر WebDAV على شبكتك المحلية</string>
+    <string name="menu_webdav_server">خادم WebDAV</string>
     <string name="menu_network">الاتصال بالخوادم</string>
 
     <!-- الاتصال بالخوادم (عميل FTP / SMB) -->

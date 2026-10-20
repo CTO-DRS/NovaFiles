@@ -40,6 +40,10 @@ object QrPayloads {
     fun ftpShareUrl(ip: String, port: Int, user: String, pass: String): String =
         "ftp://${percentEncode(user)}:${percentEncode(pass)}@$ip:$port/"
 
+    /** v0.27 — رابط مشاركة خادم WebDAV: http://user:pass@ip:port/ */
+    fun davShareUrl(ip: String, port: Int, user: String, pass: String): String =
+        "http://${percentEncode(user)}:${percentEncode(pass)}@$ip:$port/"
+
     /**
      * رابط مباشر لملف/مجلد داخل جذر الخادم:
      * rootPath مجذر الخادم المشترك وtargetPath المسار المطلوب الوصول إليه.
