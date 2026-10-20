@@ -10,6 +10,11 @@ import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Folder
+import androidx.compose.material.icons.outlined.History
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -80,15 +85,21 @@ object Routes {
     fun direct(sendMode: Boolean) = "direct?mode=${if (sendMode) "send" else "receive"}"
 }
 
-private data class Tab(val route: String, val labelRes: Int, val icon: androidx.compose.ui.graphics.vector.ImageVector)
+private data class Tab(
+    val route: String,
+    val labelRes: Int,
+    val icon: androidx.compose.ui.graphics.vector.ImageVector,
+    val iconActive: androidx.compose.ui.graphics.vector.ImageVector? = null,
+)
 
 // v0.19 — الخزنة انتقلت إلى الإعدادات، ومكانها تبويب «الأخيرة»
+// v0.20 — أيقونات مزدوجة: مفرغة للخامل ومجسّمة للنشط (سلوك iOS)
 private val tabs = listOf(
-    Tab(Routes.BROWSER, R.string.nav_browser, Icons.Filled.Folder),
-    Tab(Routes.SEARCH, R.string.nav_search, Icons.Filled.Search),
-    Tab(Routes.FAVORITES, R.string.nav_favorites, Icons.Filled.Star),
-    Tab(Routes.RECENTS, R.string.nav_recents, Icons.Filled.History),
-    Tab(Routes.SETTINGS, R.string.nav_settings, Icons.Filled.Settings),
+    Tab(Routes.BROWSER, R.string.nav_browser, Icons.Outlined.Folder, Icons.Filled.Folder),
+    Tab(Routes.SEARCH, R.string.nav_search, Icons.Outlined.Search, Icons.Filled.Search),
+    Tab(Routes.FAVORITES, R.string.nav_favorites, Icons.Outlined.Star, Icons.Filled.Star),
+    Tab(Routes.RECENTS, R.string.nav_recents, Icons.Outlined.History, Icons.Filled.History),
+    Tab(Routes.SETTINGS, R.string.nav_settings, Icons.Outlined.Settings, Icons.Filled.Settings),
 )
 
 @Composable
@@ -166,6 +177,7 @@ fun NovaRoot() {
                         key = tab.route,
                         label = stringResource(tab.labelRes),
                         icon = tab.icon,
+                        iconActive = tab.iconActive,
                     )
                 },
                 selected = currentRoute ?: Routes.BROWSER,
