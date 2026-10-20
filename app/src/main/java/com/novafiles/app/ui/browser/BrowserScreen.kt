@@ -92,6 +92,7 @@ fun BrowserScreen(
     onOpenSearchFor: (String) -> Unit,
     onOpenFtp: () -> Unit = {},
     onOpenDav: () -> Unit = {},
+    onOpenTerminal: () -> Unit = {},
     onOpenNetwork: () -> Unit = {},
     onOpenOps: () -> Unit = {},
     onOpenDirectSend: () -> Unit = {},
@@ -112,6 +113,7 @@ fun BrowserScreen(
             onOpenSearchFor = onOpenSearchFor,
             onOpenFtp = onOpenFtp,
             onOpenDav = onOpenDav,
+            onOpenTerminal = onOpenTerminal,
             onOpenNetwork = onOpenNetwork,
             onOpenOps = onOpenOps,
             onOpenDirectSend = onOpenDirectSend,
@@ -127,6 +129,7 @@ private fun SinglePaneBrowser(
     onOpenSearchFor: (String) -> Unit,
     onOpenFtp: () -> Unit,
     onOpenDav: () -> Unit,
+    onOpenTerminal: () -> Unit,
     onOpenNetwork: () -> Unit,
     onOpenOps: () -> Unit,
     onOpenDirectSend: () -> Unit,
@@ -525,6 +528,10 @@ private fun SinglePaneBrowser(
             IOSAction(stringResource(R.string.menu_webdav_server)) {
                 menuOpen = false
                 onOpenDav()
+            },
+            IOSAction(stringResource(R.string.menu_terminal)) {
+                menuOpen = false
+                onOpenTerminal()
             },
             IOSAction(stringResource(R.string.direct_menu_entry)) {
                 menuOpen = false

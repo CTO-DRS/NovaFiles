@@ -597,4 +597,18 @@
     <string name="apps_action_delete">Delete file</string>
     <string name="apps_backup_done">Backup saved to Downloads/NovaFiles-APKs</string>
     <string name="apps_backup_fail">Could not copy APK</string>
+
+    <!-- v0.28 — Embedded terminal -->
+    <string name="terminal_title">Terminal</string>
+    <string name="menu_terminal">Terminal</string>
+    <string name="terminal_input_hint">Type a command…</string>
+    <string name="terminal_welcome">NovaFiles shell — type help for the command list</string>
+    <string name="terminal_footer_tip">“Tab” completes paths · “Prev/Next” cycles history · tap the path to copy it</string>
+    <string name="terminal_send">Run</string>
+    <string name="terminal_chip_history_up">Prev</string>
+    <string name="terminal_chip_history_down">Next</string>
+    <string name="terminal_chip_tab">Tab</string>
+    <string name="terminal_chip_clear_input">Clear line</string>
+    <string name="terminal_chip_clear_screen">Clear screen</string>
+    <string name="terminal_a11y_output">Command output — fully readable and selectable text</string>
 </resources>

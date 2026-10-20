@@ -597,4 +597,18 @@
     <string name="apps_action_delete">حذف الملف</string>
     <string name="apps_backup_done">حُفظت النسخة في التنزيلات/NovaFiles-APKs</string>
     <string name="apps_backup_fail">تعذر نسخ APK</string>
+
+    <!-- v0.28 — الطرفية المدمجة -->
+    <string name="terminal_title">الطرفية</string>
+    <string name="menu_terminal">الطرفية</string>
+    <string name="terminal_input_hint">اكتب أمراً…</string>
+    <string name="terminal_welcome">شل NovaFiles — اكتب help لعرض قائمة الأوامر</string>
+    <string name="terminal_footer_tip">«إكمال» يكمل المسارات · «السابق/التالي» للتنقل بين الأوامر السابقة · انقر المسار لنسخه</string>
+    <string name="terminal_send">تنفيذ</string>
+    <string name="terminal_chip_history_up">السابق</string>
+    <string name="terminal_chip_history_down">التالي</string>
+    <string name="terminal_chip_tab">إكمال</string>
+    <string name="terminal_chip_clear_input">مسح السطر</string>
+    <string name="terminal_chip_clear_screen">مسح الشاشة</string>
+    <string name="terminal_a11y_output">ناتج الأوامر — نص كامل قابل للقراءة والتحديد</string>
 </resources>
