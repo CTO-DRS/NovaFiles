@@ -209,6 +209,57 @@
     <string name="ftp_notification_title">NovaFiles — sharing active</string>
     <string name="ftp_notification_text">Your files are reachable from any browser or file explorer</string>
     <string name="menu_wifi_share">WiFi Sharing</string>
+    <!-- v0.27 — FTP server improvements -->
+    <string name="ftp_sessions_row">Active connections</string>
+    <string name="ftp_sessions_hint">Number of devices currently connected to the server</string>
+    <string name="ftp_speed_section">Speed limit</string>
+    <string name="ftp_speed_switch">Throttle transfer speed</string>
+    <string name="ftp_speed_hint">Cap total bandwidth per second to keep the connection smooth</string>
+    <string name="ftp_speed_kb">Limit (KB/s)</string>
+    <string name="ftp_speed_bad">Enter a positive limit in KB per second or disable throttling</string>
+    <string name="ftp_log_section">Connection log</string>
+    <string name="ftp_log_empty">No events yet — sessions and transfers appear here when a device connects</string>
+    <string name="ftp_log_clear">Clear log</string>
+    <string name="netlog_connect">Connect</string>
+    <string name="netlog_login">Login</string>
+    <string name="netlog_login_failed">Failed login</string>
+    <string name="netlog_disconnect">Disconnect</string>
+    <string name="netlog_download">Download</string>
+    <string name="netlog_upload">Upload</string>
+    <string name="netlog_mkdir">New folder</string>
+    <string name="netlog_delete">Delete</string>
+    <string name="netlog_move">Move</string>
+    <string name="netlog_error">Error</string>
+    <!-- v0.27 — embedded WebDAV server -->
+    <string name="dav_title">WebDAV server</string>
+    <string name="dav_share_switch">WebDAV server</string>
+    <string name="dav_share_hint">Share your files with Windows Explorer, Finder and any WebDAV client</string>
+    <string name="dav_status_running">Server is running</string>
+    <string name="dav_status_stopped">Server is stopped</string>
+    <string name="dav_status_hint">Turn on the server to show the access URL here</string>
+    <string name="dav_copy_url">Copy access URL</string>
+    <string name="dav_root_label">Shared folder: %1$s</string>
+    <string name="dav_settings_section">Server settings</string>
+    <string name="dav_port">Port</string>
+    <string name="dav_username">Username</string>
+    <string name="dav_password">Password</string>
+    <string name="dav_settings_footer">Changes apply on next start — stop the server to edit them</string>
+    <string name="dav_howto_header">How to connect?</string>
+    <string name="dav_howto_1">Make sure both devices are on the same WiFi network</string>
+    <string name="dav_howto_2">On Windows: "This PC" → "Map network drive" then enter the URL</string>
+    <string name="dav_howto_3">On Mac: Finder → "Connect to Server" (⌘K) then enter the URL</string>
+    <string name="dav_howto_4">On Linux: Nautilus → "Connect to Server" and pick WebDAV</string>
+    <string name="dav_howto_5">From any browser: open the URL directly to browse folders and download files</string>
+    <string name="dav_security_note">Note: data is transferred unencrypted inside your local network — stop the server when done and avoid public networks.</string>
+    <string name="dav_need_storage">Grant "All files access" from the Files tab first to share your storage</string>
+    <string name="dav_bad_port">Port must be a number between 1024 and 65535</string>
+    <string name="dav_need_credentials">Enter a non-empty username and password</string>
+    <string name="dav_alert_title">WebDAV server</string>
+    <string name="dav_notif_channel">WebDAV sharing</string>
+    <string name="dav_notif_channel_desc">Shown while the WebDAV server is running</string>
+    <string name="dav_notification_title">NovaFiles — WebDAV server active</string>
+    <string name="dav_notification_text">Your files are now available over WebDAV on your local network</string>
+    <string name="menu_webdav_server">WebDAV server</string>
     <string name="menu_network">Connect to Server</string>
 
     <!-- Network client (FTP / SMB) -->

@@ -120,6 +120,7 @@ fun shouldUseDualPane(screenWidthDp: Int): Boolean = screenWidthDp >= DUAL_PANE_
 internal fun DualPaneBrowser(
     onOpenFile: (File) -> Unit,
     onOpenFtp: () -> Unit,
+    onOpenDav: () -> Unit = {},
     onOpenNetwork: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -214,6 +215,7 @@ internal fun DualPaneBrowser(
                     dualMode = true,
                     otherPath = { vmB.path.value },
                     onOpenFtp = onOpenFtp,
+                    onOpenDav = onOpenDav,
                     onOpenNetwork = onOpenNetwork,
                     modifier = Modifier.weight(1f),
                     dropTargetActive = dragSession != null && dragSession?.sourceVm !== vmA,
@@ -243,6 +245,7 @@ internal fun DualPaneBrowser(
                     dualMode = true,
                     otherPath = { vmA.path.value },
                     onOpenFtp = onOpenFtp,
+                    onOpenDav = onOpenDav,
                     onOpenNetwork = onOpenNetwork,
                     modifier = Modifier.weight(1f),
                     dropTargetActive = dragSession != null && dragSession?.sourceVm !== vmB,
@@ -313,6 +316,7 @@ private fun BrowserPane(
     dualMode: Boolean,
     otherPath: () -> String,
     onOpenFtp: () -> Unit = {},
+    onOpenDav: () -> Unit = {},
     onOpenNetwork: () -> Unit = {},
     modifier: Modifier = Modifier,
     // v0.17 — السحب عبر اللوحتين
@@ -678,6 +682,10 @@ private fun BrowserPane(
             IOSAction(stringResource(R.string.action_new_folder)) { vm.showDialog(BrowserDialog.NewFolder) },
             IOSAction(stringResource(R.string.action_refresh)) { vm.refresh() },
             IOSAction(stringResource(R.string.show_hidden), selected = showHidden) { vm.setShowHidden(!showHidden) },
+            IOSAction(stringResource(R.string.menu_webdav_server)) {
+                menuOpen = false
+                onOpenDav()
+            },
             IOSAction(stringResource(R.string.menu_wifi_share)) {
                 menuOpen = false
                 onOpenFtp()

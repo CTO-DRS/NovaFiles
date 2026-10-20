@@ -14,6 +14,10 @@ import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import com.novafiles.app.core.netlog.ConnectionLog
+import com.novafiles.app.core.netlog.NetEventType
+import com.novafiles.app.core.netlog.SpeedLimiter
+import com.novafiles.app.core.netlog.ThrottledOutputStream
 
 /** عنوان IPv4 المحلي للجهاز على الشبكة (wlan0 أولًا) — لعرضه في واجهة المشاركة */
 fun localIpv4(preferWifi: Boolean = true): String? {
@@ -58,7 +62,14 @@ class FtpServer(
     @Volatile var port: Int = 2121,
     @Volatile var username: String = "nova",
     @Volatile var password: String = "nova",
+    /** v0.27 — سجل اتصالات اختياري (جلسات دخول/نقل/أخطاء) */
+    val connLog: ConnectionLog? = null,
+    /** v0.27 — حادّ سرعة مشترك اختياري (بايت/ثانية — 0 بلا حد) */
+    val limiter: SpeedLimiter? = null,
 ) {
+
+    /** v0.27 — سجل الجلسات النشطة لحظياً (يقرأه من الواجهة ويقطع منها) */
+    val sessions = FtpSessionRegistry()
 
     @Volatile var isRunning: Boolean = false
         private set
@@ -132,7 +143,7 @@ class FtpServer(
                 if (!isRunning) { try { client.close() } catch (_: Exception) {}; break }
                 val id = ++clientSeq
                 Thread({
-                    handleClient(client)
+                    handleClient(client, id)
                 }, "ftp-conn-$id").apply {
                     isDaemon = true
                     start()
@@ -151,6 +162,8 @@ class FtpServer(
         var cwd: File = root
         var renameFrom: File? = null
         var restartOffset: Long = 0L
+        /** معرف الجلسة في السجل — يُربط في handleClient */
+        var sessionId: Int = -1
         /** مُنشئ اتصال البيانات القادم: إما PASV (قبول) أو PORT (اتصال صادر) */
         var dataSocketProvider: (() -> Socket)? = null
 
@@ -162,11 +175,15 @@ class FtpServer(
         }
     }
 
-    private fun handleClient(socket: Socket) {
+    private fun handleClient(socket: Socket, connId: Int) {
         clientSockets.add(socket)
+        val host = socket.inetAddress?.hostAddress ?: "?"
+        val sessionId = sessions.register(host, System.currentTimeMillis()) { runCatching { socket.close() } }
+        connLog?.append(NetEventType.CONNECT, "$host (منفذ محلي ${socket.port})")
         try {
             socket.tcpNoDelay = true
             val session = Session(socket)
+            session.sessionId = sessionId
             session.reply("220 NovaFiles FTP ready")
             val reader = java.io.BufferedReader(
                 java.io.InputStreamReader(socket.getInputStream(), StandardCharsets.UTF_8),
@@ -174,12 +191,15 @@ class FtpServer(
             while (isRunning) {
                 val line = reader.readLine() ?: break
                 if (line.isBlank()) continue
+                sessions.touch(sessionId, System.currentTimeMillis())
                 handleCommand(session, line.trim())
             }
         } catch (_: Exception) {
             // انقطاع الاتصال — نغلق بصمت
         } finally {
             clientSockets.remove(socket)
+            sessions.unregister(sessionId)
+            connLog?.append(NetEventType.DISCONNECT, "$host")
             try { socket.close() } catch (_: Exception) {}
         }
     }
@@ -200,9 +220,14 @@ class FtpServer(
                 "PASS" -> {
                     if (arg == password) {
                         s.authenticated = true
+                        if (s.sessionId > 0) sessions.markAuthenticated(s.sessionId)
                         s.reply("230 Login successful")
                         log("client logged in")
-                    } else s.reply("530 Login incorrect")
+                        connLog?.append(NetEventType.LOGIN, s.socket.inetAddress?.hostAddress ?: "?")
+                    } else {
+                        s.reply("530 Login incorrect")
+                        connLog?.append(NetEventType.LOGIN_FAILED, s.socket.inetAddress?.hostAddress ?: "?")
+                    }
                 }
                 "QUIT" -> { s.reply("221 Goodbye"); try { s.socket.close() } catch (_: Exception) {} }
                 "SYST" -> s.reply("215 UNIX Type: L8")
@@ -237,8 +262,10 @@ class FtpServer(
                 }
                 "MKD" -> {
                     val target = resolve(s, arg)
-                    if (target.mkdir()) s.reply("257 \"${abstractPath(target)}\" created")
-                    else s.reply("550 Cannot create directory")
+                    if (target.mkdir()) {
+                        connLog?.append(NetEventType.MKDIR, abstractPath(target))
+                        s.reply("257 \"${abstractPath(target)}\" created")
+                    } else s.reply("550 Cannot create directory")
                 }
                 "RMD" -> {
                     val target = resolve(s, arg)
@@ -248,8 +275,10 @@ class FtpServer(
                 }
                 "DELE" -> {
                     val target = resolve(s, arg)
-                    if (target.isFile && target.delete()) s.reply("250 File deleted")
-                    else s.reply("550 Cannot delete file")
+                    if (target.isFile && target.delete()) {
+                        connLog?.append(NetEventType.DELETE, abstractPath(target))
+                        s.reply("250 File deleted")
+                    } else s.reply("550 Cannot delete file")
                 }
                 "RNFR" -> {
                     val target = resolve(s, arg)
@@ -263,6 +292,7 @@ class FtpServer(
                     val to = resolve(s, arg)
                     if (from != null && from.renameTo(to)) {
                         s.renameFrom = null
+                        connLog?.append(NetEventType.MOVE, "${abstractPath(from)} → ${abstractPath(to)}")
                         s.reply("250 Rename successful")
                     } else {
                         s.renameFrom = null
@@ -370,6 +400,7 @@ class FtpServer(
         val file = resolve(s, arg)
         if (!file.isFile) { s.reply("550 File not found: $arg"); return }
         s.reply("150 Opening BINARY mode data connection for ${file.name} (${file.length()} bytes)")
+        var sent = 0L
         val ok = withDataOutput(s) { out ->
             BufferedInputStream(file.inputStream().buffered(8192)).use { input ->
                 if (s.restartOffset > 0) {
@@ -381,11 +412,15 @@ class FtpServer(
                     }
                     s.restartOffset = 0
                 }
-                input.copyTo(out, 8192)
+                val target = if (limiter != null && limiter.bytesPerSecond > 0) {
+                    ThrottledOutputStream(out, limiter)
+                } else out
+                sent = input.copyTo(target, 8192)
+                target.flush()
             }
-            out.flush()
             true
         }
+        if (ok && sent > 0) connLog?.append(NetEventType.DOWNLOAD, abstractPath(file), sent)
         s.reply(if (ok) "226 Transfer complete" else "425 Cannot open data connection")
     }
 
@@ -393,13 +428,18 @@ class FtpServer(
         val file = resolve(s, arg)
         if (file.isDirectory) { s.reply("550 Target is a directory"); return }
         s.reply("150 Ok to send data")
+        var received = 0L
         val ok = withDataInput(s) { input ->
             file.outputStream().buffered(8192).use { fos ->
-                input.copyTo(fos, 8192)
-                fos.flush()
+                val target = if (limiter != null && limiter.bytesPerSecond > 0) {
+                    ThrottledOutputStream(fos, limiter)
+                } else fos
+                received = input.copyTo(target, 8192)
+                target.flush()
             }
             true
         }
+        if (ok && received > 0) connLog?.append(NetEventType.UPLOAD, abstractPath(file), received)
         s.reply(if (ok) "226 Transfer complete" else "425 Cannot open data connection")
     }
 

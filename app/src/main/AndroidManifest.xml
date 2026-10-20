@@ -97,6 +97,12 @@
             android:exported="false"
             android:foregroundServiceType="dataSync" />
 
+        <!-- v0.27 — خادم WebDAV المدمج كخدمة أمامية -->
+        <service
+            android:name=".core.davserver.WebDavServerService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+
         <!-- v0.17 — ودجات سطح المكتب الأربعة -->
         <receiver
             android:name=".widget.RecentFilesWidget"

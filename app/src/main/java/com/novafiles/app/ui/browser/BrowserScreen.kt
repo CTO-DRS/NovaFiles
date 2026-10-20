@@ -91,6 +91,7 @@ fun BrowserScreen(
     onOpenFile: (File) -> Unit,
     onOpenSearchFor: (String) -> Unit,
     onOpenFtp: () -> Unit = {},
+    onOpenDav: () -> Unit = {},
     onOpenNetwork: () -> Unit = {},
     onOpenOps: () -> Unit = {},
     onOpenDirectSend: () -> Unit = {},
@@ -102,6 +103,7 @@ fun BrowserScreen(
         DualPaneBrowser(
             onOpenFile = onOpenFile,
             onOpenFtp = onOpenFtp,
+            onOpenDav = onOpenDav,
             onOpenNetwork = onOpenNetwork,
         )
     } else {
@@ -109,6 +111,7 @@ fun BrowserScreen(
             onOpenFile = onOpenFile,
             onOpenSearchFor = onOpenSearchFor,
             onOpenFtp = onOpenFtp,
+            onOpenDav = onOpenDav,
             onOpenNetwork = onOpenNetwork,
             onOpenOps = onOpenOps,
             onOpenDirectSend = onOpenDirectSend,
@@ -123,6 +126,7 @@ private fun SinglePaneBrowser(
     onOpenFile: (File) -> Unit,
     onOpenSearchFor: (String) -> Unit,
     onOpenFtp: () -> Unit,
+    onOpenDav: () -> Unit,
     onOpenNetwork: () -> Unit,
     onOpenOps: () -> Unit,
     onOpenDirectSend: () -> Unit,
@@ -517,6 +521,10 @@ private fun SinglePaneBrowser(
             IOSAction(stringResource(R.string.menu_wifi_share)) {
                 menuOpen = false
                 onOpenFtp()
+            },
+            IOSAction(stringResource(R.string.menu_webdav_server)) {
+                menuOpen = false
+                onOpenDav()
             },
             IOSAction(stringResource(R.string.direct_menu_entry)) {
                 menuOpen = false

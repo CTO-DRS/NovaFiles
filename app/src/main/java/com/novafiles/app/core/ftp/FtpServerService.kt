@@ -12,6 +12,8 @@ import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import com.novafiles.app.MainActivity
 import com.novafiles.app.R
+import com.novafiles.app.core.netlog.ConnectionLog
+import com.novafiles.app.core.netlog.SpeedLimiter
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,6 +26,8 @@ data class FtpShareState(
     val root: String? = null,
     val port: Int = 0,
     val error: String? = null,
+    /** v0.27 — عدد الاتصالات النشطة لحظياً */
+    val sessions: Int = 0,
 )
 
 /**
@@ -39,20 +43,26 @@ class FtpServerService : Service() {
         const val EXTRA_PORT = "port"
         const val EXTRA_USER = "user"
         const val EXTRA_PASS = "pass"
+        /** v0.27 — حد السرعة بايت/ثانية (0 = بلا حد) */
+        const val EXTRA_SPEED = "speed"
 
         private const val CHANNEL_ID = "ftp_share"
         private const val NOTIF_ID = 4711
 
+        /** v0.27 — سجل مشترك لأحداث خادم FTP — تقرأه الشاشة مباشرة */
+        val connLog = ConnectionLog(200)
+
         private val _state = MutableStateFlow(FtpShareState())
         val state: StateFlow<FtpShareState> = _state.asStateFlow()
 
-        fun start(context: Context, root: String, port: Int, user: String, pass: String) {
+        fun start(context: Context, root: String, port: Int, user: String, pass: String, speedBps: Long = 0) {
             val i = Intent(context, FtpServerService::class.java).apply {
                 action = ACTION_START
                 putExtra(EXTRA_ROOT, root)
                 putExtra(EXTRA_PORT, port)
                 putExtra(EXTRA_USER, user)
                 putExtra(EXTRA_PASS, pass)
+                putExtra(EXTRA_SPEED, speedBps)
             }
             if (Build.VERSION.SDK_INT >= 26) {
                 context.startForegroundService(i)
@@ -69,6 +79,25 @@ class FtpServerService : Service() {
     }
 
     private var server: FtpServer? = null
+    private var tickThread: Thread? = null
+
+    /** حلقة نبض تحدّث عدّاد الجلسات في حالة الواجهة كل ثانية */
+    private fun startSessionTicker() {
+        tickThread?.interrupt()
+        tickThread = Thread({
+            while (server?.isRunning == true) {
+                try {
+                    Thread.sleep(1000)
+                    _state.value = _state.value.copy(sessions = server?.sessions?.activeCount ?: 0)
+                } catch (_: InterruptedException) {
+                    return@Thread
+                }
+            }
+        }, "ftp-session-tick").apply {
+            isDaemon = true
+            start()
+        }
+    }
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -94,6 +123,8 @@ class FtpServerService : Service() {
             ACTION_STOP -> {
                 server?.stop()
                 server = null
+                tickThread?.interrupt()
+                tickThread = null
                 _state.value = FtpShareState(running = false)
                 stopForeground(STOP_FOREGROUND_REMOVE)
                 stopSelf()
@@ -103,8 +134,9 @@ class FtpServerService : Service() {
                 val port = intent?.getIntExtra(EXTRA_PORT, 2121) ?: 2121
                 val user = intent?.getStringExtra(EXTRA_USER) ?: "nova"
                 val pass = intent?.getStringExtra(EXTRA_PASS) ?: "nova"
+                val speed = intent?.getLongExtra(EXTRA_SPEED, 0) ?: 0
                 startAsForeground()
-                launchServer(root, port, user, pass)
+                launchServer(root, port, user, pass, speed)
             }
         }
         return START_NOT_STICKY
@@ -133,13 +165,15 @@ class FtpServerService : Service() {
         }
     }
 
-    private fun launchServer(rootPath: String, port: Int, user: String, pass: String) {
+    private fun launchServer(rootPath: String, port: Int, user: String, pass: String, speedBps: Long = 0) {
         server?.stop()
         val srv = FtpServer(
             root = File(rootPath),
             port = port,
             username = user,
             password = pass,
+            connLog = connLog,
+            limiter = if (speedBps > 0) SpeedLimiter(speedBps) else null,
         )
         srv.onLog = { /* يمكن توصيلها بسجل لاحقاً */ }
         server = srv
@@ -151,7 +185,9 @@ class FtpServerService : Service() {
                 root = rootPath,
                 port = port,
                 error = if (ip == null) getString(R.string.ftp_no_wifi) else null,
+                sessions = 0,
             )
+            startSessionTicker()
         } else {
             _state.value = FtpShareState(
                 running = false,
@@ -165,6 +201,8 @@ class FtpServerService : Service() {
     override fun onDestroy() {
         server?.stop()
         server = null
+        tickThread?.interrupt()
+        tickThread = null
         super.onDestroy()
     }
 }

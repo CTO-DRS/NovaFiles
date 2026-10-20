@@ -43,6 +43,12 @@ class SettingsStore(private val context: Context) {
         val FTP_USER = stringPreferencesKey("ftp_user")
         val FTP_PASS = stringPreferencesKey("ftp_pass")
 
+        // v0.27 — خادم WebDAV + حد سرعة FTP
+        val DAV_PORT = intPreferencesKey("dav_port")
+        val DAV_USER = stringPreferencesKey("dav_user")
+        val DAV_PASS = stringPreferencesKey("dav_pass")
+        val FTP_SPEED_KB = intPreferencesKey("ftp_speed_kb")
+
         // v0.17 — الثيمات والإيماءات والارتباطات
         val PALETTE = stringPreferencesKey("palette_id")
         val FOLDER_ACCENTS = stringPreferencesKey("folder_accents")
@@ -62,6 +68,12 @@ class SettingsStore(private val context: Context) {
     val ftpUser: Flow<String> = context.dataStore.data.map { it[Keys.FTP_USER] ?: "nova" }
     val ftpPass: Flow<String> = context.dataStore.data.map { it[Keys.FTP_PASS] ?: "nova" }
 
+    // v0.27 — إعدادات خادم WebDAV وحد سرعة FTP (0 = بلا حد)
+    val davPort: Flow<Int> = context.dataStore.data.map { it[Keys.DAV_PORT] ?: 8888 }
+    val davUser: Flow<String> = context.dataStore.data.map { it[Keys.DAV_USER] ?: "nova" }
+    val davPass: Flow<String> = context.dataStore.data.map { it[Keys.DAV_PASS] ?: "nova" }
+    val ftpSpeedKb: Flow<Int> = context.dataStore.data.map { it[Keys.FTP_SPEED_KB] ?: 0 }
+
     suspend fun setViewGrid(grid: Boolean) = context.dataStore.edit { it[Keys.VIEW_GRID] = grid }
     suspend fun setShowHidden(hidden: Boolean) = context.dataStore.edit { it[Keys.SHOW_HIDDEN] = hidden }
     suspend fun setSortMode(mode: String) = context.dataStore.edit { it[Keys.SORT] = mode }
@@ -69,6 +81,12 @@ class SettingsStore(private val context: Context) {
     suspend fun setFtpPort(port: Int) = context.dataStore.edit { it[Keys.FTP_PORT] = port }
     suspend fun setFtpUser(user: String) = context.dataStore.edit { it[Keys.FTP_USER] = user }
     suspend fun setFtpPass(pass: String) = context.dataStore.edit { it[Keys.FTP_PASS] = pass }
+
+    // v0.27
+    suspend fun setDavPort(port: Int) = context.dataStore.edit { it[Keys.DAV_PORT] = port }
+    suspend fun setDavUser(user: String) = context.dataStore.edit { it[Keys.DAV_USER] = user }
+    suspend fun setDavPass(pass: String) = context.dataStore.edit { it[Keys.DAV_PASS] = pass }
+    suspend fun setFtpSpeedKb(kb: Int) = context.dataStore.edit { it[Keys.FTP_SPEED_KB] = kb }
 
     // v0.17 — الثيمات والإيماءات والارتباطات
     val paletteId: Flow<String> = context.dataStore.data.map { it[Keys.PALETTE] ?: "nova" }
