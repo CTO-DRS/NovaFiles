@@ -1,11 +1,13 @@
 package com.novafiles.app.ui.ios
 
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -15,10 +17,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -35,6 +37,8 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -249,20 +253,25 @@ fun IOSNavTextButton(
 
 /**
  * ══════════════════════════════════════════════════════════
- *  شريط التبويبات السفلي بنمط iOS (Tab Bar) — v0.19
- *  ─ زوايا علوية دائرية 22dp + ظل عائم + كبسولة تمييز نشطة
- *  ─ v0.19: صف 58dp، كبسولة 52×28dp، أيقونات 24dp، تسميات 11sp،
- *    وانتقال لوني ناعم عند تبديل التبويب (روح iPadOS)
+ *  شريط التبويبات السفلي بنمط iPadOS الحديث — v0.20
+ *  ─ تصميم عائم منفصل: كبسولة بزوايا كاملة 26dp بهوامش من كل الجهات
+ *    تطفو فوق مساحة أزرار النظام بظل ناعم
+ *  ─ كبسولة نشطة منزلقة: تتحرك بانسيابية 240ms خلف أيقونة التبويب
+ *    المختار بدل الظهور/الاختفاء (RTL/LTR تلقائياً)
+ *  ─ تبديل الأيقونة: مفرغة للخامل ومجسّمة للنشط (سلوك iOS الأصيل)
+ *  ─ تسميات 11sp + انتقال لوني 200ms + نبضة لمسية عند الاختيار
  * ══════════════════════════════════════════════════════════
  */
 data class IOSBarItem(
     val key: String,
     val label: String,
     val icon: ImageVector,
+    /** v0.20 — نسخة مجسّمة تُعرض عند نشاط التبويب (اختيارية) */
+    val iconActive: ImageVector? = null,
 )
 
-/** زوايا أعلى شريط التبويبات */
-private val BottomBarShape = RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp)
+/** زوايا الكبسولة العائمة لشريط التبويبات */
+private val BottomBarShape = RoundedCornerShape(26.dp)
 
 @Composable
 fun IOSBottomBar(
@@ -271,83 +280,88 @@ fun IOSBottomBar(
     onSelect: (String) -> Unit,
 ) {
     val p = LocalIOSPalette.current
+    val haptic = LocalHapticFeedback.current
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(
-                elevation = 16.dp,
-                shape = BottomBarShape,
-                clip = false,
-                ambientColor = Color.Black,
-                spotColor = Color.Black,
-            )
-            .background(p.tabBarBg, shape = BottomBarShape),
+            // v0.20 — يطفو فوق مساحة أزرار التنقل للنظام
+            .windowInsetsPadding(WindowInsets.navigationBars)
+            .padding(start = 10.dp, end = 10.dp, bottom = 4.dp),
     ) {
-        // الخط الشعري العلوي داخل الزوايا الدائرية
-        Box(
-            modifier = Modifier
-                .padding(horizontal = 18.dp)
-                .fillMaxWidth()
-                .height(0.5.dp)
-                .background(p.separator),
-        )
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(58.dp),
+                .shadow(
+                    elevation = 18.dp,
+                    shape = BottomBarShape,
+                    clip = false,
+                    ambientColor = Color.Black,
+                    spotColor = Color.Black,
+                )
+                .background(p.tabBarBg, shape = BottomBarShape)
+                .padding(vertical = 6.dp),
         ) {
-            items.forEach { item ->
-                val active = item.key == selected
-                // v0.19 — انتقال لوني ناعم بدل القفز الحاد
-                val tint by animateColorAsState(
-                    targetValue = if (active) p.accent else p.secondaryLabel,
-                    animationSpec = tween(180),
-                    label = "tabTint",
+            BoxWithConstraints(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(58.dp),
+            ) {
+                val cellWidth = maxWidth / items.size
+                val selIndex = items.indexOfFirst { it.key == selected }.coerceAtLeast(0)
+                val pillWidth = 48.dp
+                // v0.20 — الكبسولة المنزلقة: تتحرك بين التبويبات بنعومة
+                // (offset المبني على Dp واعٍ بالاتجاه: يعمل في RTL وLTR تلقائياً)
+                val pillX by animateDpAsState(
+                    targetValue = cellWidth * selIndex + (cellWidth - pillWidth) / 2,
+                    animationSpec = tween(240, easing = FastOutSlowInEasing),
+                    label = "tabPillX",
                 )
-                val pillAlpha by animateFloatAsState(
-                    targetValue = if (active) 1f else 0f,
-                    animationSpec = tween(180),
-                    label = "tabPill",
-                )
-                Column(
+                Box(
                     modifier = Modifier
-                        .weight(1f)
-                        .fillMaxSize()
-                        .clickable { onSelect(item.key) },
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Spacer(Modifier.height(7.dp))
-                    // كبسولة تمييز خلف الأيقونة النشطة — تظهر وتختفي بنعومة
-                    Box(
-                        modifier = Modifier
-                            .size(width = 52.dp, height = 28.dp)
-                            .clip(RoundedCornerShape(14.dp))
-                            .background(p.accent.copy(alpha = 0.16f * pillAlpha)),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Icon(
-                            imageVector = item.icon,
-                            contentDescription = item.label,
-                            tint = tint,
-                            modifier = Modifier.size(24.dp),
+                        .offset(x = pillX, y = 7.dp)
+                        .size(width = pillWidth, height = 28.dp)
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(p.accent.copy(alpha = 0.16f)),
+                )
+                Row(modifier = Modifier.fillMaxSize()) {
+                    items.forEach { item ->
+                        val active = item.key == selected
+                        // انتقال لوني ناعم للون التبويب
+                        val tint by animateColorAsState(
+                            targetValue = if (active) p.accent else p.secondaryLabel,
+                            animationSpec = tween(200),
+                            label = "tabTint",
                         )
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .fillMaxSize()
+                                .clickable {
+                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    onSelect(item.key)
+                                },
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+                            Spacer(Modifier.height(7.dp))
+                            // v0.20 — الأيقونة تتبدل: مفرغة للخامل ومجسّمة للنشط
+                            Icon(
+                                imageVector = if (active) (item.iconActive ?: item.icon) else item.icon,
+                                contentDescription = item.label,
+                                tint = tint,
+                                modifier = Modifier.size(24.dp),
+                            )
+                            Spacer(Modifier.height(2.dp))
+                            TextiOS(
+                                text = item.label,
+                                style = TextStyle(fontSize = 11.sp, fontWeight = if (active) FontWeight.SemiBold else FontWeight.Normal),
+                                color = tint,
+                                maxLines = 1,
+                            )
+                        }
                     }
-                    Spacer(Modifier.height(2.dp))
-                    TextiOS(
-                        text = item.label,
-                        style = TextStyle(fontSize = 11.sp, fontWeight = if (active) FontWeight.SemiBold else FontWeight.Normal),
-                        color = tint,
-                        maxLines = 1,
-                    )
                 }
             }
         }
-        // مسافة شريط التنقل السفلي للنظام
-        Spacer(
-            Modifier
-                .fillMaxWidth()
-                .windowInsetsBottomHeight(WindowInsets.navigationBars),
-        )
     }
 }
 
