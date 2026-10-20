@@ -71,6 +71,7 @@ object Routes {
     const val FTP = "ftp"
     const val DAV = "dav"          // v0.27 — خادم WebDAV المدمج
     const val TERMINAL = "terminal"    // v0.28 — الطرفية المدمجة
+    const val CHECKSUMS = "checksums?path={path}"  // v0.29 — التحقق والمطابقة
     const val NETWORK = "network"
     const val CONN_FORM = "connform?connId={connId}"
     const val REMOTE = "remote?connId={connId}"
@@ -86,6 +87,7 @@ object Routes {
     fun editor(path: String) = "editor?path=${android.net.Uri.encode(path)}"
     fun viewer(path: String) = "viewer?path=${android.net.Uri.encode(path)}"
     fun archive(path: String) = "archive?path=${android.net.Uri.encode(path)}"
+    fun checksums(path: String) = "checksums?path=${android.net.Uri.encode(path)}"
     fun connForm(connId: Long) = "connform?connId=$connId"
     fun remote(connId: Long) = "remote?connId=$connId"
     fun direct(sendMode: Boolean) = "direct?mode=${if (sendMode) "send" else "receive"}"
@@ -225,6 +227,7 @@ private fun NovaNavHost(nav: NavHostController) {
                 onOpenDirectSend = { nav.navigate(Routes.direct(sendMode = true)) },
                 onOpenAnalyzer = { nav.navigate(Routes.ANALYZER) },
                 onOpenApps = { nav.navigate(Routes.APPS) },
+                onOpenChecksums = { nav.navigate(Routes.checksums(it)) },
             )
         }
         composable(Routes.SEARCH) {
@@ -251,6 +254,19 @@ private fun NovaNavHost(nav: NavHostController) {
         }
         composable(Routes.TERMINAL) {
             TerminalScreen(onBack = { nav.popBackStack() })
+        }
+        composable(
+            Routes.CHECKSUMS,
+            arguments = listOf(navArgument("path") {
+                type = NavType.StringType
+                nullable = true
+                defaultValue = null
+            }),
+        ) { entry ->
+            com.novafiles.app.ui.checksum.ChecksumScreen(
+                initialPath = entry.arguments?.getString("path"),
+                onBack = { nav.popBackStack() },
+            )
         }
         composable(Routes.APPS) {
             AppsScreen(onBack = { nav.popBackStack() })

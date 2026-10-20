@@ -59,8 +59,9 @@ class JunkScannerTest {
 
     @Test
     fun `regular files never flagged`() = runBlocking {
-        File(root, "photo.jpg").writeBytes(ByteArray(10))
-        File(root, "notes.txt").writeBytes(ByteArray(10))
+        // v0.29: المحتوى يجب أن يختلف — مكررات المحتوى (بصمة لا اسم) تُكتشف في المنظّف
+        File(root, "photo.jpg").writeText("jpeg-content-alpha")
+        File(root, "notes.txt").writeText("text-content-beta")
         val report = scan()
         assertTrue(report.items.isEmpty())
     }
