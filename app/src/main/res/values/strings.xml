@@ -526,4 +526,24 @@
     <string name="time_days">منذ %1$d أيام</string>
     <string name="settings_security">الأمان</string>
     <string name="vault_row_hint">المجلدات المشفرة والحماية البيومترية</string>
+    <!-- v0.22 — مدير التطبيقات -->
+    <string name="apps_title">مدير التطبيقات</string>
+    <string name="apps_summary">‏%1$d عنصراً · %2$s</string>
+    <string name="apps_filter_all">الكل</string>
+    <string name="apps_filter_user">مثبتة</string>
+    <string name="apps_filter_system">النظام</string>
+    <string name="apps_filter_apk">ملفات APK</string>
+    <string name="apps_empty">لا توجد تطبيقات</string>
+    <string name="apps_empty_hint">لم يُعثر على أي تطبيق مثبت على هذا الجهاز</string>
+    <string name="apps_apk_empty">لا ملفات APK في التخزين</string>
+    <string name="apps_apk_empty_hint">ملفات التثبيت المنزّلة ستظهر هنا لتنظيفها أو إعادة تثبيتها</string>
+    <string name="apps_action_open">فتح</string>
+    <string name="apps_action_backup">نسخ APK احتياطياً</string>
+    <string name="apps_action_share">مشاركة APK</string>
+    <string name="apps_action_info">معلومات التطبيق</string>
+    <string name="apps_action_uninstall">إزالة التثبيت</string>
+    <string name="apps_action_install">تثبيت</string>
+    <string name="apps_action_delete">حذف الملف</string>
+    <string name="apps_backup_done">حُفظت النسخة في التنزيلات/NovaFiles-APKs</string>
+    <string name="apps_backup_fail">تعذر نسخ APK</string>
 </resources>
