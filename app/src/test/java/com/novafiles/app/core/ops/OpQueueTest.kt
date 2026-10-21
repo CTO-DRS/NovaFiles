@@ -325,4 +325,108 @@ class OpQueueTest {
 
         assertEquals(400, OpQueue.totalBytes(listOf(dir, solo)))
     }
+
+    // ----- v0.30 — الضغط المتقدم عبر ArchiveRequest -----
+
+    private fun advancedZipTest(
+        request: com.novafiles.app.core.archive.ArchiveRequest,
+        outName: String,
+        expectWhole: Boolean = true,
+        sourceBytes: ByteArray = ByteArray(8192) { (it % 251).toByte() },
+        verify: (File, OpRecord) -> Unit,
+    ) = runTest {
+        val d = StandardTestDispatcher(testScheduler)
+        val q = newQueue(newScope(d), d)
+        val srcDir2 = tmp.newFolder("adv-src")
+        val src = File(srcDir2, "doc.bin").apply { writeBytes(sourceBytes) }
+        val out = File(tmp.newFolder("adv-out"), outName)
+
+        q.enqueue(OpSpec(OpKind.ZIP, title = "ضغط", sources = listOf(src), target = out, archive = request))
+        testScheduler.advanceUntilIdle()
+
+        val rec = q.ops.value.single()
+        assertEquals(OpStatus.DONE, rec.status)
+        if (expectWhole) {
+            assertTrue("الناتج يجب أن يكون موجوداً: ${out.path}", out.exists() && out.length() > 0)
+        }
+        verify(out, rec)
+    }
+
+    @Test
+    fun `advanced zip creates 7z with sha result info`() = advancedZipTest(
+        com.novafiles.app.core.archive.ArchiveRequest(com.novafiles.app.core.archive.CreateFormat.SEVEN_Z),
+        "doc.7z",
+    ) { out, rec ->
+        // فك 7z عبر محرك القراءة الموحد للتأكد من الصلاحية
+        com.novafiles.app.core.archive.ArchiveEngine.extractAll(out, File(out.parentFile, "x"))
+        assertTrue(rec.resultInfo!!.startsWith("sha256:"))
+        assertTrue(rec.resultInfo!!.length >= "sha256:".length + 12)
+    }
+
+    @Test
+    fun `advanced zip tar gz extractable via engine`() = advancedZipTest(
+        com.novafiles.app.core.archive.ArchiveRequest(com.novafiles.app.core.archive.CreateFormat.TAR_GZ),
+        "doc.tar.gz",
+    ) { out, _ ->
+        val dest = File(out.parentFile, "tgz")
+        val count = com.novafiles.app.core.archive.ArchiveEngine.extractAll(out, dest)
+        // مصدر ملف مفرد → المدخل باسمه مباشرة (لا مسار مجلد)
+        assertEquals(1, count)
+        assertEquals(8192, File(dest, "doc.bin").length())
+    }
+
+    @Test
+    fun `advanced zip with password produces encrypted archive`() = advancedZipTest(
+        com.novafiles.app.core.archive.ArchiveRequest(
+            com.novafiles.app.core.archive.CreateFormat.ZIP,
+            password = "سر القائمة".toCharArray(),
+        ),
+        "sec.zip",
+    ) { out, rec ->
+        val headers = net.lingala.zip4j.ZipFile(out, "سر القائمة".toCharArray()).fileHeaders
+        assertTrue(headers.any { !it.isDirectory && it.isEncrypted })
+        assertTrue(rec.resultInfo!!.startsWith("sha256:"))
+    }
+
+    @Test
+    fun `advanced zip with split produces volumes and index`() = advancedZipTest(
+        com.novafiles.app.core.archive.ArchiveRequest(
+            com.novafiles.app.core.archive.CreateFormat.ZIP,
+            splitBytes = 4L * 1024,
+        ),
+        "vol.zip",
+        expectWhole = false,
+        // بيانات عشوائية ضعيفة الانضغاط حتى يتجاوز الناتج حجم الجزء الواحد
+        sourceBytes = ByteArray(20 * 1024).also { java.util.Random(99L).nextBytes(it) },
+    ) { out, rec ->
+        // الأجزاء تحمل امتداد الترقيم والأصل حُذف بعد التقسيم
+        val dir = out.parentFile!!
+        assertTrue(File(dir, "vol.zip.001").isFile)
+        assertFalse(out.exists())
+        val parts = dir.listFiles { f -> f.name.startsWith("vol.zip.") && f.name != "vol.zip.nvasplit" }!!
+        assertTrue("يجب أن تكون هناك أجزاء متعددة", parts.size >= 2)
+        assertTrue(File(dir, "vol.zip.nvasplit").isFile)
+        assertTrue(rec.resultInfo!!.contains("volumes:"))
+    }
+
+    @Test
+    fun `legacy zip path unchanged without archive request`() = runTest {
+        val d = StandardTestDispatcher(testScheduler)
+        val q = newQueue(newScope(d), d)
+        val src = makeFile("legacy.bin", 2048)
+        val out = File(tmp.newFolder("lg-out"), "legacy.zip")
+
+        q.enqueue(OpSpec(OpKind.ZIP, title = "ضغط", sources = listOf(src), target = out))
+        testScheduler.advanceUntilIdle()
+
+        val rec = q.ops.value.single()
+        assertEquals(OpStatus.DONE, rec.status)
+        assertTrue(out.exists())
+        // المسار التقليدي لا يضيف معلومات نتيجة
+        assertEquals(null, rec.resultInfo)
+        // صالح للقراءة بـ java.util.zip
+        java.util.zip.ZipFile(out, java.util.zip.ZipFile.OPEN_READ, Charsets.UTF_8).use { zf ->
+            assertTrue(zf.entries().asSequence().any { it.name == "legacy.bin" })
+        }
+    }
 }

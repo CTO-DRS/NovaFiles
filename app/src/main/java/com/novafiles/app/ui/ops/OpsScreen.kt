@@ -209,6 +209,15 @@ private fun OpCard(
                     color = palette.destructive,
                 )
             }
+            // v0.30 — معلومات نتيجة الضغط: بصمة SHA-256 وعدد الأجزاء
+            if (record.status == OpStatus.DONE && record.resultInfo != null) {
+                Spacer(Modifier.size(4.dp))
+                Text(
+                    record.resultInfo ?: "",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
     }
 }

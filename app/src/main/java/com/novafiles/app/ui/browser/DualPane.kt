@@ -625,6 +625,16 @@ private fun BrowserPane(
                 onDismiss = { vm.closeDialog() },
                 onApply = { plan -> vm.applyBatchRename(plan) },
             )
+            // v0.30 — ورقة «ضغط إلى…» في وضع اللوحتين أيضاً
+            BrowserDialog.CompressTo -> CompressToSheet(
+                itemCount = selection.size,
+                suggestedName = compressBaseName(selection.map { File(it) }, path),
+                onDismiss = { vm.closeDialog() },
+                onCompress = { request ->
+                    vm.compressSelection(request)
+                    vm.closeDialog()
+                },
+            )
             BrowserDialog.None -> {}
         }
 

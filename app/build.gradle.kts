@@ -13,8 +13,8 @@ android {
         applicationId = "com.novafiles.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 29
-        versionName = "0.29.0"
+        versionCode = 30
+        versionName = "0.30.0"
 
         // v0.16 — معرّفات عملاء OAuth للسحابة: يضبطها كل مُطوّر عبر gradle.properties
         // (NOVA_DRIVE_CLIENT_ID=...) — فارغة افتراضياً ليعمل البناء دون أسرار
@@ -106,6 +106,8 @@ dependencies {
     implementation(libs.commons.compress)
     implementation(libs.xz)
     implementation(libs.junrar)
+    // v0.30: إنشاء ZIP بكلمات مرور AES-256 (Zip4j)
+    implementation(libs.zip4j)
     implementation(libs.zxing.core)
 
     // اختبارات وحدة JVM — مع خادم SSH مدمج لاختبار SFTP حقيقياً

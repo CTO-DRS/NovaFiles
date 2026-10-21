@@ -325,6 +325,23 @@
     <!-- ═══ الأرشيفات (ZIP/7z/TAR/RAR) ═══ -->
     <string name="archive_title">عارض الأرشيف</string>
     <string name="action_compress">ضغط إلى ZIP</string>
+    <!-- v0.30 — مصنع الأرشيفات: ورقة «ضغط إلى…» -->
+    <string name="compress_to_title">ضغط إلى…</string>
+    <string name="compress_to_subtitle">إنشاء أرشيف من %1$d عنصر مع بصمة SHA-256 تلقائية</string>
+    <string name="compress_format">الصيغة</string>
+    <string name="compress_level">مستوى الضغط</string>
+    <string name="compress_level_store">تخزين</string>
+    <string name="compress_level_fastest">الأسرع</string>
+    <string name="compress_level_balanced">متوازن</string>
+    <string name="compress_level_maximum">الأقصى</string>
+    <string name="compress_password">كلمة المرور (اختياري)</string>
+    <string name="compress_password_hint">متاح لصيغ ZIP و 7z فقط — تشفير AES-256</string>
+    <string name="compress_split">تقسيم الأحجام (مع فهرس إعادة تجميع)</string>
+    <string name="compress_split_none">بلا تقسيم</string>
+    <string name="compress_output_name">سيُنشأ: %1$s</string>
+    <string name="compress_action">ضغط</string>
+    <string name="op_result_sha">SHA-256: %1$s</string>
+    <string name="op_result_volumes">أجزاء: %1$d</string>
     <string name="action_extract">استخراج هنا</string>
     <string name="archive_extract_all">استخراج الكل</string>
     <string name="archive_contents">المحتويات</string>

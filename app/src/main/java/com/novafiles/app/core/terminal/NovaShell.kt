@@ -1,5 +1,12 @@
 package com.novafiles.app.core.terminal
 
+import com.novafiles.app.core.archive.ArchiveCreateEngine
+import com.novafiles.app.core.archive.ArchiveEngine
+import com.novafiles.app.core.archive.ArchiveSplitter
+import com.novafiles.app.core.archive.CreateFormat
+import com.novafiles.app.core.archive.CreateLevel
+import com.novafiles.app.core.archive.CreateSpec
+import com.novafiles.app.core.archive.SplitIndex
 import com.novafiles.app.util.Format
 import java.io.File
 import java.security.MessageDigest
@@ -627,35 +634,149 @@ class NovaShell(
     }
 
     private fun cmdZip(rest: List<String>): SegmentResult {
-        val args = splitArgs(rest)
-        requireFlags("zip", args, "")
-        if (args.positional.size < 2) {
-            return SegmentResult(listOf(ShellLine.err("usage: zip archive.zip source...")), ok = false)
+        // v0.30 — تحليل يدوي: أعلام ذات قيم (-p كلمة المرور، --split حجم) وأرقام مستويات (-0..-9)
+        var password: CharArray? = null
+        var levelDigit: Char? = null
+        var splitRaw: String? = null
+        val positional = ArrayList<String>()
+        var endFlags = false
+        var i = 0
+        val usage = "usage: zip archive.<zip|7z|tar.gz> source... [-p pass] [-0..-9] [--split N[K|M|G]]"
+        while (i < rest.size) {
+            val t = rest[i]
+            when {
+                !endFlags && t == "--" -> endFlags = true
+                !endFlags && t == "--split" -> {
+                    splitRaw = rest.getOrNull(i + 1)
+                    if (splitRaw == null) {
+                        return SegmentResult(listOf(ShellLine.err("zip: --split requires a size, e.g. --split 10M")), ok = false)
+                    }
+                    i++
+                }
+                !endFlags && t.startsWith("--split=") -> splitRaw = t.substringAfter("=")
+                !endFlags && t.startsWith("-p") -> {
+                    val v = if (t.length > 2) t.substring(2) else {
+                        val nxt = rest.getOrNull(i + 1)
+                        if (nxt == null) {
+                            return SegmentResult(listOf(ShellLine.err("zip: -p requires a password")), ok = false)
+                        }
+                        i++
+                        nxt
+                    }
+                    password = v.toCharArray()
+                }
+                !endFlags && t.length == 2 && t[0] == '-' && t[1] in '0'..'9' -> levelDigit = t[1]
+                !endFlags && t.length > 1 && t[0] == '-' -> {
+                    return SegmentResult(listOf(ShellLine.err("zip: invalid option -- '${t.drop(1)}'")), ok = false)
+                }
+                else -> positional += t
+            }
+            i++
         }
-        val out = resolve(args.positional.first())
-        val sources = args.positional.drop(1).map { resolve(it) }
+        if (positional.size < 2) {
+            return SegmentResult(listOf(ShellLine.err(usage)), ok = false)
+        }
+        val out = resolve(positional.first())
+        val format = CreateFormat.forFileName(out.name)
+        if (format == null) {
+            return SegmentResult(
+                listOf(ShellLine.err("zip: unsupported archive type: ${out.name} (use .zip .7z .tar .tar.gz .tar.bz2 .tar.xz)")),
+                ok = false,
+            )
+        }
+        val splitBytes = splitRaw?.let {
+            val parsed = parseSize(it)
+            if (parsed == null || parsed < 1024) {
+                return SegmentResult(listOf(ShellLine.err("zip: bad split size: $it (min 1024, use K/M/G suffix)")), ok = false)
+            }
+            parsed
+        } ?: 0L
+        val level = when (levelDigit) {
+            null -> CreateLevel.BALANCED
+            '0' -> CreateLevel.STORE
+            in '1'..'3' -> CreateLevel.FASTEST
+            in '4'..'7' -> CreateLevel.BALANCED
+            else -> CreateLevel.MAXIMUM
+        }
+        val sources = positional.drop(1).map { resolve(it) }
         val missing = sources.filter { !it.exists() }
         if (missing.isNotEmpty()) {
             return SegmentResult(listOf(ShellLine.err("zip: no such file or directory: ${missing.first().path}")), ok = false)
         }
-        val count = com.novafiles.app.core.archive.ZipArchive.createZip(sources, out)
-        val size = Format.bytes(out.length())
-        return SegmentResult(listOf(ShellLine.good("created ${out.path} ($count file(s), $size)")))
+        return try {
+            val result = ArchiveCreateEngine().create(
+                CreateSpec(sources, out, format, level, password, splitBytes),
+            )
+            val lines = ArrayList<ShellLine>()
+            if (result.volumes.isNotEmpty()) {
+                lines += ShellLine.good(
+                    "created ${result.volumes.size} volume(s) of ${out.name} " +
+                        "(${result.fileCount} file(s), ${Format.bytes(result.inputBytes)} total)",
+                )
+                lines += ShellLine.dim("reassembly index: ${result.volumeIndex?.name}")
+            } else {
+                lines += ShellLine.good(
+                    "created ${out.path} (${result.fileCount} file(s), ${Format.bytes(out.length())})",
+                )
+            }
+            lines += ShellLine.dim("sha256: ${result.sha256}")
+            SegmentResult(lines)
+        } catch (e: Exception) {
+            SegmentResult(listOf(ShellLine.err("zip: ${e.message ?: e.javaClass.simpleName}")), ok = false)
+        }
+    }
+
+    /** حجم بلاحقة K/M/G (ثنائي 1024) أو بايتات خام — null عند الفساد */
+    internal fun parseSize(raw: String): Long? {
+        val m = Regex("^(\\d+)([KMGkmg]?)$").matchEntire(raw.trim()) ?: return null
+        val base = m.groupValues[1].toLongOrNull() ?: return null
+        return when (m.groupValues[2].uppercase()) {
+            "" -> base
+            "K" -> base * 1024
+            "M" -> base * 1024 * 1024
+            "G" -> base * 1024 * 1024 * 1024
+            else -> null
+        }
     }
 
     private fun cmdUnzip(rest: List<String>): SegmentResult {
         val args = splitArgs(rest)
         requireFlags("unzip", args, "")
         if (args.positional.isEmpty()) {
-            return SegmentResult(listOf(ShellLine.err("usage: unzip archive.zip [destDir]")), ok = false)
+            return SegmentResult(listOf(ShellLine.err("usage: unzip archive [destDir]")), ok = false)
         }
-        val zip = resolve(args.positional.first())
-        if (!zip.isFile) {
-            return SegmentResult(listOf(ShellLine.err("unzip: no such file: ${zip.path}")), ok = false)
-        }
+        val first = resolve(args.positional.first())
         val dest = args.positional.getOrNull(1)?.let { resolve(it) } ?: cwd
-        val count = com.novafiles.app.core.archive.ZipArchive.extractAll(zip, dest)
-        return SegmentResult(listOf(ShellLine.good("extracted $count file(s) to ${dest.absolutePath}")))
+        // v0.30 — فهرس إعادة تجميع؟ اجمع الأجزاء أولاً ثم استخرج
+        if (first.name.endsWith(SplitIndex.INDEX_EXT)) {
+            return try {
+                val whole = ArchiveSplitter.join(first, dest)
+                val count = ArchiveEngine.extractAll(whole, dest)
+                SegmentResult(listOf(ShellLine.good("reassembled ${whole.name} and extracted $count file(s) to ${dest.absolutePath}")))
+            } catch (e: Exception) {
+                SegmentResult(listOf(ShellLine.err("unzip: ${e.message ?: e.javaClass.simpleName}")), ok = false)
+            }
+        }
+        // جزء أول بلا فهرس؟ أكمل التجميع من الأجزاء
+        if (Regex("^.*\\.\\d{3}$").matches(first.name) && first.isFile) {
+            return try {
+                val whole = ArchiveSplitter.joinFromFirstVolume(first, dest)
+                val count = ArchiveEngine.extractAll(whole, dest)
+                SegmentResult(listOf(ShellLine.good("reassembled ${whole.name} and extracted $count file(s) to ${dest.absolutePath}")))
+            } catch (e: Exception) {
+                SegmentResult(listOf(ShellLine.err("unzip: ${e.message ?: e.javaClass.simpleName}")), ok = false)
+            }
+        }
+        if (!first.isFile) {
+            return SegmentResult(listOf(ShellLine.err("unzip: no such file: ${first.path}")), ok = false)
+        }
+        return try {
+            // v0.30 — كل الصيغ عبر ArchiveEngine الموحد (zip/7z/tar*/rar/gz)
+            val count = ArchiveEngine.extractAll(first, dest)
+            SegmentResult(listOf(ShellLine.good("extracted $count file(s) to ${dest.absolutePath}")))
+        } catch (e: Exception) {
+            SegmentResult(listOf(ShellLine.err("unzip: ${e.message ?: e.javaClass.simpleName}")), ok = false)
+        }
     }
 
     private fun cmdHash(rest: List<String>): SegmentResult {
@@ -728,8 +849,9 @@ class NovaShell(
             "cat [-n] file...       print file contents",
             "du [-h] [path...]      disk usage per path",
             "find [path] [-name p] [-type f|d] [-maxdepth n]   search",
-            "zip out.zip src...     create a ZIP archive",
-            "unzip a.zip [dest]     extract a ZIP archive",
+            "zip out.zip src...     create archives (zip/7z/tar*) with -p pass, -0..-9 level, --split N[K|M|G]",
+            "unzip a.7z [dest]      extract any archive; reassemble .nvasplit / .001 volumes first",
+            "unzip a.zip.001 [dest] reassemble split volumes and extract",
             "hash [-a md5|sha1|sha256] file...   checksums (default sha256)",
             "echo text...           print text",
             "history                command history",
