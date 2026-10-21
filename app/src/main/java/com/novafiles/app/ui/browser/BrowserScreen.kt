@@ -313,7 +313,7 @@ private fun SinglePaneBrowser(
                         IOSNavIconButton(
                             Icons.Filled.FolderZip,
                             contentDescription = stringResource(R.string.action_compress),
-                        ) { vm.zipSelection() }
+                        ) { vm.showDialog(BrowserDialog.CompressTo) }
                         IOSNavIconButton(
                             Icons.Filled.ContentCopy,
                             contentDescription = stringResource(R.string.action_copy),
@@ -473,6 +473,16 @@ private fun SinglePaneBrowser(
                     vm.applyBatchRename(plan)
                 },
             )
+            // v0.30 — ورقة «ضغط إلى…» : صيغة + مستوى + كلمة مرور + تقسيم
+            BrowserDialog.CompressTo -> CompressToSheet(
+                itemCount = selection.size,
+                suggestedName = compressBaseName(selection.map { File(it) }, path),
+                onDismiss = { vm.closeDialog() },
+                onCompress = { request ->
+                    vm.compressSelection(request)
+                    vm.closeDialog()
+                },
+            )
             BrowserDialog.None -> {}
         }
 
@@ -573,3 +583,14 @@ private fun SinglePaneBrowser(
         ),
     )
 }
+
+/**
+ * v0.30 — الاسم الأساس المقترح لورقة «ضغط إلى…»:
+ * عنصر واحد → اسمه دون امتداد، وأكثر → اسم المجلد الحالي.
+ */
+internal fun compressBaseName(sources: List<File>, currentPath: String): String =
+    if (sources.size == 1) {
+        sources[0].nameWithoutExtension.ifEmpty { sources[0].name }
+    } else {
+        File(currentPath).name.ifEmpty { "Archive" }
+    }

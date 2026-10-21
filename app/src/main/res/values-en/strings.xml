@@ -325,6 +325,23 @@
     <!-- ═══ Archives (ZIP/7z/TAR/RAR) ═══ -->
     <string name="archive_title">Archive Viewer</string>
     <string name="action_compress">Compress to ZIP</string>
+    <!-- v0.30 — archive factory: Compress to… sheet -->
+    <string name="compress_to_title">Compress to…</string>
+    <string name="compress_to_subtitle">Create an archive from %1$d items with automatic SHA-256</string>
+    <string name="compress_format">Format</string>
+    <string name="compress_level">Compression level</string>
+    <string name="compress_level_store">Store</string>
+    <string name="compress_level_fastest">Fastest</string>
+    <string name="compress_level_balanced">Balanced</string>
+    <string name="compress_level_maximum">Maximum</string>
+    <string name="compress_password">Password (optional)</string>
+    <string name="compress_password_hint">ZIP and 7z only — AES-256 encryption</string>
+    <string name="compress_split">Split volumes (with reassembly index)</string>
+    <string name="compress_split_none">No split</string>
+    <string name="compress_output_name">Will create: %1$s</string>
+    <string name="compress_action">Compress</string>
+    <string name="op_result_sha">SHA-256: %1$s</string>
+    <string name="op_result_volumes">Volumes: %1$d</string>
     <string name="action_extract">Extract Here</string>
     <string name="archive_extract_all">Extract All</string>
     <string name="archive_contents">Contents</string>

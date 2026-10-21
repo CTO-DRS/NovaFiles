@@ -1,7 +1,10 @@
 package com.novafiles.app.core.ops
 
 import android.content.Context
+import com.novafiles.app.core.archive.ArchiveCreateEngine
 import com.novafiles.app.core.archive.ArchiveEngine
+import com.novafiles.app.core.archive.ArchiveRequest
+import com.novafiles.app.core.archive.CreateSpec
 import com.novafiles.app.core.archive.ZipArchive
 import com.novafiles.app.core.archive.stripArchiveExt
 import kotlinx.coroutines.CoroutineDispatcher
@@ -53,6 +56,8 @@ data class OpRecord(
     val error: String? = null,
     val startedAt: Long? = null,
     val endedAt: Long? = null,
+    /** v0.30 — معلومات النتيجة (بصمة SHA-256، عدد الأجزاء) تُعرض في الواجهة */
+    val resultInfo: String? = null,
 )
 
 /** مواصفة عملية تُنفَّذ */
@@ -63,6 +68,8 @@ data class OpSpec(
     /** مجلد الهدف (نسخ/نقل) أو ملف zip الهدف (ضغط) أو مجلد الاستخراج (اختياري) */
     val target: File? = null,
     val policy: ConflictPolicy = ConflictPolicy.RENAME,
+    /** v0.30 — طلب ضغط متقدم (صيغة/مستوى/كلمة مرور/تقسيم) — null = ZIP التقليدي */
+    val archive: ArchiveRequest? = null,
 )
 
 /** مستمع تحديثات خارجي (إشعارات أندرويد) */
@@ -241,8 +248,34 @@ class OpQueue(
     private suspend fun executeZip(id: String, spec: OpSpec): Int = withContext(ioDispatcher) {
         val out = spec.target ?: error("missing_zip_target")
         out.parentFile?.mkdirs()
-        ZipArchive.createZip(spec.sources, out) { done, total ->
-            patch(id) { it.copy(progress = it.progress?.copy(bytesDone = done, bytesTotal = total)) }
+        val request = spec.archive
+        if (request == null) {
+            // v0.12 — المسار التقليدي (ZIP بلا خيارات) دون تغيير
+            ZipArchive.createZip(spec.sources, out) { done, total ->
+                patch(id) { it.copy(progress = it.progress?.copy(bytesDone = done, bytesTotal = total)) }
+            }
+        } else {
+            // v0.30 — مصنع الأرشيفات: كل الصيغ/المستويات/كلمات المرور/التقسيم
+            val engine = ArchiveCreateEngine(isCancelled = { id in cancelled })
+            val result = engine.create(
+                CreateSpec(
+                    sources = spec.sources,
+                    out = out,
+                    format = request.format,
+                    level = request.level,
+                    password = request.password,
+                    splitBytes = request.splitBytes,
+                ),
+            ) { done, total ->
+                patch(id) { it.copy(progress = it.progress?.copy(bytesDone = done, bytesTotal = total)) }
+            }
+            // تحقق SHA-256 تلقائي من محرك v0.29 — يظهر في سجل العملية
+            val info = if (result.volumes.isNotEmpty()) {
+                "sha256:${result.sha256.take(12)}… | volumes:${result.volumes.size}"
+            } else {
+                "sha256:${result.sha256.take(12)}…"
+            }
+            patch(id) { it.copy(resultInfo = info) }
         }
         spec.sources.size
     }

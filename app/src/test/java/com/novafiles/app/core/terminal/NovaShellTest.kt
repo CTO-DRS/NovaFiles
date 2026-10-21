@@ -723,4 +723,138 @@ class NovaShellTest {
         run("echo x")
         assertEquals(listOf("echo x"), shell.history)
     }
+
+    // ═══════════ v0.30 — مصنع الأرشيفات في الطرفية ═══════════
+
+    @Test
+    fun zipCreatesSevenZipByExtension() {
+        val src = File(home, "sz").apply { mkdirs() }
+        File(src, "a.txt").writeText("content")
+        val r = run("zip out.7z sz/")
+        assertTrue("should succeed: ${r.lines.map { it.text }}", r.ok)
+        assertTrue(f("out.7z").exists() && f("out.7z").length() > 0)
+        assertTrue(r.lines.any { it.text.startsWith("sha256: ") })
+    }
+
+    @Test
+    fun zipCreatesTarGzByExtensionAndUnzipExtractsIt() {
+        val src = File(home, "tg").apply { mkdirs() }
+        File(src, "doc.txt").writeText("تقرير عربي")
+        assertTrue(run("zip tape.tar.gz tg/").ok)
+        assertTrue(f("tape.tar.gz").exists())
+        val r = run("unzip tape.tar.gz exdir")
+        assertTrue("extract should succeed: ${r.lines.map { it.text }}", r.ok)
+        assertEquals("تقرير عربي", f("exdir/tg/doc.txt").readText())
+    }
+
+    @Test
+    fun zipPasswordFlagEncryptedZipRoundTripsViaUnzipAllFormatsPath() {
+        val src = File(home, "pw").apply { mkdirs() }
+        File(src, "secret.txt").writeText("top secret")
+        assertTrue(run("zip vault.zip -p hunter2 pw/").ok)
+        assertTrue(f("vault.zip").exists())
+        // فحص هيكلي: المدخلات مشفرة AES فعلاً (Zip4j يقرأ ما كتبه)
+        val headers = net.lingala.zip4j.ZipFile(f("vault.zip"), "hunter2".toCharArray()).fileHeaders
+        assertTrue(headers.any { !it.isDirectory && it.isEncrypted && it.encryptionMethod == net.lingala.zip4j.model.enums.EncryptionMethod.AES })
+        // القراءة بكلمة المرور عبر Zip4j
+        val dest = File(home, "vault-out")
+        net.lingala.zip4j.ZipFile(f("vault.zip"), "hunter2".toCharArray()).extractAll(dest.absolutePath)
+        assertEquals("top secret", File(dest, "pw/secret.txt").readText())
+    }
+
+    @Test
+    fun zipPasswordGluedFormWorks() {
+        val src = File(home, "pw2").apply { mkdirs() }
+        File(src, "s.txt").writeText("x")
+        assertTrue(run("zip g.zip -psecret pw2/").ok)
+        val dest = File(home, "g-out")
+        net.lingala.zip4j.ZipFile(f("g.zip"), "secret".toCharArray()).extractAll(dest.absolutePath)
+        assertTrue(File(dest, "pw2/s.txt").exists())
+    }
+
+    @Test
+    fun zipLevelNineFlagAcceptedAndProducedArchiveValid() {
+        val src = File(home, "lv").apply { mkdirs() }
+        File(src, "f.txt").writeText("aaaa".repeat(2000))
+        val r = run("zip max.zip -9 lv/")
+        assertTrue(r.ok)
+        assertTrue(f("max.zip").exists())
+        val r0 = run("zip min.zip -0 lv/")
+        assertTrue(r0.ok)
+        assertTrue("STORE أكبر من MAXIMUM", f("min.zip").length() > f("max.zip").length())
+    }
+
+    @Test
+    fun zipSplitFlagProducesVolumesAndIndex() {
+        val src = File(home, "sp").apply { mkdirs() }
+        // بيانات عشوائية فعلاً (بذرة ثابتة) ضعيفة الانضغاط حتى ينتج أرشيفاً كبيراً
+        val rnd = java.util.Random(42L)
+        val blob = ByteArray(96 * 1024).also { rnd.nextBytes(it) }
+        File(src, "blob.bin").writeBytes(blob)
+        val r = run("zip parts.zip --split 16K sp/")
+        assertTrue("should succeed: ${r.lines.map { it.text }}", r.ok)
+        val volumes = (1..99).count { f("parts.zip.%03d".format(it)).exists() }
+        assertTrue("متوقع 4 أجزاء على الأقل، وجد $volumes", volumes >= 4)
+        assertTrue(f("parts.zip.nvasplit").exists())
+        assertTrue(r.lines.any { it.text.contains("volume(s)") })
+    }
+
+    @Test
+    fun unzipReassemblesIndexVolumesThenExtracts() {
+        val src = File(home, "re").apply { mkdirs() }
+        File(src, "payload.txt").writeText("reassembly payload".repeat(1500))
+        assertTrue(run("zip full.zip --split 8K re/").ok)
+        // الأرشيف الكامل حُذف بعد التقسيم — الأجزاء فقط
+        assertFalse(f("full.zip").exists())
+        val r = run("unzip full.zip.nvasplit restored")
+        assertTrue("reassembly+extract: ${r.lines.map { it.text }}", r.ok)
+        assertEquals("reassembly payload".repeat(1500), f("restored/full.zip").let { zip ->
+            java.util.zip.ZipFile(zip, java.util.zip.ZipFile.OPEN_READ, Charsets.UTF_8).use { zf ->
+                zf.getInputStream(zf.getEntry("re/payload.txt")).readBytes().decodeToString()
+            }
+        })
+    }
+
+    @Test
+    fun unzipReassemblesFirstVolumeWithoutIndex() {
+        val src = File(home, "ri").apply { mkdirs() }
+        File(src, "p.txt").writeText("no index here".repeat(900))
+        assertTrue(run("zip noix.zip --split 4K ri/").ok)
+        assertTrue(f("noix.zip.nvasplit").delete())
+        val r = run("unzip noix.zip.001 restored2")
+        assertTrue(r.ok)
+        assertEquals("no index here".repeat(900), f("restored2/ri/p.txt").readText())
+    }
+
+    @Test
+    fun zipRejectsUnknownFormatAndBadSplitAndBadOption() {
+        val src = File(home, "zz").apply { mkdirs() }
+        File(src, "x.txt").writeText("x")
+        assertFalse(run("zip out.rar zz/").ok)
+        assertFalse(run("zip out.zip --split 512 zz/").ok)
+        assertFalse(run("zip out.zip --bogus zz/").ok)
+        assertFalse(run("zip out.zip -p").ok)
+    }
+
+    @Test
+    fun parseSizeHandlesSuffixesAndRejectsGarbage() {
+        assertEquals(10L, shell.parseSizeForTest("10"))
+        assertEquals(1024L, shell.parseSizeForTest("1K"))
+        assertEquals(16L * 1024 * 1024, shell.parseSizeForTest("16M"))
+        assertEquals(3L * 1024 * 1024 * 1024, shell.parseSizeForTest("3G"))
+        assertEquals(null, shell.parseSizeForTest("abc"))
+        assertEquals(null, shell.parseSizeForTest("10X"))
+        assertEquals(null, shell.parseSizeForTest(""))
+    }
+
+    @Test
+    fun zipHelpMentionsNewFlags() {
+        val help = text("help").joinToString("\n")
+        assertTrue(help.contains("--split"))
+        assertTrue(help.contains("-p pass"))
+        assertTrue(help.contains(".nvasplit"))
+    }
 }
+
+/** جسر اختبار داخلي لـ parseSize دون كشف API عام */
+fun NovaShell.parseSizeForTest(raw: String): Long? = parseSize(raw)

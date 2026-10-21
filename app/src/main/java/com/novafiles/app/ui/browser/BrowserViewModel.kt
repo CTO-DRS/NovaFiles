@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.novafiles.app.AppContainer
 import com.novafiles.app.core.archive.ArchiveEngine
+import com.novafiles.app.core.archive.ArchiveRequest
 import com.novafiles.app.core.archive.ZipArchive
 import com.novafiles.app.core.archive.stripArchiveExt
 import com.novafiles.app.core.fs.FileOps
@@ -40,6 +41,8 @@ sealed interface BrowserDialog {
     data class Details(val file: File) : BrowserDialog
     data class ConfirmDelete(val count: Int) : BrowserDialog
     data object BatchRename : BrowserDialog
+    /** v0.30 — ورقة «ضغط إلى…» بمستوى وكلمة مرور وتقسيم */
+    data object CompressTo : BrowserDialog
     data object None : BrowserDialog
 }
 
@@ -284,6 +287,23 @@ class BrowserViewModel(
         enqueueOps(OpKind.ZIP, sources, out)
     }
 
+    /**
+     * v0.30 — «ضغط إلى…» : إنشاء أرشيف بأي صيغة مدعومة مع مستوى وكلمة مرور وتقسيم.
+     * البصمة SHA-256 تُحسب تلقائياً بعد الإنشاء وتظهر في سجل العمليات.
+     */
+    fun compressSelection(request: ArchiveRequest) {
+        val sources = _selection.value.map { File(it) }.filter { it.exists() }
+        clearSelection()
+        if (sources.isEmpty()) return
+        val base = if (sources.size == 1) {
+            sources[0].nameWithoutExtension.ifEmpty { sources[0].name }
+        } else {
+            File(_path.value).name.ifEmpty { "Archive" }
+        }
+        val out = uniqueArchiveName(File(_path.value), "$base${request.format.ext}")
+        enqueueOps(OpKind.ZIP, sources, out, request)
+    }
+
     /** استخراج أي أرشيف مدعوم (zip/7z/tar/rar/…) — v0.12: عبر قائمة العمليات */
     fun extractArchive(archive: File) {
         val dest = File(archive.parentFile, stripArchiveExt(archive.name).ifEmpty { "extracted" })
@@ -312,7 +332,7 @@ class BrowserViewModel(
 
     val opRecords get() = container.ops.ops
 
-    private fun enqueueOps(kind: OpKind, sources: List<File>, target: File?) {
+    private fun enqueueOps(kind: OpKind, sources: List<File>, target: File?, archive: ArchiveRequest? = null) {
         val count = sources.size
         val title = appContext.getString(
             when (kind) {
@@ -325,7 +345,7 @@ class BrowserViewModel(
             count,
         )
         container.ops.enqueue(
-            OpSpec(kind = kind, title = title, sources = sources, target = target, policy = ConflictPolicy.RENAME),
+            OpSpec(kind = kind, title = title, sources = sources, target = target, policy = ConflictPolicy.RENAME, archive = archive),
         )
         OpService.start(appContext)
         _message.value = "queued:$count"
@@ -343,6 +363,21 @@ class BrowserViewModel(
         var i = 2
         while (f.exists()) {
             f = File(dir, "$base ($i).zip")
+            i++
+        }
+        return f
+    }
+
+    /** v0.30 — تسمية فريدة لأي صيغة أرشيف (مع الحفاظ على الامتداد كاملاً مثل tar.gz) */
+    private fun uniqueArchiveName(dir: File, name: String): File {
+        var f = File(dir, name)
+        if (!f.exists()) return f
+        val dot = name.indexOf('.')
+        val base = if (dot >= 0) name.substring(0, dot) else name
+        val ext = if (dot >= 0) name.substring(dot) else ""
+        var i = 2
+        while (f.exists()) {
+            f = File(dir, "$base ($i)$ext")
             i++
         }
         return f
