@@ -13,8 +13,8 @@ android {
         applicationId = "com.novafiles.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 30
-        versionName = "0.30.0"
+        versionCode = 31
+        versionName = "0.31.0"
 
         // v0.16 — معرّفات عملاء OAuth للسحابة: يضبطها كل مُطوّر عبر gradle.properties
         // (NOVA_DRIVE_CLIENT_ID=...) — فارغة افتراضياً ليعمل البناء دون أسرار
@@ -55,6 +55,8 @@ android {
 
 dependencies {
     // الأساسيات
+    implementation(libs.androidx.media3.exoplayer)
+    implementation(libs.androidx.media3.ui)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.appcompat)
     implementation(libs.androidx.lifecycle.runtime.ktx)

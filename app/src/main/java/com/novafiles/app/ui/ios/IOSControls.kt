@@ -356,20 +356,28 @@ fun IOSFilledButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     destructive: Boolean = false,
+    enabled: Boolean = true,
 ) {
     val p = LocalIOSPalette.current
     Box(
         modifier = modifier
             .fillMaxWidth()
             .height(50.dp)
-            .background(if (destructive) p.destructive else p.accent, RoundedCornerShape(12.dp))
-            .clickable(onClick = onClick),
+            .background(
+                when {
+                    !enabled -> p.fill
+                    destructive -> p.destructive
+                    else -> p.accent
+                },
+                RoundedCornerShape(12.dp),
+            )
+            .clickable(enabled = enabled, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         Text(
             text,
             style = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.SemiBold),
-            color = Color.White,
+            color = if (enabled) Color.White else p.secondaryLabel,
         )
     }
 }

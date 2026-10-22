@@ -72,6 +72,9 @@ object Routes {
     const val DAV = "dav"          // v0.27 — خادم WebDAV المدمج
     const val TERMINAL = "terminal"    // v0.28 — الطرفية المدمجة
     const val CHECKSUMS = "checksums?path={path}"  // v0.29 — التحقق والمطابقة
+    const val MEDIA = "media?path={path}"          // v0.31 — مشغل الوسائط المدمج
+    const val PDF = "pdf?path={path}"              // v0.31 — عارض PDF المدمج
+    const val MEDIA_TOOLS = "mediatools?path={path}" // v0.31 — أدوات الوسائط (صور)
     const val NETWORK = "network"
     const val CONN_FORM = "connform?connId={connId}"
     const val REMOTE = "remote?connId={connId}"
@@ -88,6 +91,9 @@ object Routes {
     fun viewer(path: String) = "viewer?path=${android.net.Uri.encode(path)}"
     fun archive(path: String) = "archive?path=${android.net.Uri.encode(path)}"
     fun checksums(path: String) = "checksums?path=${android.net.Uri.encode(path)}"
+    fun media(path: String) = "media?path=${android.net.Uri.encode(path)}"
+    fun pdf(path: String) = "pdf?path=${android.net.Uri.encode(path)}"
+    fun mediaTools(path: String) = "mediatools?path=${android.net.Uri.encode(path)}"
     fun connForm(connId: Long) = "connform?connId=$connId"
     fun remote(connId: Long) = "remote?connId=$connId"
     fun direct(sendMode: Boolean) = "direct?mode=${if (sendMode) "send" else "receive"}"
@@ -196,12 +202,14 @@ fun NovaRoot() {
     }
 }
 
-/** فتح ملف: عارض صور، محرر نصوص، عارض أرشيف، أو تطبيق خارجي */
+/** فتح ملف: مشغل وسائط، عارض PDF، عارض صور، محرر نصوص، عارض أرشيف، أو تطبيق خارجي */
 fun openFile(nav: NavHostController, file: File) {
     val ctx = nav.context
     when (FileType.of(file)) {
         FileType.IMAGE -> nav.navigate(Routes.viewer(file.absolutePath))
         FileType.TEXT, FileType.CODE -> nav.navigate(Routes.editor(file.absolutePath))
+        FileType.AUDIO, FileType.VIDEO -> nav.navigate(Routes.media(file.absolutePath)) // v0.31 — مشغل مدمج
+        FileType.PDF -> nav.navigate(Routes.pdf(file.absolutePath))                    // v0.31 — عارض PDF مدمج
         FileType.ARCHIVE ->
             if (ArchiveEngine.supports(file.name)) nav.navigate(Routes.archive(file.absolutePath))
             else com.novafiles.app.util.Intents.view(ctx, file)
@@ -228,6 +236,7 @@ private fun NovaNavHost(nav: NavHostController) {
                 onOpenAnalyzer = { nav.navigate(Routes.ANALYZER) },
                 onOpenApps = { nav.navigate(Routes.APPS) },
                 onOpenChecksums = { nav.navigate(Routes.checksums(it)) },
+                onOpenMediaTools = { nav.navigate(Routes.mediaTools(it)) },
             )
         }
         composable(Routes.SEARCH) {
@@ -254,6 +263,52 @@ private fun NovaNavHost(nav: NavHostController) {
         }
         composable(Routes.TERMINAL) {
             TerminalScreen(onBack = { nav.popBackStack() })
+        }
+        // v0.31 — مشغل الوسائط المدمج
+        composable(
+            Routes.MEDIA,
+            arguments = listOf(navArgument("path") {
+                type = NavType.StringType
+                nullable = true
+                defaultValue = null
+            }),
+        ) { entry ->
+            val p = entry.arguments?.getString("path")
+            if (p != null && java.io.File(p).exists()) {
+                com.novafiles.app.ui.media.MediaScreen(path = p, onBack = { nav.popBackStack() })
+            } else {
+                nav.popBackStack()
+            }
+        }
+        // v0.31 — عارض PDF المدمج
+        composable(
+            Routes.PDF,
+            arguments = listOf(navArgument("path") {
+                type = NavType.StringType
+                nullable = true
+                defaultValue = null
+            }),
+        ) { entry ->
+            val p = entry.arguments?.getString("path")
+            if (p != null && java.io.File(p).exists()) {
+                com.novafiles.app.ui.media.PdfViewerScreen(path = p, onBack = { nav.popBackStack() })
+            } else {
+                nav.popBackStack()
+            }
+        }
+        // v0.31 — أدوات الوسائط (معالجة الصور الدفعية)
+        composable(
+            Routes.MEDIA_TOOLS,
+            arguments = listOf(navArgument("path") {
+                type = NavType.StringType
+                nullable = true
+                defaultValue = null
+            }),
+        ) { entry ->
+            com.novafiles.app.ui.media.MediaToolsScreen(
+                folderPath = entry.arguments?.getString("path"),
+                onBack = { nav.popBackStack() },
+            )
         }
         composable(
             Routes.CHECKSUMS,
