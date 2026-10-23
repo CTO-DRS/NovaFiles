@@ -45,6 +45,20 @@ object ContrastAuditor {
     fun passesAA(foreground: Int, background: Int, largeText: Boolean = false): Boolean =
         level(foreground, background, largeText) != ContrastLevel.FAIL
 
+    /** v0.37 — مراجعة AAA صارمة: هل يبلغ الزوج 7:1 (نص عادي) أو 4.5:1 (نص كبير)؟ */
+    fun passesAAA(foreground: Int, background: Int, largeText: Boolean = false): Boolean =
+        level(foreground, background, largeText) == ContrastLevel.AAA
+
+    /**
+     * v0.37 — تقرير عائلة اللون المميز: اللون على خلفيته وزر/نص عليه،
+     * مع تصنيف كل زوج — تُستخدم لضمان أن الـ 12 لوحة تبقى فوق أرضية AA
+     * وتوثيق موقعها من AAA.
+     */
+    fun auditAccentFamily(family: AccentPairSpec): List<A11yFinding> = listOf(
+        A11yFinding("onAccent/accent", wcagContrast(family.onAccent, family.accent), level(family.onAccent, family.accent)),
+        A11yFinding("accentDeep/white", wcagContrast(family.accentDeep, 0xFFFFFFFF.toInt()), level(family.accentDeep, 0xFFFFFFFF.toInt(), largeText = true)),
+    )
+
     /**
      * مقياس النوع الديناميكي: 8 خطوات من XS حتى XXXL مضاعفة معامل iOS-like.
      * القيم sp — كل خطوة ≥ السابقة بفارق لا يقل عن 1sp (ضمان قابلية التمييز).
@@ -93,3 +107,6 @@ data class TouchTargetResult(
 )
 
 data class A11yFinding(val pair: String, val ratio: Double, val level: ContrastLevel)
+
+/** v0.37 — زوج لوني لعائلة accent يُدقَّق: نص فوق اللون + نسخة نصية أعمق على أبيض */
+data class AccentPairSpec(val accent: Int, val onAccent: Int, val accentDeep: Int)

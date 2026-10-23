@@ -481,7 +481,7 @@
     <string name="dup_scan">Scan for duplicates</string>
     <string name="dup_scanning">Scanning… %1$d</string>
     <string name="dup_near_images">Include similar images (dHash)</string>
-    <string name="dup_result_title">%1$d groups — %2$s reclaimable</string>
+    <string name="dup_result_title">%1$d groups — %2$d reclaimable</string>
     <string name="dup_exact">Exact match</string>
     <string name="dup_similar">Visual match</string>
     <string name="dup_no_groups">No duplicates — your storage is clean</string>
