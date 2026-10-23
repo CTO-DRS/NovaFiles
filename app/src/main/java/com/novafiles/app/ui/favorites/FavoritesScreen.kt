@@ -26,8 +26,12 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -43,6 +47,7 @@ import com.novafiles.app.novaContainer
 import com.novafiles.app.ui.ios.IOSNavBar
 import com.novafiles.app.ui.ios.LocalIOSPalette
 import com.novafiles.app.ui.ios.rememberBottomBarClearance
+import com.novafiles.app.ui.tags.TagFilterBar
 import com.novafiles.app.util.TypeIcons
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.rememberCoroutineScope
@@ -57,6 +62,21 @@ fun FavoritesScreen(onOpenFile: (File) -> Unit) {
     val scope = rememberCoroutineScope()
     val favorites by container.db.favoritesDao().observeAll().collectAsState(initial = emptyList())
 
+    // v0.33 — فلترة المفضلة بوسم
+    val tagsRepo = container.tags
+    val tagDefs by tagsRepo.observeDefs().collectAsState(initial = emptyList())
+    var tagCounts by remember { mutableStateOf<Map<Long, Int>>(emptyMap()) }
+    var selectedTagId by remember { mutableStateOf<Long?>(null) }
+    var tagPaths by remember { mutableStateOf<Set<String>?>(null) }
+    LaunchedEffect(tagDefs) { tagCounts = tagsRepo.counts() }
+    LaunchedEffect(selectedTagId) {
+        tagPaths = selectedTagId?.let { tagsRepo.pathsForTag(it).toSet() }
+    }
+    val shownFavorites: List<com.novafiles.app.data.db.FavoriteEntity> = remember(favorites, tagPaths) {
+        val filterSet: Set<String>? = tagPaths
+        if (filterSet == null) favorites else favorites.filter { fav -> fav.path in filterSet }
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -64,7 +84,15 @@ fun FavoritesScreen(onOpenFile: (File) -> Unit) {
     ) {
         IOSNavBar(title = stringResource(R.string.nav_favorites))
 
-        if (favorites.isEmpty()) {
+        // v0.33 — شريط فلترة الوسوم
+        TagFilterBar(
+            defs = tagDefs,
+            counts = tagCounts,
+            selectedTagId = selectedTagId,
+            onSelect = { selectedTagId = it },
+        )
+
+        if (shownFavorites.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 Text(
                     stringResource(R.string.empty_favorites),
@@ -77,7 +105,7 @@ fun FavoritesScreen(onOpenFile: (File) -> Unit) {
                 modifier = Modifier.fillMaxSize(),
                 contentPadding = PaddingValues(top = 10.dp, bottom = 10.dp + rememberBottomBarClearance()),
             ) {
-                items(favorites, key = { it.path }) { fav ->
+                items(shownFavorites, key = { it.path }) { fav ->
                     val file = File(fav.path)
                     val type = FileType.of(file)
                     val exists = file.exists()
