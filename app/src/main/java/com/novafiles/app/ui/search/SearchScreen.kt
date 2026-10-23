@@ -61,6 +61,7 @@ import com.novafiles.app.ui.ios.IOSNavBar
 import com.novafiles.app.ui.ios.IOSSearchField
 import com.novafiles.app.ui.ios.LocalIOSPalette
 import com.novafiles.app.novaContainer
+import com.novafiles.app.ui.tags.TagColorDot
 import com.novafiles.app.util.TypeIcons
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -81,8 +82,19 @@ fun SearchScreen(onOpenFile: (File) -> Unit) {
     var scanning by remember { mutableStateOf(false) }
     var filtersOpen by remember { mutableStateOf(false) }
     var typeOpen by remember { mutableStateOf(false) }
+    var tagOpen by remember { mutableStateOf(false) }
     var job by remember { mutableStateOf<Job?>(null) }
     val scope = rememberCoroutineScope()
+
+    // v0.33 — فلترة الوسوم + عرض وسوم كل نتيجة
+    val tagsRepo = container.tags
+    val tagDefs by tagsRepo.observeDefs().collectAsState(initial = emptyList())
+    var tagFilterId by remember { mutableStateOf<Long?>(null) }
+    var tagFilterPaths by remember { mutableStateOf<Set<String>?>(null) }
+    val tagsByPath by tagsRepo.observeTagsByPath().collectAsState(initial = emptyMap())
+    LaunchedEffect(tagFilterId) {
+        tagFilterPaths = tagFilterId?.let { tagsRepo.pathsForTag(it).toSet() }
+    }
 
     val root = remember { File(FileIndexer.ROOT) }
     val indexReady by FileIndexer.ready.collectAsState()
@@ -169,6 +181,21 @@ fun SearchScreen(onOpenFile: (File) -> Unit) {
                     },
                 )
             }
+            // v0.33 — شريحة فلترة الوسم
+            AssistChip(
+                onClick = { tagOpen = true },
+                label = {
+                    Text(
+                        tagDefs.firstOrNull { it.id == tagFilterId }?.name
+                            ?: stringResource(R.string.tags_filter_chip)
+                    )
+                },
+                leadingIcon = if (tagFilterId != null) {
+                    {
+                        TagColorDot(tagDefs.first { it.id == tagFilterId }.colorIndex, sizeDp = 9)
+                    }
+                } else null,
+            )
             IOSMiniField(
                 value = minSizeMb,
                 onValueChange = { minSizeMb = it.filter { c -> c.isDigit() } },
@@ -205,7 +232,11 @@ fun SearchScreen(onOpenFile: (File) -> Unit) {
                 }
             }
             is SearchEngine.SearchState.Results -> {
-                if (s.files.isEmpty() && !scanning) {
+                // v0.33 — تطبيق فلتر الوسم على النتائج
+                val shown = remember(s.files, tagFilterPaths) {
+                    tagFilterPaths?.let { f -> s.files.filter { it.absolutePath in f } } ?: s.files
+                }
+                if (shown.isEmpty() && !scanning) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(
                             stringResource(R.string.empty_search),
@@ -214,7 +245,7 @@ fun SearchScreen(onOpenFile: (File) -> Unit) {
                     }
                 } else {
                     Text(
-                        stringResource(R.string.search_found, s.files.size),
+                        stringResource(R.string.search_found, shown.size),
                         style = MaterialTheme.typography.labelMedium,
                         modifier = Modifier.padding(horizontal = 12.dp),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -223,8 +254,12 @@ fun SearchScreen(onOpenFile: (File) -> Unit) {
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(bottom = rememberBottomBarClearance()),
                     ) {
-                        items(s.files, key = { it.absolutePath }) { file ->
-                            SearchResultRow(file = file, onTap = { onOpenFile(file) })
+                        items(shown, key = { it.absolutePath }) { file ->
+                            SearchResultRow(
+                                file = file,
+                                tags = tagsByPath[file.absolutePath].orEmpty(),
+                                onTap = { onOpenFile(file) },
+                            )
                         }
                     }
                 }
@@ -252,6 +287,20 @@ fun SearchScreen(onOpenFile: (File) -> Unit) {
         },
     )
 
+    // v0.33 — ورقة اختيار وسم الفلترة
+    IOSActionSheet(
+        visible = tagOpen,
+        onDismiss = { tagOpen = false },
+        cancelText = stringResource(R.string.action_cancel),
+        title = stringResource(R.string.tags_filter_chip),
+        actions = buildList {
+            add(IOSAction(stringResource(R.string.tags_filter_all), selected = tagFilterId == null) { tagFilterId = null })
+            tagDefs.forEach { def ->
+                add(IOSAction(def.name, selected = tagFilterId == def.id) { tagFilterId = def.id })
+            }
+        },
+    )
+
     // ورقة إجراءات iOS — المرشحات
     IOSActionSheet(
         visible = filtersOpen,
@@ -270,7 +319,11 @@ fun SearchScreen(onOpenFile: (File) -> Unit) {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun SearchResultRow(file: File, onTap: () -> Unit) {
+private fun SearchResultRow(
+    file: File,
+    tags: List<com.novafiles.app.data.db.TagDefEntity>,
+    onTap: () -> Unit,
+) {
     val type = FileType.of(file)
     Row(
         modifier = Modifier
@@ -309,6 +362,13 @@ private fun SearchResultRow(file: File, onTap: () -> Unit) {
             )
         }
         Spacer(Modifier.weight(1f))
+        // v0.33 — وسوم الملف: حتى 3 نقاط ملونة
+        if (tags.isNotEmpty()) {
+            Row(horizontalArrangement = Arrangement.spacedBy(3.dp), verticalAlignment = Alignment.CenterVertically) {
+                tags.take(3).forEach { TagColorDot(it.colorIndex, sizeDp = 8) }
+            }
+            Spacer(Modifier.width(8.dp))
+        }
         Text(
             LocalBrowser.humanSize(file.length()),
             style = MaterialTheme.typography.labelSmall,

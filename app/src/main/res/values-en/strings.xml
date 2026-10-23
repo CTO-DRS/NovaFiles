@@ -722,4 +722,25 @@
     <string name="pdf_invalid_page">Invalid page</string>
     <string name="pdf_error">Could not open the PDF file</string>
     <string name="action_go">Go</string>
+
+    <!-- v0.33 — Tags & smart shelves -->
+    <string name="tags_action">Tag</string>
+    <string name="tags_filter_all">All</string>
+    <string name="tags_filter_chip">Tag</string>
+    <string name="tags_empty">No tags yet — create your first one below</string>
+    <string name="tags_name_hint">Tag name</string>
+    <string name="tags_create_btn">Create</string>
+    <string name="tags_assign_one">Tag “%1$s”</string>
+    <string name="tags_assign_many">Tag %1$d items</string>
+    <string name="tags_delete_tag">Delete tag permanently</string>
+    <string name="tags_error_duplicate">Tag name already in use</string>
+    <string name="shelves_tab_recent">Recent</string>
+    <string name="shelves_recent_docs">Recent docs</string>
+    <string name="shelves_large_downloads">Large downloads</string>
+    <string name="shelves_stale_90">Untouched 90 days</string>
+    <string name="shelves_old_screenshots">Old screenshots</string>
+    <string name="suggestions_title">Quick pulse</string>
+    <string name="suggestions_old_screenshots">%1$d old screenshots using %2$s</string>
+    <string name="suggestions_old_installers">Old installers in Downloads: %1$d, %2$s</string>
+    <string name="suggestions_stale_large">%1$d large stale files, %2$s</string>
 </resources>

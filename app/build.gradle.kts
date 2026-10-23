@@ -13,8 +13,8 @@ android {
         applicationId = "com.novafiles.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 31
-        versionName = "0.31.0"
+        versionCode = 33
+        versionName = "0.33.0"
 
         // v0.16 — معرّفات عملاء OAuth للسحابة: يضبطها كل مُطوّر عبر gradle.properties
         // (NOVA_DRIVE_CLIENT_ID=...) — فارغة افتراضياً ليعمل البناء دون أسرار

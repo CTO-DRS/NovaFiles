@@ -722,4 +722,25 @@
     <string name="pdf_invalid_page">صفحة غير صالحة</string>
     <string name="pdf_error">تعذر فتح ملف PDF</string>
     <string name="action_go">انتقال</string>
+
+    <!-- v0.33 — الوسوم والرفوف الذكية -->
+    <string name="tags_action">وسم</string>
+    <string name="tags_filter_all">الكل</string>
+    <string name="tags_filter_chip">وسم</string>
+    <string name="tags_empty">لا وسوم بعد — أنشئ وسمك الأول بالأسفل</string>
+    <string name="tags_name_hint">اسم الوسم</string>
+    <string name="tags_create_btn">إنشاء</string>
+    <string name="tags_assign_one">وسم «%1$s»</string>
+    <string name="tags_assign_many">وسم %1$d عنصراً</string>
+    <string name="tags_delete_tag">حذف الوسم نهائياً</string>
+    <string name="tags_error_duplicate">اسم الوسم مستخدم بالفعل</string>
+    <string name="shelves_tab_recent">الأخيرة</string>
+    <string name="shelves_recent_docs">مستنداتي الأخيرة</string>
+    <string name="shelves_large_downloads">تنزيلات كبيرة</string>
+    <string name="shelves_stale_90">مهملة 90 يوماً</string>
+    <string name="shelves_old_screenshots">لقطات قديمة</string>
+    <string name="suggestions_title">نبضة سريعة</string>
+    <string name="suggestions_old_screenshots">%1$d لقطة شاشة قديمة تستهلك %2$s</string>
+    <string name="suggestions_old_installers">مثبّتات قديمة في التنزيلات: %1$d بحجم %2$s</string>
+    <string name="suggestions_stale_large">%1$d ملفات كبيرة مهملة بحجم %2$s</string>
 </resources>

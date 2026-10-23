@@ -31,6 +31,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.DriveFileRenameOutline
 import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.FolderZip
+import androidx.compose.material.icons.filled.Label
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.QrCode2
@@ -72,6 +73,8 @@ import com.novafiles.app.core.gesture.GestureConfig
 import com.novafiles.app.core.gesture.SwipeAction
 import com.novafiles.app.core.perms.StorageAccess
 import com.novafiles.app.novaContainer
+import com.novafiles.app.ui.tags.TagAssignSheet
+import com.novafiles.app.ui.tags.TagFilterBar
 import com.novafiles.app.ui.ios.IOSAction
 import com.novafiles.app.ui.ios.IOSActionSheet
 import com.novafiles.app.ui.ios.IOSAlertDialog
@@ -197,6 +200,22 @@ private fun SinglePaneBrowser(
     val quickQr by vm.quickQr.collectAsState()
     val opRecords by vm.opRecords.collectAsState()
 
+    // v0.33 — الوسوم: شريط فلترة + ورقة إسناد للتحديد
+    val tagsRepo = context.novaContainer.tags
+    val tagDefs by tagsRepo.observeDefs().collectAsState(initial = emptyList())
+    var tagCounts by remember { mutableStateOf<Map<Long, Int>>(emptyMap()) }
+    var selectedTagId by remember { mutableStateOf<Long?>(null) }
+    var tagFilterPaths by remember { mutableStateOf<Set<String>?>(null) }
+    var tagSheetOpen by remember { mutableStateOf(false) }
+    LaunchedEffect(tagDefs) { tagCounts = tagsRepo.counts() }
+    LaunchedEffect(selectedTagId) {
+        tagFilterPaths = selectedTagId?.let { tagsRepo.pathsForTag(it).toSet() }
+    }
+    val visibleItems: List<File> = remember(items, tagFilterPaths) {
+        val filterSet: Set<String>? = tagFilterPaths
+        if (filterSet == null) items else items.filter { f -> f.absolutePath in filterSet }
+    }
+
     // v0.12 — تحديث تلقائي للمجلد عندما تنتهي عملية خلفية (نسخ/نقل/حذف…)
     var lastFinishedOps by remember { mutableStateOf(0) }
     LaunchedEffect(opRecords) {
@@ -310,6 +329,10 @@ private fun SinglePaneBrowser(
                             )
                         }
                         IOSNavIconButton(
+                            Icons.Filled.Label,
+                            contentDescription = stringResource(R.string.tags_action),
+                        ) { tagSheetOpen = true }
+                        IOSNavIconButton(
                             Icons.Filled.SelectAll,
                             contentDescription = stringResource(R.string.action_select_all),
                         ) { vm.selectAll() }
@@ -346,11 +369,20 @@ private fun SinglePaneBrowser(
             if (opState.running) {
                 LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
             }
+            // v0.33 — شريط فلترة الوسوم (يظهر عند وجود وسوم فقط)
+            if (selection.isEmpty()) {
+                TagFilterBar(
+                    defs = tagDefs,
+                    counts = tagCounts,
+                    selectedTagId = selectedTagId,
+                    onSelect = { selectedTagId = it },
+                )
+            }
             if (loading) {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
-            } else if (items.isEmpty()) {
+            } else if (visibleItems.isEmpty()) {
                 // v0.18 — حالة فارغة مصممة: أيقونة هادئة + عنوان + تلميح
                 val palette = LocalIOSPalette.current
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -384,7 +416,7 @@ private fun SinglePaneBrowser(
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
-                    items(items, key = { it.absolutePath }) { file ->
+                    items(visibleItems, key = { it.absolutePath }) { file ->
                         GridFileItem(
                             file = file,
                             selected = selection.contains(file.absolutePath),
@@ -407,7 +439,7 @@ private fun SinglePaneBrowser(
                     contentPadding = PaddingValues(start = 12.dp, end = 12.dp, top = 10.dp, bottom = 10.dp + rememberBottomBarClearance()),
                     verticalArrangement = Arrangement.spacedBy(6.dp),
                 ) {
-                    items(items, key = { it.absolutePath }) { file ->
+                    items(visibleItems, key = { it.absolutePath }) { file ->
                         // v0.17 — النقر المزدوج للتنقل على المجلدات (اختياري من الإعدادات)
                         val rowSelected = selection.contains(file.absolutePath) ||
                             (doubleTapEnabled && pendingTapKey == file.absolutePath)
@@ -488,6 +520,14 @@ private fun SinglePaneBrowser(
             )
             BrowserDialog.None -> {}
         }
+
+        // v0.33 — ورقة إسناد الوسوم للتحديد الحالي
+        TagAssignSheet(
+            visible = tagSheetOpen,
+            paths = selection.toList(),
+            repo = tagsRepo,
+            onDismiss = { tagSheetOpen = false },
+        )
 
         // لوحة الشجرة الجانبية — فوق كل شيء، من الحافة الابتدائية
         DirectoryTreePanel(
