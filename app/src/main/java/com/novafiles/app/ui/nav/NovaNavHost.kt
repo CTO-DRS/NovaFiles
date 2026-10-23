@@ -75,6 +75,7 @@ object Routes {
     const val MEDIA = "media?path={path}"          // v0.31 — مشغل الوسائط المدمج
     const val PDF = "pdf?path={path}"              // v0.31 — عارض PDF المدمج
     const val MEDIA_TOOLS = "mediatools?path={path}" // v0.31 — أدوات الوسائط (صور)
+    const val SYNC = "sync?path={path}"              // v0.32 — المزامنة المجدولة
     const val NETWORK = "network"
     const val CONN_FORM = "connform?connId={connId}"
     const val REMOTE = "remote?connId={connId}"
@@ -94,6 +95,7 @@ object Routes {
     fun media(path: String) = "media?path=${android.net.Uri.encode(path)}"
     fun pdf(path: String) = "pdf?path=${android.net.Uri.encode(path)}"
     fun mediaTools(path: String) = "mediatools?path=${android.net.Uri.encode(path)}"
+    fun sync(path: String) = "sync?path=${android.net.Uri.encode(path)}"
     fun connForm(connId: Long) = "connform?connId=$connId"
     fun remote(connId: Long) = "remote?connId=$connId"
     fun direct(sendMode: Boolean) = "direct?mode=${if (sendMode) "send" else "receive"}"
@@ -237,6 +239,7 @@ private fun NovaNavHost(nav: NavHostController) {
                 onOpenApps = { nav.navigate(Routes.APPS) },
                 onOpenChecksums = { nav.navigate(Routes.checksums(it)) },
                 onOpenMediaTools = { nav.navigate(Routes.mediaTools(it)) },
+                onOpenSync = { nav.navigate(Routes.SYNC) },
             )
         }
         composable(Routes.SEARCH) {
@@ -319,6 +322,19 @@ private fun NovaNavHost(nav: NavHostController) {
             }),
         ) { entry ->
             com.novafiles.app.ui.checksum.ChecksumScreen(
+                initialPath = entry.arguments?.getString("path"),
+                onBack = { nav.popBackStack() },
+            )
+        }
+        composable(
+            Routes.SYNC,
+            arguments = listOf(navArgument("path") {
+                type = NavType.StringType
+                nullable = true
+                defaultValue = null
+            }),
+        ) { entry ->
+            com.novafiles.app.ui.sync.SyncScreen(
                 initialPath = entry.arguments?.getString("path"),
                 onBack = { nav.popBackStack() },
             )
