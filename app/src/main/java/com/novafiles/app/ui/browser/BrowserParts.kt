@@ -18,8 +18,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.MoreVert
@@ -30,6 +32,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -52,6 +55,8 @@ import com.novafiles.app.R
 import com.novafiles.app.core.archive.ArchiveEngine
 import com.novafiles.app.core.fs.FileType
 import com.novafiles.app.core.fs.LocalBrowser
+import com.novafiles.app.core.props.ExifEngine
+import com.novafiles.app.core.props.MediaMetaEngine
 import com.novafiles.app.core.ftp.FtpServerService
 import com.novafiles.app.core.ftp.localIpv4
 import com.novafiles.app.core.perms.StorageAccess
@@ -72,6 +77,7 @@ import com.novafiles.app.util.TypeIcons
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 
 /**
@@ -529,46 +535,220 @@ internal fun NameDialog(title: String, initial: String, onDismiss: () -> Unit, o
     )
 }
 
+/**
+ * v0.36.0 — ورقة الخصائص الموسّعة: تُحلّ تُحمَّل خلفياً عبر المحركات الخالصة:
+ *  EXIF للصور (كاميرا/تعريض/GPS) عبر ExifEngine، ميتاداتا صوت/فيديو (مدة/ترميز/
+ *  دقة) عبر MediaMetaEngine، وإحصاء مجلدات (عمق/عدد/فئات) عبر FolderStatsEngine.
+ * ملاحظة القراءة المقيَّدة: يُقرأ رأس الملف فقط (512KB للصور / 2MB للوسائط) —
+ * كافٍ لأن EXIF يقع مبكراً وتقدير MP3 يُصحَّح بالحجم الحقيقي.
+ */
+private data class LoadedProps(
+    val exif: com.novafiles.app.core.props.ExifEngine.ExifInfo? = null,
+    val media: com.novafiles.app.core.props.MediaMetaEngine.MediaMeta? = null,
+    val folder: com.novafiles.app.core.props.FolderStatsEngine.FolderStats? = null,
+)
+
 @Composable
 internal fun DetailsDialog(file: File, onClose: () -> Unit) {
+    var props by remember(file) { mutableStateOf<LoadedProps?>(null) }
+    LaunchedEffect(file) {
+        props = withContext(kotlinx.coroutines.Dispatchers.IO) {
+            val ext = file.extension.lowercase()
+            when {
+                file.isDirectory -> LoadedProps(
+                    folder = runCatching {
+                        com.novafiles.app.core.props.FolderStatsEngine.scan(file)
+                    }.getOrNull(),
+                )
+                ext in setOf("jpg", "jpeg") -> LoadedProps(
+                    exif = runCatching {
+                        com.novafiles.app.core.props.ExifEngine.parse(file.readBytesCapped(512 * 1024))
+                    }.getOrNull(),
+                )
+                ext in setOf("mp4", "mov", "m4a", "m4v", "mp3") -> LoadedProps(
+                    media = runCatching {
+                        com.novafiles.app.core.props.MediaMetaEngine.parse(
+                            file.readBytesCapped(2 * 1024 * 1024),
+                            totalSizeOverride = runCatching { file.length() }.getOrDefault(0L),
+                        )
+                    }.getOrNull(),
+                )
+                else -> LoadedProps()
+            }
+        }
+    }
+    val p = props
     IOSAlertDialog(
         title = stringResource(R.string.dialog_details_title),
         confirmText = stringResource(R.string.action_ok),
         onConfirm = onClose,
         content = {
-            Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+            Column(
+                modifier = Modifier
+                    .padding(horizontal = 16.dp)
+                    .verticalScroll(rememberScrollState()),
+            ) {
                 Text(
                     file.name,
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
                 Spacer(Modifier.size(8.dp))
-                Text(
-                    "${stringResource(R.string.details_path)}: ${file.absolutePath}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                PropRow(stringResource(R.string.details_path), file.absolutePath)
                 if (file.isDirectory) {
-                    Text(
-                        "${stringResource(R.string.details_items)}: ${LocalBrowser.itemCount(file)}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    val f = p?.folder
+                    PropRow(
+                        stringResource(R.string.details_items),
+                        LocalBrowser.itemCount(file).toString(),
                     )
+                    if (f == null) PropRow(stringResource(R.string.props_loading), "…")
+                    else {
+                        PropRow(stringResource(R.string.props_folder_files), f.fileCount.toString())
+                        PropRow(stringResource(R.string.props_folder_size), LocalBrowser.humanSize(f.totalBytes))
+                        PropRow(stringResource(R.string.props_folder_depth), f.maxDepth.toString())
+                        f.largest?.let {
+                            PropRow(
+                                stringResource(R.string.props_folder_largest),
+                                it.name + " · " + LocalBrowser.humanSize(it.size),
+                            )
+                        }
+                        f.dominantCategory?.let {
+                            PropRow(
+                                stringResource(R.string.props_folder_dominant),
+                                propCategoryLabel(it),
+                            )
+                        }
+                    }
                 } else {
-                    Text(
-                        "${stringResource(R.string.details_size)}: ${LocalBrowser.humanSize(file.length())}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
+                    PropRow(stringResource(R.string.details_size), LocalBrowser.humanSize(file.length()))
+                    // EXIF للصور
+                    val exif = p?.exif
+                    if (p != null && file.extension.lowercase() in setOf("jpg", "jpeg")) {
+                        if (exif == null && file.length() > 0) PropRow(stringResource(R.string.props_loading), "…")
+                        else if (exif != null && exif.hasAny) {
+                            PropHeader(stringResource(R.string.props_exif_header))
+                            exif.cameraModel?.let {
+                                PropRow(
+                                    stringResource(R.string.props_exif_camera),
+                                    listOfNotNull(exif.cameraMake, it).joinToString(" "),
+                                )
+                            }
+                            exif.takenAt?.let { PropRow(stringResource(R.string.props_exif_taken), it) }
+                            exif.exposureTimeSec?.let {
+                                ExifEngine.friendlyExposure(it)?.let { f ->
+                                    PropRow(stringResource(R.string.props_exif_exposure), f)
+                                }
+                            }
+                            exif.fNumber?.let { PropRow(stringResource(R.string.props_exif_fnumber), "f/" + trimNum(it)) }
+                            exif.iso?.let { PropRow(stringResource(R.string.props_exif_iso), "ISO $it") }
+                            exif.focalLengthMm?.let { PropRow(stringResource(R.string.props_exif_focal), trimNum(it) + " mm") }
+                            if (exif.width != null && exif.height != null) {
+                                PropRow(stringResource(R.string.props_exif_dims), "${exif.width}×${exif.height}")
+                            }
+                            if (exif.hasGps) {
+                                PropRow(stringResource(R.string.props_exif_gps), ExifEngine.friendlyGps(exif.latitude, exif.longitude).orEmpty())
+                            }
+                            exif.altitudeM?.let { PropRow(stringResource(R.string.props_exif_altitude), trimNum(it) + " m") }
+                        }
+                    }
+                    // ميتاداتا الصوت/الفيديو
+                    val media = p?.media
+                    if (p != null && file.extension.lowercase() in setOf("mp4", "mov", "m4a", "m4v", "mp3")) {
+                        if (media == null && file.length() > 0) PropRow(stringResource(R.string.props_loading), "…")
+                        else if (media != null && media.hasAny) {
+                            PropHeader(stringResource(R.string.props_media_header))
+                            media.durationSec?.let {
+                                PropRow(
+                                    stringResource(R.string.props_media_duration),
+                                    MediaMetaEngine.friendlyDuration(it) +
+                                        if (media.durationEstimated) " ~" else "",
+                                )
+                            }
+                            media.codec?.let {
+                                PropRow(stringResource(R.string.props_media_codec), MediaMetaEngine.friendlyCodec(it) ?: it)
+                            }
+                            if (media.width != null && media.height != null) {
+                                PropRow(stringResource(R.string.props_media_dims), "${media.width}×${media.height}")
+                            }
+                            media.bitrateKbps?.let { PropRow(stringResource(R.string.props_media_bitrate), "$it kbps") }
+                            media.sampleRateHz?.let { PropRow(stringResource(R.string.props_media_rate), "$it Hz") }
+                            media.title?.let { PropRow(stringResource(R.string.props_media_title), it) }
+                            media.artist?.let { PropRow(stringResource(R.string.props_media_artist), it) }
+                            media.album?.let { PropRow(stringResource(R.string.props_media_album), it) }
+                        }
+                    }
                 }
-                Text(
-                    "${stringResource(R.string.details_modified)}: ${LocalBrowser.formatDate(file.lastModified())}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+                PropRow(stringResource(R.string.details_modified), LocalBrowser.formatDate(file.lastModified()))
             }
         },
     )
+}
+
+/** صف خصائص: تسمية ثابتة + قيمة — نمط iOS مضغوط */
+@Composable
+private fun PropRow(label: String, value: String) {
+    Row(modifier = Modifier.padding(vertical = 2.dp)) {
+        Text(
+            label,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.width(110.dp),
+        )
+        Text(
+            value,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.weight(1f),
+        )
+    }
+}
+
+@Composable
+private fun PropHeader(text: String) {
+    Text(
+        text,
+        style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.SemiBold),
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.padding(top = 8.dp),
+    )
+}
+
+private fun trimNum(v: Double): String {
+    val r = kotlin.math.round(v * 100) / 100
+    return if (r == r.toLong().toDouble()) r.toLong().toString() else r.toString()
+}
+
+/** اسم فئة التخزين عبر موارد الواجهة — نفس ربط شاشة المحلل */
+@Composable
+private fun propCategoryLabel(c: com.novafiles.app.core.analyzer.StorageCategory): String = when (c) {
+    com.novafiles.app.core.analyzer.StorageCategory.VIDEO -> stringResource(com.novafiles.app.R.string.cat_video)
+    com.novafiles.app.core.analyzer.StorageCategory.AUDIO -> stringResource(com.novafiles.app.R.string.cat_audio)
+    com.novafiles.app.core.analyzer.StorageCategory.IMAGES -> stringResource(com.novafiles.app.R.string.cat_images)
+    com.novafiles.app.core.analyzer.StorageCategory.DOCS -> stringResource(com.novafiles.app.R.string.cat_docs)
+    com.novafiles.app.core.analyzer.StorageCategory.APPS -> stringResource(com.novafiles.app.R.string.cat_apps)
+    com.novafiles.app.core.analyzer.StorageCategory.ARCHIVES -> stringResource(com.novafiles.app.R.string.cat_archives)
+    com.novafiles.app.core.analyzer.StorageCategory.OTHER -> stringResource(com.novafiles.app.R.string.cat_other)
+}
+
+/** قراءة رأس ملف فقط — سقف ثابت يمنع تحميل ملفات ضخمة في الذاكرة */
+private fun File.readBytesCapped(cap: Int): ByteArray {
+    val size = runCatching { length() }.getOrDefault(0L)
+    val toRead = minOf(size, cap.toLong()).toInt().coerceAtLeast(0)
+    if (toRead == 0) return ByteArray(0)
+    return runCatching {
+        inputStream().use { ins ->
+            val out = java.io.ByteArrayOutputStream(toRead)
+            val buf = ByteArray(64 * 1024)
+            var remaining = toRead
+            while (remaining > 0) {
+                val n = ins.read(buf, 0, minOf(buf.size, remaining))
+                if (n < 0) break
+                out.write(buf, 0, n)
+                remaining -= n
+            }
+            out.toByteArray()
+        }
+    }.getOrDefault(ByteArray(0))
 }
 
 /**

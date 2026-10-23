@@ -957,4 +957,39 @@
     <string name="rules_notif_channel_desc">Persistent notification while live watching is on</string>
     <string name="rules_notification_title">Automation watching active</string>
     <string name="rules_notification_text">Your rules run the moment new files arrive in their folders</string>
+
+    <!-- ═══ v0.36.0 — Bookmarks, file properties and report export ═══ -->
+    <string name="bookmarks_title">Bookmarks</string>
+    <string name="bookmarks_add_current">Pin current folder for quick access</string>
+    <string name="bookmarks_remove">Remove bookmark</string>
+    <string name="bookmarks_empty">Pin your daily work folders to reach them in one tap</string>
+    <string name="props_loading">Analyzing…</string>
+    <string name="props_folder_files">Files</string>
+    <string name="props_folder_size">Total size</string>
+    <string name="props_folder_depth">Max depth</string>
+    <string name="props_folder_largest">Largest item</string>
+    <string name="props_folder_dominant">Dominant type</string>
+    <string name="props_exif_header">Photo details</string>
+    <string name="props_exif_camera">Camera</string>
+    <string name="props_exif_taken">Taken</string>
+    <string name="props_exif_exposure">Exposure</string>
+    <string name="props_exif_fnumber">Aperture</string>
+    <string name="props_exif_iso">ISO speed</string>
+    <string name="props_exif_focal">Focal length</string>
+    <string name="props_exif_dims">Dimensions</string>
+    <string name="props_exif_gps">Location</string>
+    <string name="props_exif_altitude">Altitude</string>
+    <string name="props_media_header">Media details</string>
+    <string name="props_media_duration">Duration</string>
+    <string name="props_media_codec">Codec</string>
+    <string name="props_media_dims">Resolution</string>
+    <string name="props_media_bitrate">Bitrate</string>
+    <string name="props_media_rate">Sample rate</string>
+    <string name="props_media_title">Title</string>
+    <string name="props_media_artist">Artist</string>
+    <string name="props_media_album">Album</string>
+    <string name="report_export_storage">Export storage report</string>
+    <string name="report_export_duplicates">Export duplicates (CSV)</string>
+    <string name="report_export_junk">Export cleaner results (CSV)</string>
+    <string name="report_share_cleanup">Share before/after report (JSON)</string>
 </resources>
