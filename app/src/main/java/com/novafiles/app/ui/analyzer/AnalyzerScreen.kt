@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.IosShare
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -60,6 +61,7 @@ import com.novafiles.app.core.analyzer.Treemap
 import com.novafiles.app.core.analyzer.TreemapNode
 import com.novafiles.app.core.analyzer.TreemapRect
 import com.novafiles.app.core.fs.FileIndexer
+import com.novafiles.app.core.report.ReportExporter
 import com.novafiles.app.data.db.FileIndexEntity
 import com.novafiles.app.novaContainer
 import com.novafiles.app.ui.ios.IOSGroupCard
@@ -68,6 +70,8 @@ import com.novafiles.app.ui.ios.IOSListRow
 import com.novafiles.app.ui.ios.IOSNavBar
 import com.novafiles.app.ui.ios.IOSNavIconButton
 import com.novafiles.app.ui.ios.LocalIOSPalette
+import com.novafiles.app.util.Intents
+import com.novafiles.app.util.ReportFiles
 import java.io.File
 import java.text.DateFormat
 import java.util.Date
@@ -148,6 +152,35 @@ fun AnalyzerScreen(onBack: () -> Unit) {
             subtitle = stringResource(R.string.analyzer_subtitle),
             onBack = onBack,
         ) {
+            // v0.36 — تصدير تقرير التخزين الحالي CSV+JSON إلى مجلد التقارير ومشاركته
+            IOSNavIconButton(
+                icon = Icons.Filled.IosShare,
+                contentDescription = stringResource(R.string.report_export_storage),
+                onClick = {
+                    val rep = report ?: return@IOSNavIconButton
+                    val currentRows = rows
+                    val currentTree = tree
+                    scope.launch(Dispatchers.IO) {
+                        val now = System.currentTimeMillis()
+                        val csv = ReportExporter.storageCsv(rep)
+                        ReportFiles.write("storage", "csv", csv, now)
+                        ReportFiles.write("storage", "json", ReportExporter.storageJson(rep), now)
+                        ReportFiles.write(
+                            "dirs", "csv",
+                            ReportExporter.dirsCsv(currentTree.values.toList()), now,
+                        )
+                        ReportFiles.write(
+                            "notable", "csv",
+                            ReportExporter.notableCsv(currentRows.filter { !it.isDirectory }
+                                .sortedByDescending { it.size }.take(200)
+                                .map { NotableFile(it.path, it.name, it.size, it.modified) }),
+                        )
+                        val f = ReportFiles.write("storage", "csv", csv, now) // المشاركة: CSV
+                        // المشاركة تفتح لآخر ملف كُتب — أعد استخدام أول CSV حتمي
+                        if (f != null) Intents.share(context, f)
+                    }
+                },
+            )
             IOSNavIconButton(icon = Icons.Filled.Refresh, contentDescription = null, onClick = { loadSnapshot() })
         }
 

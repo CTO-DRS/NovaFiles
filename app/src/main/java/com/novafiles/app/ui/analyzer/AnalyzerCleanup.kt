@@ -48,6 +48,7 @@ import com.novafiles.app.core.analyzer.SnapshotRow
 import com.novafiles.app.core.fs.FileIndexer
 import com.novafiles.app.core.ops.OpKind
 import com.novafiles.app.core.ops.OpSpec
+import com.novafiles.app.core.report.ReportExporter
 import com.novafiles.app.novaContainer
 import com.novafiles.app.ui.ios.IOSAlertDialog
 import com.novafiles.app.ui.ios.IOSFilledButton
@@ -57,6 +58,8 @@ import com.novafiles.app.ui.ios.IOSListRow
 import com.novafiles.app.ui.ios.IOSSwitch
 import com.novafiles.app.ui.ios.LocalIOSPalette
 import com.novafiles.app.util.Format
+import com.novafiles.app.util.Intents
+import com.novafiles.app.util.ReportFiles
 import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -124,6 +127,15 @@ internal fun DuplicatesTab(rows: List<SnapshotRow>) {
                         text = if (scanning) stringResource(R.string.dup_scanning, scannedCount)
                         else stringResource(R.string.dup_scan),
                         onClick = { startScan() },
+                    )
+                    // v0.36 — تصدير نتيجة الفحص CSV (المجموعات + الأدوار)
+                    Spacer(Modifier.height(8.dp))
+                    ExportReportButton(
+                        text = stringResource(R.string.report_export_duplicates),
+                        content = report?.let { rep -> ({ ReportExporter.duplicatesCsv(rep) }) },
+                        context = context,
+                        scope = scope,
+                        kind = "duplicates",
                     )
                 }
             }
@@ -247,6 +259,8 @@ internal fun JunkTab() {
     var openCat by remember { mutableStateOf<JunkCategory?>(null) }
     var selected by remember { mutableStateOf<Set<String>>(emptySet()) }
     var confirmClean by remember { mutableStateOf(false) }
+    // v0.36 — تقرير آخر تنظيف (قبل/بعد) جاهز للمشاركة
+    var cleanupReportFile by remember { mutableStateOf<java.io.File?>(null) }
 
     fun startScan() {
         scanning = true
@@ -275,6 +289,23 @@ internal fun JunkTab() {
                         text = stringResource(R.string.junk_scan),
                         onClick = { startScan() },
                     )
+                    // v0.36 — تصدير نتيجة الفحص CSV (كل الفئات مع ×N للمكررات)
+                    Spacer(Modifier.height(8.dp))
+                    ExportReportButton(
+                        text = stringResource(R.string.report_export_junk),
+                        content = report?.let { rep -> ({ ReportExporter.junkCsv(rep) }) },
+                        context = context,
+                        scope = scope,
+                        kind = "junk",
+                    )
+                    // v0.36 — مشاركة تقرير قبل/بعد لآخر تنظيف مكتمل
+                    cleanupReportFile?.let { f ->
+                        Spacer(Modifier.height(8.dp))
+                        IOSFilledButton(
+                            text = stringResource(R.string.report_share_cleanup),
+                            onClick = { Intents.share(context, f) },
+                        )
+                    }
                 }
             }
         }
@@ -386,6 +417,18 @@ internal fun JunkTab() {
                 confirmClean = false
                 val files = selected.filter { !it.endsWith("/") }.map { File(it) }
                 if (files.isNotEmpty()) {
+                    // v0.36 — تقرير قبل/بعد: الوفر = بايتات ما أُرسل للمهملات
+                    // (الترتيب حتمي: القائمة تُكتب مرتبة داخل المحرك)
+                    val beforeBytes = files.sumOf { runCatching { it.length() }.getOrDefault(0L) }
+                    val now = System.currentTimeMillis()
+                    val json = ReportExporter.cleanupJson(
+                        before = ReportExporter.CleanupSnapshot(files.size, beforeBytes, now),
+                        after = ReportExporter.CleanupSnapshot(0, 0, now),
+                        removedFiles = files.map { it.absolutePath },
+                    )
+                    scope.launch(Dispatchers.IO) {
+                        cleanupReportFile = ReportFiles.write("cleanup", "json", json, now)
+                    }
                     container.ops.enqueue(
                         OpSpec(
                             kind = OpKind.TRASH,

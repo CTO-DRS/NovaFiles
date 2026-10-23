@@ -957,4 +957,39 @@
     <string name="rules_notif_channel_desc">إشعار دائم طالما المراقبة الحية تعمل</string>
     <string name="rules_notification_title">مراقبة الأتمتة نشطة</string>
     <string name="rules_notification_text">تُنفَّذ قواعدك فور وصول ملفات جديدة إلى مجلداتها</string>
+
+    <!-- ═══ v0.36.0 — الإشارات المرجعية وخصائص الملفات وتصدير التقارير ═══ -->
+    <string name="bookmarks_title">الإشارات المرجعية</string>
+    <string name="bookmarks_add_current">تثبيت المجلد الحالي مرجعاً سريعاً</string>
+    <string name="bookmarks_remove">إزالة الإشارة المرجعية</string>
+    <string name="bookmarks_empty">ثبّت مجلدات عملك اليومية لتصل إليها بلمسة واحدة</string>
+    <string name="props_loading">جارٍ التحليل…</string>
+    <string name="props_folder_files">الملفات</string>
+    <string name="props_folder_size">الحجم الكلي</string>
+    <string name="props_folder_depth">أقصى عمق</string>
+    <string name="props_folder_largest">أكبر عنصر</string>
+    <string name="props_folder_dominant">الفئة المهيمنة</string>
+    <string name="props_exif_header">بيانات الصورة</string>
+    <string name="props_exif_camera">الكاميرا</string>
+    <string name="props_exif_taken">تاريخ الالتقاط</string>
+    <string name="props_exif_exposure">زمن التعريض</string>
+    <string name="props_exif_fnumber">فتحة العدسة</string>
+    <string name="props_exif_iso">حساسية ISO</string>
+    <string name="props_exif_focal">البعد البؤري</string>
+    <string name="props_exif_dims">الأبعاد</string>
+    <string name="props_exif_gps">الموقع</string>
+    <string name="props_exif_altitude">الارتفاع</string>
+    <string name="props_media_header">بيانات الوسائط</string>
+    <string name="props_media_duration">المدة</string>
+    <string name="props_media_codec">الترميز</string>
+    <string name="props_media_dims">الدقة</string>
+    <string name="props_media_bitrate">سرعة البت</string>
+    <string name="props_media_rate">معدل العينات</string>
+    <string name="props_media_title">العنوان</string>
+    <string name="props_media_artist">الفنان</string>
+    <string name="props_media_album">الألبوم</string>
+    <string name="report_export_storage">تصدير تقرير التخزين</string>
+    <string name="report_export_duplicates">تصدير نتيجة المكررات (CSV)</string>
+    <string name="report_export_junk">تصدير نتيجة المنظّف (CSV)</string>
+    <string name="report_share_cleanup">مشاركة تقرير قبل/بعد (JSON)</string>
 </resources>

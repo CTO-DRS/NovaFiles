@@ -89,6 +89,11 @@ class AppContainer(appContext: Context) {
     val rulesRepo: com.novafiles.app.core.rules.RulesRepository by lazy {
         com.novafiles.app.core.rules.RulesRepository(ctx)
     }
+
+    /** v0.36 — إشارات مرجعية للمسارات: مجلدات العمل اليومية في الشجرة الجانبية */
+    val bookmarks: com.novafiles.app.data.prefs.BookmarksStore by lazy {
+        com.novafiles.app.data.prefs.BookmarksStore(ctx)
+    }
     val ruleLog: com.novafiles.app.core.rules.RuleExecutionLog by lazy {
         com.novafiles.app.core.rules.RuleExecutionLog(200)
     }

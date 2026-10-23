@@ -22,15 +22,20 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Bookmarks
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,7 +51,9 @@ import androidx.compose.ui.unit.sp
 import com.novafiles.app.R
 import com.novafiles.app.core.fs.DirTree
 import com.novafiles.app.core.fs.TreeNode
+import com.novafiles.app.novaContainer
 import com.novafiles.app.ui.ios.LocalIOSPalette
+import kotlinx.coroutines.launch
 import java.io.File
 
 /**
@@ -145,6 +152,9 @@ internal fun DirectoryTreePanel(
                 }
 
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    // v0.36 — الإشارات المرجعية: مجلدات العمل اليومية فوق الشجرة
+                    item { BookmarksSection(currentPath, onNavigate) }
+                    item { Spacer(Modifier.height(6.dp)) }
                     items(nodes, key = { it.path }) { node ->
                         TreeRow(
                             node = node,
@@ -159,6 +169,110 @@ internal fun DirectoryTreePanel(
                 }
             }
         }
+    }
+}
+
+/**
+ * v0.36 — قسم الإشارات المرجعية أعلى الشجرة: وصول فوري لمجلدات العمل اليومية،
+ * منفصلة عن المفضلة. زر (+) يثبّت المجلد الحالي، و(X) يزيل مرجعاً.
+ */
+@Composable
+private fun BookmarksSection(
+    currentPath: String,
+    onNavigate: (String) -> Unit,
+) {
+    val p = LocalIOSPalette.current
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
+    val store = context.novaContainer.bookmarks
+    val list by store.bookmarks.collectAsState(initial = emptyList())
+    val alreadyBookmarked = list.any { it.path == currentPath }
+
+    Column(Modifier.padding(horizontal = 8.dp)) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Icon(
+                Icons.Filled.Star,
+                contentDescription = null,
+                tint = p.accent,
+                modifier = Modifier.size(16.dp),
+            )
+            Spacer(Modifier.width(6.dp))
+            Text(
+                stringResource(R.string.bookmarks_title),
+                style = TextStyle(fontSize = 12.sp, fontWeight = FontWeight.SemiBold),
+                color = p.secondaryLabel,
+                modifier = Modifier.weight(1f),
+            )
+            // تثبيت المجلد الحالي — يختفي الزر إذا كان مرجعاً بالفعل
+            if (!alreadyBookmarked) {
+                Icon(
+                    Icons.Filled.Add,
+                    contentDescription = stringResource(R.string.bookmarks_add_current),
+                    tint = p.accent,
+                    modifier = Modifier
+                        .size(22.dp)
+                        .clickable {
+                            scope.launch {
+                                val added = store.add(currentPath, currentPath.substringAfterLast('/'))
+                                // السقف الممتلئ يُتجاهل بصمت — القائمة صغيرة بطبيعتها (24)
+                                if (!added) Unit
+                            }
+                        },
+                )
+            }
+        }
+
+        list.forEach { bm ->
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp, vertical = 1.dp)
+                    .background(p.accent.copy(alpha = 0.10f), RoundedCornerShape(9.dp))
+                    .clickable { onNavigate(bm.path) }
+                    .padding(start = 8.dp, end = 4.dp, top = 6.dp, bottom = 6.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Icon(
+                    Icons.Filled.Bookmarks,
+                    contentDescription = null,
+                    tint = p.accent,
+                    modifier = Modifier.size(16.dp),
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(
+                    bm.name,
+                    style = TextStyle(fontSize = 14.sp),
+                    color = p.label,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f),
+                )
+                Icon(
+                    Icons.Filled.Close,
+                    contentDescription = stringResource(R.string.bookmarks_remove),
+                    tint = p.secondaryLabel,
+                    modifier = Modifier
+                        .size(18.dp)
+                        .clickable { scope.launch { store.remove(bm.path) } },
+                )
+            }
+        }
+
+        if (list.isEmpty()) {
+            Text(
+                stringResource(R.string.bookmarks_empty),
+                style = TextStyle(fontSize = 12.sp),
+                color = p.secondaryLabel,
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+            )
+        }
+        // فاصل خفيف قبل الشجرة
+        Spacer(Modifier.height(2.dp))
     }
 }
 
