@@ -400,9 +400,52 @@ interface SyncRunsDao {
     suspend fun clearFor(pairId: Long)
 }
 
+// ═══════════════ v0.34 — المحرك الذكي: نقاط الاستهلاك والتجاهل النهائي ═══════════════
+
+/** نقطة استهلاك أسبوعية لنبضة التخزين — تُلتقط من فهرس Room مرة كل أسبوع */
+@Entity(tableName = "storage_points")
+data class StoragePointEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val capturedAt: Long,
+    val usedBytes: Long,
+    /** أحجام الأدلة العليا بنسق PerDirBlob: «size\tname» لكل سطر */
+    val perDirBlob: String = "",
+)
+
+@Dao
+interface StoragePointsDao {
+    @Insert
+    suspend fun insert(p: StoragePointEntity)
+
+    @Query("SELECT * FROM storage_points ORDER BY capturedAt ASC")
+    suspend fun allByTime(): List<StoragePointEntity>
+
+    @Query("SELECT COUNT(*) FROM storage_points")
+    suspend fun count(): Int
+}
+
+/** اقتراح مُتجاهَل نهائياً أو عنصر مراجعة محتفظ به — المفتاح مستقر لا يتغير */
+@Entity(tableName = "smart_dismissed")
+data class SmartDismissEntity(
+    @PrimaryKey val key: String,
+    val dismissedAt: Long = System.currentTimeMillis(),
+)
+
+@Dao
+interface SmartDismissDao {
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun add(d: SmartDismissEntity)
+
+    @Query("SELECT `key` FROM smart_dismissed")
+    suspend fun allKeys(): List<String>
+
+    @Query("SELECT EXISTS(SELECT 1 FROM smart_dismissed WHERE `key` = :key)")
+    suspend fun exists(key: String): Boolean
+}
+
 @Database(
-    entities = [FavoriteEntity::class, TagDefEntity::class, TagFileEntity::class, FileIndexEntity::class, FileIndexFtsEntity::class, ConnectionEntity::class, CloudAccountEntity::class, SyncLedgerEntity::class, SyncPairEntity::class, SyncRunEntity::class],
-    version = 6,
+    entities = [FavoriteEntity::class, TagDefEntity::class, TagFileEntity::class, FileIndexEntity::class, FileIndexFtsEntity::class, ConnectionEntity::class, CloudAccountEntity::class, SyncLedgerEntity::class, SyncPairEntity::class, SyncRunEntity::class, StoragePointEntity::class, SmartDismissEntity::class],
+    version = 7,
     exportSchema = false,
 )
 abstract class NovaDb : RoomDatabase() {
@@ -415,6 +458,8 @@ abstract class NovaDb : RoomDatabase() {
     abstract fun syncLedgerDao(): SyncLedgerDao
     abstract fun syncPairsDao(): SyncPairsDao
     abstract fun syncRunsDao(): SyncRunsDao
+    abstract fun storagePointsDao(): StoragePointsDao
+    abstract fun smartDismissDao(): SmartDismissDao
 
     companion object {
         /**
@@ -505,6 +550,23 @@ abstract class NovaDb : RoomDatabase() {
                 db.execSQL("CREATE INDEX IF NOT EXISTS `index_sync_runs_pairId` ON `sync_runs` (`pairId`)")
                 db.execSQL(
                     "ALTER TABLE `cloud_accounts` ADD COLUMN `cameraSources` TEXT NOT NULL DEFAULT 'CAMERA'",
+                )
+            }
+        }
+
+        /**
+         * v0.34 — 6→7: جدولا نبضة التخزين (نقاط أسبوعية) والتجاهل النهائي
+         * للمحرك الذكي — إضافات خالصة بلا مسّ لأي بيانات موجودة.
+         */
+        val MIGRATION_6_7: Migration = object : Migration(6, 7) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `storage_points` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                        "`capturedAt` INTEGER NOT NULL, `usedBytes` INTEGER NOT NULL, `perDirBlob` TEXT NOT NULL)",
+                )
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `smart_dismissed` (`key` TEXT NOT NULL, " +
+                        "`dismissedAt` INTEGER NOT NULL, PRIMARY KEY(`key`))",
                 )
             }
         }

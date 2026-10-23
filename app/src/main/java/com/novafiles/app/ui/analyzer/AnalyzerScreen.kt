@@ -28,6 +28,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -76,10 +77,11 @@ import kotlinx.coroutines.withContext
 
 /**
  * v0.14.0 — شاشة تحليل التخزين (ذكاء التخزين)
- * أربع تبويبات بنمط iOS: نظرة عامة / الخريطة / المكررات / المنظّف.
+ * خمس تبويبات بنمط iOS: نظرة عامة / الخريطة / المكررات / المنظّف / نبضة (v0.34).
  * البيانات من لقطة الفهرس (لا مسح ثانٍ للقرص).
+ * تبويب النبضة يخضع لمفتاح الطبقة الذكية في الإعدادات.
  */
-enum class AnalyzerTab { OVERVIEW, MAP, DUPLICATES, JUNK }
+enum class AnalyzerTab { OVERVIEW, MAP, DUPLICATES, JUNK, PULSE }
 
 /** ألوان الفئات — لوحة iOS مميزة لكل فئة */
 fun categoryColor(c: StorageCategory): Color = when (c) {
@@ -114,6 +116,12 @@ fun AnalyzerScreen(onBack: () -> Unit) {
     var rows by remember { mutableStateOf<List<SnapshotRow>>(emptyList()) }
     var report by remember { mutableStateOf<StorageReport?>(null) }
     var tree by remember { mutableStateOf<Map<String, com.novafiles.app.core.analyzer.DirNode>>(emptyMap()) }
+    val smartEnabled by container.settings.smartEnabled.collectAsState(initial = true)
+
+    // إيقاف الطبقة الذكية يعيد المستخدم للنظرة العامة فوراً
+    LaunchedEffect(smartEnabled) {
+        if (!smartEnabled && tab == AnalyzerTab.PULSE) tab = AnalyzerTab.OVERVIEW
+    }
 
     fun loadSnapshot() {
         loading = true
@@ -143,28 +151,36 @@ fun AnalyzerScreen(onBack: () -> Unit) {
             IOSNavIconButton(icon = Icons.Filled.Refresh, contentDescription = null, onClick = { loadSnapshot() })
         }
 
-        AnalyzerTabBar(selected = tab, onSelect = { tab = it })
+        AnalyzerTabBar(selected = tab, tabs = tabsFor(smartEnabled), onSelect = { tab = it })
 
         when (tab) {
             AnalyzerTab.OVERVIEW -> OverviewTab(loading, rows, report)
             AnalyzerTab.MAP -> MapTab(loading, rows, tree)
             AnalyzerTab.DUPLICATES -> DuplicatesTab(rows)
             AnalyzerTab.JUNK -> JunkTab()
+            AnalyzerTab.PULSE -> PulseTab(rows, loading)
         }
     }
 }
 
 // ═══════════════ شريط التبويبات ═══════════════
 
+/** تبويبات المحلل — النبضة تظهر فقط مع تفعيل الطبقة الذكية */
+private fun tabsFor(smartEnabled: Boolean): List<Pair<AnalyzerTab, Int>> = buildList {
+    add(AnalyzerTab.OVERVIEW to R.string.analyzer_tab_overview)
+    add(AnalyzerTab.MAP to R.string.analyzer_tab_map)
+    add(AnalyzerTab.DUPLICATES to R.string.analyzer_tab_duplicates)
+    add(AnalyzerTab.JUNK to R.string.analyzer_tab_junk)
+    if (smartEnabled) add(AnalyzerTab.PULSE to R.string.analyzer_tab_pulse)
+}
+
 @Composable
-private fun AnalyzerTabBar(selected: AnalyzerTab, onSelect: (AnalyzerTab) -> Unit) {
+private fun AnalyzerTabBar(
+    selected: AnalyzerTab,
+    tabs: List<Pair<AnalyzerTab, Int>>,
+    onSelect: (AnalyzerTab) -> Unit,
+) {
     val palette = LocalIOSPalette.current
-    val tabs = listOf(
-        AnalyzerTab.OVERVIEW to R.string.analyzer_tab_overview,
-        AnalyzerTab.MAP to R.string.analyzer_tab_map,
-        AnalyzerTab.DUPLICATES to R.string.analyzer_tab_duplicates,
-        AnalyzerTab.JUNK to R.string.analyzer_tab_junk,
-    )
     Row(
         modifier = Modifier
             .fillMaxWidth()

@@ -31,7 +31,7 @@ class AppContainer(appContext: Context) {
 
     val db: NovaDb by lazy {
         Room.databaseBuilder(ctx, NovaDb::class.java, "nova.db")
-            .addMigrations(NovaDb.MIGRATION_4_5, NovaDb.MIGRATION_5_6)
+            .addMigrations(NovaDb.MIGRATION_4_5, NovaDb.MIGRATION_5_6, NovaDb.MIGRATION_6_7)
             .fallbackToDestructiveMigration()
             .build()
     }
