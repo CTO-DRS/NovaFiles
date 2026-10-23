@@ -992,4 +992,30 @@
     <string name="report_export_duplicates">Export duplicates (CSV)</string>
     <string name="report_export_junk">Export cleaner results (CSV)</string>
     <string name="report_share_cleanup">Share before/after report (JSON)</string>
+    <!-- ═══ v0.38.0 — Security guide for the new user ═══ -->
+    <string name="guide_title">Security Guide</string>
+    <string name="guide_footer_hint">Eight sections that protect your files from day one — tap a section to mark it read</string>
+    <string name="guide_progress">Read %2$d of %3$d sections (%1$d%%)</string>
+    <string name="guide_complete">Security guide complete — your files are in safe hands</string>
+    <string name="severity_essential">Essential</string>
+    <string name="severity_recommended">Recommended</string>
+    <string name="severity_advanced">Advanced</string>
+    <string name="settings_security_guide">Security Guide</string>
+    <string name="settings_security_guide_hint">Eight sections that protect your files from day one</string>
+    <string name="guide_s_vault_pin_t">Turn on the Vault with a strong PIN</string>
+    <string name="guide_s_vault_pin_b">The Vault encrypts sensitive files with AES-256-GCM backed by hardware Keystore keys. Choose 6 or more unexpected digits — never reuse your phone unlock code.</string>
+    <string name="guide_s_encryption_t">Understand encryption before you need it</string>
+    <string name="guide_s_encryption_b">Vault folders derive HKDF keys from your PIN plus a hardware key, and cloud credentials stay in a local AES/GCM vault. No key ever leaves your device.</string>
+    <string name="guide_s_recovery_t">Store your recovery phrase away from the device</string>
+    <string name="guide_s_recovery_b">The 12-word BIP39 phrase is your only way back if the PIN is forgotten. Write it on paper and keep it safe — never photograph or message it.</string>
+    <string name="guide_s_network_t">Share over the network with strong credentials</string>
+    <string name="guide_s_network_b">The built-in FTP and WebDAV servers are password-protected by default. Change the nova/nova defaults immediately, keep scheduled sync on Wi-Fi only, and accept the TOFU host fingerprint on first connect.</string>
+    <string name="guide_s_cloud_t">Connect cloud accounts with least privilege</string>
+    <string name="guide_s_cloud_b">OAuth with PKCE grants file-scoped access only. Review linked connections in your provider settings periodically and revoke what you no longer use.</string>
+    <string name="guide_s_perms_t">Review permissions right after install</string>
+    <string name="guide_s_perms_b">NovaFiles asks for all-files access to manage your whole storage — nothing more. No network without your action, no tracking, no usage stats sent anywhere.</string>
+    <string name="guide_s_safedelete_t">Use secure wipe for sensitive files</string>
+    <string name="guide_s_safedelete_b">Ordinary deletion can be undone by recovery tools. Secure wipe overwrites the file data before removing it from the .NovaFilesTrash bin — use it for official documents and private photos.</string>
+    <string name="guide_s_updates_t">Update from the official source only</string>
+    <string name="guide_s_updates_b">NovaFiles is 100% open source — builds are reproducible and the APK hash can be verified before install. Update from F-Droid or GitHub Releases only.</string>
 </resources>

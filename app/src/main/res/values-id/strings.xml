@@ -985,4 +985,30 @@
     <string name="report_export_duplicates">Ekspor duplikat (CSV)</string>
     <string name="report_export_junk">Ekspor hasil pembersih (CSV)</string>
     <string name="report_share_cleanup">Bagikan laporan sebelum/sesudah (JSON)</string>
+    <!-- ═══ v0.38.0 — Panduan keamanan untuk pengguna baru ═══ -->
+    <string name="guide_title">Panduan Keamanan</string>
+    <string name="guide_footer_hint">Delapan bagian yang melindungi berkas Anda sejak hari pertama — ketuk bagian untuk menandainya sudah dibaca</string>
+    <string name="guide_progress">Dibaca %2$d dari %3$d bagian (%1$d%%)</string>
+    <string name="guide_complete">Panduan keamanan selesai — berkas Anda dalam tangan yang aman</string>
+    <string name="severity_essential">Esensial</string>
+    <string name="severity_recommended">Disarankan</string>
+    <string name="severity_advanced">Lanjutan</string>
+    <string name="settings_security_guide">Panduan Keamanan</string>
+    <string name="settings_security_guide_hint">Delapan bagian yang melindungi berkas Anda sejak hari pertama</string>
+    <string name="guide_s_vault_pin_t">Aktifkan Vault dengan PIN yang kuat</string>
+    <string name="guide_s_vault_pin_b">Vault mengenkripsi berkas sensitif dengan AES-256-GCM yang ditopang kunci Keystore perangkat keras. Pilih 6 digit atau lebih yang tak terduga — jangan pernah memakai ulang kode buka telepon.</string>
+    <string name="guide_s_encryption_t">Pahami enkripsi sebelum Anda membutuhkannya</string>
+    <string name="guide_s_encryption_b">Folder Vault menurunkan kunci HKDF dari PIN Anda plus kunci perangkat keras, dan kredensial awan tersimpan di brankas AES/GCM lokal. Tak ada kunci yang pernah keluar dari perangkat Anda.</string>
+    <string name="guide_s_recovery_t">Simpan frasa pemulihan jauh dari perangkat</string>
+    <string name="guide_s_recovery_b">Frasa BIP39 12 kata adalah satu-satunya jalan kembali jika PIN terlupa. Tulis di kertas dan simpan di tempat aman — jangan pernah memotretnya atau mengirimkannya.</string>
+    <string name="guide_s_network_t">Bagikan lewat jaringan dengan kredensial kuat</string>
+    <string name="guide_s_network_b">Server FTP dan WebDAV bawaan terlindungi kata sandi secara bawaan. Segera ubah nilai nova/nova, jaga sinkronisasi terjadwal hanya di Wi-Fi, dan setujui sidik jari TOFU saat koneksi pertama.</string>
+    <string name="guide_s_cloud_t">Hubungkan awan dengan hak paling kecil</string>
+    <string name="guide_s_cloud_b">OAuth dengan PKCE hanya memberi akses berkas. Tinjau koneksi tertaut secara berkala di pengaturan penyedia dan cabut yang tak dipakai lagi.</string>
+    <string name="guide_s_perms_t">Periksa izin segera setelah memasang</string>
+    <string name="guide_s_perms_b">NovaFiles meminta akses semua berkas untuk mengelola seluruh penyimpanan Anda — tidak lebih. Tanpa jaringan tanpa aksi Anda, tanpa pelacakan, tanpa statistik penggunaan yang dikirim.</string>
+    <string name="guide_s_safedelete_t">Gunakan hapus aman untuk berkas sensitif</string>
+    <string name="guide_s_safedelete_b">Penghapusan biasa bisa dibatalkan alat pemulihan. Hapus aman menimpa data berkas sebelum dikeluarkan dari tempat sampah .NovaFilesTrash — pakai untuk dokumen resmi dan foto pribadi.</string>
+    <string name="guide_s_updates_t">Perbarui hanya dari sumber resmi</string>
+    <string name="guide_s_updates_b">NovaFiles 100% sumber terbuka — build dapat direproduksi dan hash APK dapat diverifikasi sebelum dipasang. Perbarui hanya dari F-Droid atau GitHub Releases.</string>
 </resources>

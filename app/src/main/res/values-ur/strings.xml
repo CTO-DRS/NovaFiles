@@ -985,4 +985,30 @@
     <string name="report_export_duplicates">نقلیں برآمد کریں (CSV)</string>
     <string name="report_export_junk">صفائی کرنے والے کے نتائج برآمد کریں (CSV)</string>
     <string name="report_share_cleanup">پہلے/بعد رپورٹ شیئر کریں (JSON)</string>
+    <!-- ═══ v0.38.0 — نئے صارف کے لیے سلامتی گائیڈ ═══ -->
+    <string name="guide_title">سلامتی گائیڈ</string>
+    <string name="guide_footer_hint">آٹھ ابواب جو پہلے دن سے آپ کی فائلوں کی حفاظت کرتے ہیں — پڑھا ہوا نشان زد کرنے کے لیے باب پر ٹیپ کریں</string>
+    <string name="guide_progress">%3$d ابواب میں سے %2$d پڑھ لیے (%1$d%%)</string>
+    <string name="guide_complete">سلامتی گائیڈ مکمل — آپ کی فائلیں امان میں ہیں</string>
+    <string name="severity_essential">بنیادی</string>
+    <string name="severity_recommended">تجویز کردہ</string>
+    <string name="severity_advanced">جدید</string>
+    <string name="settings_security_guide">سلامتی گائیڈ</string>
+    <string name="settings_security_guide_hint">آٹھ ابواب جو پہلے دن سے آپ کی فائلوں کی حفاظت کرتے ہیں</string>
+    <string name="guide_s_vault_pin_t">مضبوط PIN کے ساتھ خزانہ فعال کریں</string>
+    <string name="guide_s_vault_pin_b">خزانہ حساس فائلوں کو AES-256-GCM سے مرموز کرتا ہے جو ہارڈویئر Keystore کنجیوں پر مبنی ہے۔ کم از کم 6 غیر متوقع ہندسے چنیں — فون کا کھولنے والا کوڈ دوبارہ کبھی استعمال نہ کریں۔</string>
+    <string name="guide_s_encryption_t">مرموز کاری کو ضرورت پڑنے سے پہلے سمجھیں</string>
+    <string name="guide_s_encryption_b">خزانے کے فولڈرز HKDF کنجیاں آپ کے PIN اور ہارڈویئر کنجی سے اخذ کرتے ہیں، اور کلاؤڈ اسناد مقامی AES/GCM خزانے میں رہتی ہیں۔ کوئی کنجی کبھی آپ کے آلے سے باہر نہیں جاتی۔</string>
+    <string name="guide_s_recovery_t">بحالی کا فقرہ آلے سے دور محفوظ رکھیں</string>
+    <string name="guide_s_recovery_b">12 الفاظ کا BIP39 فقرہ PIN بھولنے پر واپسی کا واحد راستہ ہے۔ کاغذ پر لکھیں اور محفوظ جگہ رکھیں — کبھی تصویر نہ کھینچیں اور نہ بھیجیں۔</string>
+    <string name="guide_s_network_t">نیٹ ورک پر مضبوط اسناد کے ساتھ شیئر کریں</string>
+    <string name="guide_s_network_b">شامل FTP اور WebDAV سرورز بہ طور طے شدہ پاس ورڈ سے محفوظ ہیں۔ nova/nova کی طے شدہ قدریں فوراً بدلیں، شیڈولڈ سینک صرف Wi-Fi پر رکھیں، اور پہلے رابطے پر TOFU فنگر پرنٹ منظور کریں۔</string>
+    <string name="guide_s_cloud_t">کلاوڈ کم سے کم اختیارات کے ساتھ جوڑیں</string>
+    <string name="guide_s_cloud_b">PKCE کے ساتھ OAuth صرف فائل حد تک رسائی دیتا ہے۔ منسلک کنکشنز کا باقاعدہ جائزہ لیں اور غیر استعمال شدہ منسوخ کریں۔</string>
+    <string name="guide_s_perms_t">انسٹال کے فوراً بعد اجازتیں جانچیں</string>
+    <string name="guide_s_perms_b">NovaFiles آپ کا پورا اسٹوریج سنبھالنے کے لیے تمام فائلوں تک رسائی مانگتا ہے — اس سے زیادہ کچھ نہیں۔ آپ کی کارروائی کے بغیر کوئی نیٹ ورک نہیں، کوئی ٹریکنگ نہیں، کوئی استعمال کے اعداد و شمار نہیں۔</string>
+    <string name="guide_s_safedelete_t">حساس فائلوں کے لیے محفوظ مٹان استعمال کریں</string>
+    <string name="guide_s_safedelete_b">عام حذف کو بازیافت کے اوزار واپس لا سکتے ہیں۔ محفوظ مٹان فائل کو .NovaFilesTrash سے نکالنے سے پہلے اس کا ڈیٹا اوپر لکھ دیتا ہے — سرکاری دستاویزات اور ذاتی تصاویر کے لیے استعمال کریں۔</string>
+    <string name="guide_s_updates_t">صرف سرکاری ماخذ سے اپ ڈیٹ کریں</string>
+    <string name="guide_s_updates_b">NovaFiles 100% اوپن سورس ہے — بلڈز دوبارہ پیدا کیے جا سکتے ہیں اور APK ہاش تنصیب سے پہلے تصدیق کیا جا سکتا ہے۔ صرف F-Droid یا GitHub Releases سے اپ ڈیٹ کریں۔</string>
 </resources>

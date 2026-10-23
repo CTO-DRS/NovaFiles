@@ -77,6 +77,7 @@ object Routes {
     const val MEDIA_TOOLS = "mediatools?path={path}" // v0.31 — أدوات الوسائط (صور)
     const val SYNC = "sync?path={path}"              // v0.32 — المزامنة المجدولة
     const val RULES = "rules?path={path}"      // v0.35 — قواعد الأتمتة
+    const val SECURITY_GUIDE = "securityguide" // v0.38 — الدليل الأمني للمستخدم الجديد
     const val NETWORK = "network"
     const val CONN_FORM = "connform?connId={connId}"
     const val REMOTE = "remote?connId={connId}"
@@ -259,7 +260,14 @@ private fun NovaNavHost(nav: NavHostController) {
             Vault2Screen(onBack = { nav.popBackStack() })
         }
         composable(Routes.SETTINGS) {
-            SettingsScreen(onOpenVault = { nav.navigate(Routes.VAULT) })
+            SettingsScreen(
+                onOpenVault = { nav.navigate(Routes.VAULT) },
+                onOpenSecurityGuide = { nav.navigate(Routes.SECURITY_GUIDE) },
+            )
+        }
+        // v0.38 — الدليل الأمني للمستخدم الجديد
+        composable(Routes.SECURITY_GUIDE) {
+            com.novafiles.app.ui.settings.SecurityGuideScreen(onBack = { nav.popBackStack() })
         }
         composable(Routes.FTP) {
             FtpScreen(onBack = { nav.popBackStack() })

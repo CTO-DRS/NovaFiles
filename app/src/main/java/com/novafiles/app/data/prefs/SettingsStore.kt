@@ -59,6 +59,9 @@ class SettingsStore(private val context: Context) {
 
         // v0.34 — الطبقة الذكية: إيقافها يخفي نبضة التخزين ويوقف التقاط النقاط
         val SMART_ENABLED = booleanPreferencesKey("smart_enabled")
+
+        // v0.38 — الدليل الأمني: الأقسام المُقرأة CSV حسب SecurityGuide.serialize
+        val SECURITY_GUIDE_READ = stringPreferencesKey("security_guide_read")
     }
 
     val viewGrid: Flow<Boolean> = context.dataStore.data.map { it[Keys.VIEW_GRID] ?: false }
@@ -109,6 +112,10 @@ class SettingsStore(private val context: Context) {
     // v0.34 — الطبقة الذكية (مفعلة افتراضياً؛ الإيقاف يحترم دائماً)
     val smartEnabled: Flow<Boolean> = context.dataStore.data.map { it[Keys.SMART_ENABLED] ?: true }
     suspend fun setSmartEnabled(on: Boolean) = context.dataStore.edit { it[Keys.SMART_ENABLED] = on }
+
+    // v0.38 — تقدّم الدليل الأمني (CSV من معرفات الأقسام المُقرأة)
+    val securityGuideRead: Flow<String> = context.dataStore.data.map { it[Keys.SECURITY_GUIDE_READ] ?: "" }
+    suspend fun setSecurityGuideRead(raw: String) = context.dataStore.edit { it[Keys.SECURITY_GUIDE_READ] = raw }
 
     /** وصول خام للتخزين (تستخدمه الخزنة لحفظ ملح وتجزئة PIN) */
     suspend fun peekRaw(): Preferences = context.dataStore.data.first()

@@ -985,4 +985,30 @@
     <string name="report_export_duplicates">Duplikate exportieren (CSV)</string>
     <string name="report_export_junk">Putzfrau-Ergebnisse exportieren (CSV)</string>
     <string name="report_share_cleanup">Vorher/Nachher-Bericht teilen (JSON)</string>
+    <!-- ═══ v0.38.0 — Sicherheitsleitfaden für neue Nutzer ═══ -->
+    <string name="guide_title">Sicherheitsleitfaden</string>
+    <string name="guide_footer_hint">Acht Abschnitte, die Ihre Dateien vom ersten Tag an schützen — tippen Sie auf einen Abschnitt, um ihn als gelesen zu markieren</string>
+    <string name="guide_progress">%2$d von %3$d Abschnitten gelesen (%1$d%%)</string>
+    <string name="guide_complete">Sicherheitsleitfaden abgeschlossen — Ihre Dateien sind in guten Händen</string>
+    <string name="severity_essential">Wesentlich</string>
+    <string name="severity_recommended">Empfohlen</string>
+    <string name="severity_advanced">Fortgeschritten</string>
+    <string name="settings_security_guide">Sicherheitsleitfaden</string>
+    <string name="settings_security_guide_hint">Acht Abschnitte, die Ihre Dateien vom ersten Tag an schützen</string>
+    <string name="guide_s_vault_pin_t">Aktivieren Sie den Tresor mit starker PIN</string>
+    <string name="guide_s_vault_pin_b">Der Tresor verschlüsselt sensible Dateien mit AES-256-GCM und Hardware-Keystore-Schlüsseln. Wählen Sie mindestens 6 unvorhersehbare Ziffern — nie den Telefon-Entsperrcode wiederverwenden.</string>
+    <string name="guide_s_encryption_t">Verstehen Sie Verschlüsselung, bevor Sie sie brauchen</string>
+    <string name="guide_s_encryption_b">Tresor-Ordner leiten HKDF-Schlüssel aus PIN und Hardware-Schlüssel ab, Cloud-Zugänge bleiben in einem lokalen AES/GCM-Tresor. Kein Schlüssel verlässt jemals Ihr Gerät.</string>
+    <string name="guide_s_recovery_t">Bewahren Sie die Wiederherstellungsphrase außerhalb des Geräts auf</string>
+    <string name="guide_s_recovery_b">Die 12-Wort-BIP39-Phrase ist Ihr einziger Weg zurück, falls die PIN verloren geht. Schreiben Sie sie auf Papier und verwahren Sie sie sicher — niemals fotografieren oder senden.</string>
+    <string name="guide_s_network_t">Teilen Sie im Netzwerk mit starken Zugangsdaten</string>
+    <string name="guide_s_network_b">Die integrierten FTP- und WebDAV-Server sind standardmäßig passwortgeschützt. Ändern Sie nova/nova sofort, halten Sie geplante Synchronisierung nur im WLAN, und bestätigen Sie den TOFU-Fingerprint beim ersten Kontakt.</string>
+    <string name="guide_s_cloud_t">Verbinden Sie Cloud mit minimalen Rechten</string>
+    <string name="guide_s_cloud_b">OAuth mit PKCE gewährt nur dateibezogenen Zugriff. Prüfen Sie verknüpfte Verbindungen regelmäßig in den Anbieter-Einstellungen und widerrufen Sie ungenutzte.</string>
+    <string name="guide_s_perms_t">Prüfen Sie Berechtigungen gleich nach der Installation</string>
+    <string name="guide_s_perms_b">NovaFiles fragt Zugriff auf alle Dateien, um Ihren gesamten Speicher zu verwalten — nichts weiter. Kein Netzwerk ohne Ihre Aktion, kein Tracking, keine Nutzungsstatistiken.</string>
+    <string name="guide_s_safedelete_t">Nutzen Sie sicheres Löschen für sensible Dateien</string>
+    <string name="guide_s_safedelete_b">Gewöhnliches Löschen lässt sich mit Wiederherstellungswerkzeugen rückgängig machen. Sicheres Löschen überschreibt die Daten, bevor die Datei den .NovaFilesTrash-Papierkorb verlässt — für offizielle Dokumente und private Fotos.</string>
+    <string name="guide_s_updates_t">Aktualisieren Sie nur aus offiziellen Quellen</string>
+    <string name="guide_s_updates_b">NovaFiles ist 100% Open Source — Builds sind reproduzierbar und der APK-Hash vor der Installation prüfbar. Aktualisieren Sie nur über F-Droid oder GitHub Releases.</string>
 </resources>
