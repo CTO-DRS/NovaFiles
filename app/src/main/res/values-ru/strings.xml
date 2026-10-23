@@ -985,4 +985,30 @@
     <string name="report_export_duplicates">Экспорт дубликатов (CSV)</string>
     <string name="report_export_junk">Экспорт результатов чистильщика (CSV)</string>
     <string name="report_share_cleanup">Поделиться отчётом до/после (JSON)</string>
+    <!-- ═══ v0.38.0 — Руководство по безопасности для нового пользователя ═══ -->
+    <string name="guide_title">Руководство по безопасности</string>
+    <string name="guide_footer_hint">Восемь разделов, защищающих ваши файлы с первого дня — коснитесь раздела, чтобы отметить его прочитанным</string>
+    <string name="guide_progress">Прочитано %2$d из %3$d разделов (%1$d%%)</string>
+    <string name="guide_complete">Руководство по безопасности пройдено — ваши файлы в надёжных руках</string>
+    <string name="severity_essential">Обязательно</string>
+    <string name="severity_recommended">Рекомендуется</string>
+    <string name="severity_advanced">Продвинуто</string>
+    <string name="settings_security_guide">Руководство по безопасности</string>
+    <string name="settings_security_guide_hint">Восемь разделов, защищающих ваши файлы с первого дня</string>
+    <string name="guide_s_vault_pin_t">Включите Хранилище с надёжным PIN</string>
+    <string name="guide_s_vault_pin_b">Хранилище шифрует чувствительные файлы через AES-256-GCM с аппаратными ключами Keystore. Выберите не менее 6 непредсказуемых цифр — никогда не используйте код разблокировки телефона повторно.</string>
+    <string name="guide_s_encryption_t">Поймите шифрование, прежде чем оно понадобится</string>
+    <string name="guide_s_encryption_b">Папки Хранилища выводят ключи HKDF из PIN и аппаратного ключа, а облачные учётные данные остаются в локальном AES/GCM-хранилище. Ни один ключ никогда не покидает устройство.</string>
+    <string name="guide_s_recovery_t">Храните фразу восстановления вне устройства</string>
+    <string name="guide_s_recovery_b">Фраза BIP39 из 12 слов — единственный путь назад, если PIN забыт. Запишите её на бумаге и храните в надёжном месте — никогда не фотографируйте и не отправляйте её.</string>
+    <string name="guide_s_network_t">Делитесь по сети с надёжными учётными данными</string>
+    <string name="guide_s_network_b">Встроенные серверы FTP и WebDAV по умолчанию защищены паролем. Сразу смените значения nova/nova, держите плановую синхронизацию только по Wi-Fi и подтвердите отпечаток TOFU при первом подключении.</string>
+    <string name="guide_s_cloud_t">Подключайте облако с минимальными правами</string>
+    <string name="guide_s_cloud_b">OAuth с PKCE даёт доступ только к файлам. Периодически проверяйте связанные подключения в настройках провайдера и отзывайте неиспользуемые.</string>
+    <string name="guide_s_perms_t">Проверьте разрешения сразу после установки</string>
+    <string name="guide_s_perms_b">NovaFiles запрашивает доступ ко всем файлам, чтобы управлять всем вашим хранилищем — и больше ничего. Сеть только по вашему действию, никакого слежения, никакой статистики использования.</string>
+    <string name="guide_s_safedelete_t">Используйте безопасное стирание для чувствительных файлов</string>
+    <string name="guide_s_safedelete_b">Обычное удаление можно отменить инструментами восстановления. Безопасное стирание перезаписывает данные файла перед удалением из корзины .NovaFilesTrash — для официальных документов и личных фотографий.</string>
+    <string name="guide_s_updates_t">Обновляйтесь только из официального источника</string>
+    <string name="guide_s_updates_b">NovaFiles на 100% открытый код — сборки воспроизводимы, хеш APK проверяем до установки. Обновляйтесь только из F-Droid или GitHub Releases.</string>
 </resources>

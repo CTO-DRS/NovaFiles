@@ -985,4 +985,30 @@
     <string name="report_export_duplicates">Exportar duplicados (CSV)</string>
     <string name="report_export_junk">Exportar resultados del limpiador (CSV)</string>
     <string name="report_share_cleanup">Compartir informe antes/después (JSON)</string>
+    <!-- ═══ v0.38.0 — Guía de seguridad para el nuevo usuario ═══ -->
+    <string name="guide_title">Guía de seguridad</string>
+    <string name="guide_footer_hint">Ocho secciones que protegen tus archivos desde el primer día — toca una sección para marcarla como leída</string>
+    <string name="guide_progress">Leídas %2$d de %3$d secciones (%1$d%%)</string>
+    <string name="guide_complete">Guía de seguridad completada — tus archivos están en buenas manos</string>
+    <string name="severity_essential">Esencial</string>
+    <string name="severity_recommended">Recomendado</string>
+    <string name="severity_advanced">Avanzado</string>
+    <string name="settings_security_guide">Guía de seguridad</string>
+    <string name="settings_security_guide_hint">Ocho secciones que protegen tus archivos desde el primer día</string>
+    <string name="guide_s_vault_pin_t">Activa la Bóveda con un PIN fuerte</string>
+    <string name="guide_s_vault_pin_b">La Bóveda cifra archivos sensibles con AES-256-GCM respaldado por claves Keystore de hardware. Elige 6 o más dígitos impredecibles — nunca reutilices el código de desbloqueo del teléfono.</string>
+    <string name="guide_s_encryption_t">Entiende el cifrado antes de necesitarlo</string>
+    <string name="guide_s_encryption_b">Las carpetas de la Bóveda derivan claves HKDF de tu PIN más una clave de hardware, y las credenciales de nube quedan en una bóveda AES/GCM local. Ninguna clave sale nunca de tu dispositivo.</string>
+    <string name="guide_s_recovery_t">Guarda tu frase de recuperación lejos del dispositivo</string>
+    <string name="guide_s_recovery_b">La frase BIP39 de 12 palabras es tu único camino de vuelta si olvidas el PIN. Escríbela en papel y guárdala a salvo — nunca la fotografíes ni la envíes por mensaje.</string>
+    <string name="guide_s_network_t">Comparte en red con credenciales fuertes</string>
+    <string name="guide_s_network_b">Los servidores FTP y WebDAV integrados están protegidos con contraseña por defecto. Cambia nova/nova de inmediato, mantén la sincronización programada solo por Wi-Fi y acepta la huella TOFU en la primera conexión.</string>
+    <string name="guide_s_cloud_t">Conecta la nube con el mínimo privilegio</string>
+    <string name="guide_s_cloud_b">OAuth con PKCE concede acceso solo a archivos. Revisa periódicamente las conexiones vinculadas en los ajustes del proveedor y revoca las que ya no uses.</string>
+    <string name="guide_s_perms_t">Revisa los permisos justo tras instalar</string>
+    <string name="guide_s_perms_b">NovaFiles pide acceso a todos los archivos para gestionar todo tu almacenamiento — nada más. Sin red sin tu acción, sin rastreo, sin estadísticas de uso enviadas.</string>
+    <string name="guide_s_safedelete_t">Usa el borrado seguro para archivos sensibles</string>
+    <string name="guide_s_safedelete_b">El borrado normal puede revertirse con herramientas de recuperación. El borrado seguro sobrescribe los datos antes de retirar el archivo de la papelera .NovaFilesTrash — úsalo con documentos oficiales y fotos privadas.</string>
+    <string name="guide_s_updates_t">Actualiza solo desde la fuente oficial</string>
+    <string name="guide_s_updates_b">NovaFiles es 100% de código abierto — las compilaciones son reproducibles y el hash del APK verificable antes de instalar. Actualiza solo desde F-Droid o GitHub Releases.</string>
 </resources>

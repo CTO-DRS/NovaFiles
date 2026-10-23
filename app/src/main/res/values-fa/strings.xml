@@ -985,4 +985,30 @@
     <string name="report_export_duplicates">برون‌بری تکراری‌ها (CSV)</string>
     <string name="report_export_junk">برون‌بری نتایج پاک‌کننده (CSV)</string>
     <string name="report_share_cleanup">اشتراک گزارش قبل/بعد (JSON)</string>
+    <!-- ═══ v0.38.0 — راهنمای امنیتی برای کاربر تازه ═══ -->
+    <string name="guide_title">راهنمای امنیتی</string>
+    <string name="guide_footer_hint">هشت بخش که از همان روز نخست از فایل‌های شما محافظت می‌کنند — برای علامت‌گذاری به‌عنوان خوانده‌شده روی بخش ضربه بزنید</string>
+    <string name="guide_progress">%2$d از %3$d بخش خوانده شد (%1$d%%)</string>
+    <string name="guide_complete">راهنمای امنیتی کامل شد — فایل‌های شما در امان‌اند</string>
+    <string name="severity_essential">اساسی</string>
+    <string name="severity_recommended">توصیه‌شده</string>
+    <string name="severity_advanced">پیشرفته</string>
+    <string name="settings_security_guide">راهنمای امنیتی</string>
+    <string name="settings_security_guide_hint">هشت بخش که از همان روز نخست از فایل‌های شما محافظت می‌کنند</string>
+    <string name="guide_s_vault_pin_t">گاوصندوق را با PIN قوی فعال کنید</string>
+    <string name="guide_s_vault_pin_b">گاوصندوق فایل‌های حساس را با AES-256-GCM پشتیبانی‌شده از کلیدهای Keystore سخت‌افزاری رمزنگاری می‌کند. دست‌کم ۶ رقم غیرقابل حدس برگزینید — هرگز کد قفل گوشی را بازاستفاده نکنید.</string>
+    <string name="guide_s_encryption_t">پیش از نیاز، رمزنگاری را بفهمید</string>
+    <string name="guide_s_encryption_b">پوشه‌های گاوصندوق کلیدهای HKDF را از PIN شما به‌علاوه یک کلید سخت‌افزاری می‌سازند و اعتبارنامه‌های ابری در گاوصندوق محلی AES/GCM می‌مانند. هیچ کلیدی هرگز از دستگاه شما بیرون نمی‌رود.</string>
+    <string name="guide_s_recovery_t">عبارت بازیابی را دور از دستگاه نگه دارید</string>
+    <string name="guide_s_recovery_b">عبارت ۱۲ کلمه‌ای BIP39 تنها راه بازگشت در فراموشی PIN است. آن را روی کاغذ بنویسید و در جای امن نگه دارید — هرگز از آن عکس نگیرید و ارسالش نکنید.</string>
+    <string name="guide_s_network_t">در شبکه با اعتبارنامه قوی به اشتراک بگذارید</string>
+    <string name="guide_s_network_b">سرورهای داخلی FTP و WebDAV به‌طور پیش‌فرض با گذرواژه محافظت می‌شوند. مقادیر پیش‌فرض nova/nova را فوراً تغییر دهید، همگام‌سازی زمان‌بندی‌شده را فقط روی Wi-Fi نگه دارید و در نخستین اتصال اثر انگشت TOFU را بپذیرید.</string>
+    <string name="guide_s_cloud_t">ابر را با کمترین دسترسی وصل کنید</string>
+    <string name="guide_s_cloud_b">OAuth با PKCE فقط دسترسی فایل‌محور می‌دهد. اتصال‌های پیوسته را دوره‌ای در تنظیمات سرویس‌دهنده بازبینی کنید و آن‌ها را که دیگر به کار نمی‌روید لغو کنید.</string>
+    <string name="guide_s_perms_t">بلافاصله پس از نصب، مجوزها را بازبینی کنید</string>
+    <string name="guide_s_perms_b">NovaFiles برای مدیریت کل فضای شما «دسترسی به همه فایل‌ها» را می‌خواهد — نه بیشتر. بدون اقدام شما شبکه‌ای در کار نیست، ردیابی نیست و آمار استفاده‌ای ارسال نمی‌شود.</string>
+    <string name="guide_s_safedelete_t">برای فایل‌های حساس از پاک‌سازی امن استفاده کنید</string>
+    <string name="guide_s_safedelete_b">حذف عادی با ابزارهای بازیابی برگشت‌پذیر است. پاک‌سازی امن داده‌های فایل را پیش از خارج‌شدن از سطل .NovaFilesTrash بازنویسی می‌کند — برای اسناد رسمی و عکس‌های خصوصی به کار ببرید.</string>
+    <string name="guide_s_updates_t">فقط از منبع رسمی به‌روزرسانی کنید</string>
+    <string name="guide_s_updates_b">NovaFiles صد درصد متن‌باز است — ساخت‌ها بازتولیدپذیرند و هش APK پیش از نصب قابل راستی‌آزمایی است. فقط از F-Droid یا GitHub Releases به‌روزرسانی کنید.</string>
 </resources>

@@ -105,10 +105,10 @@ class BuildMaturityTest {
 
     @Test
     fun `app version must be semver and positive`() {
-        assertTrue(BuildMaturityEngine.auditAppVersion("0.37.0", 37).isEmpty())
-        assertTrue(BuildMaturityEngine.auditAppVersion("0.37", 37).isNotEmpty())
-        assertTrue(BuildMaturityEngine.auditAppVersion("1.0.0-rc1", 37).isNotEmpty())
-        assertTrue(BuildMaturityEngine.auditAppVersion("0.37.0", 0).isNotEmpty())
+        assertTrue(BuildMaturityEngine.auditAppVersion("0.38.0", 38).isEmpty())
+        assertTrue(BuildMaturityEngine.auditAppVersion("0.38", 38).isNotEmpty())
+        assertTrue(BuildMaturityEngine.auditAppVersion("1.0.0-rc1", 38).isNotEmpty())
+        assertTrue(BuildMaturityEngine.auditAppVersion("0.38.0", 0).isNotEmpty())
         assertTrue(BuildMaturityEngine.auditAppVersion(null, null).size == 2)
     }
 
@@ -150,14 +150,14 @@ class BuildMaturityTest {
     // ---------- إصدار المستودع الفعلي ----------
 
     @Test
-    fun `repo app version is semver and matches v0_37`() {
+    fun `repo app version is semver and matches v0_38`() {
         // يقرأ app/build.gradle.kts ويتحقق من ثنائي الإصدار الحالي
         val text = repoFile("app/build.gradle.kts", "app/build.gradle.kts")
         val name = Regex("""versionName\s*=\s*"([^"]+)"""").find(text)?.groupValues?.get(1)
         val code = Regex("""versionCode\s*=\s*(\d+)""").find(text)?.groupValues?.get(1)?.toInt()
         val issues = BuildMaturityEngine.auditAppVersion(name, code)
         assertTrue("إصدار المستودع مخالف: $issues", issues.isEmpty())
-        assertEquals("0.37.0", name)
-        assertEquals(37, code)
+        assertEquals("0.38.0", name)
+        assertEquals(38, code)
     }
 }

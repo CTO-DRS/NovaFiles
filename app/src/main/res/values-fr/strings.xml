@@ -985,4 +985,30 @@
     <string name="report_export_duplicates">Exporter les doublons (CSV)</string>
     <string name="report_export_junk">Exporter les résultats du nettoyage (CSV)</string>
     <string name="report_share_cleanup">Partager le rapport avant/après (JSON)</string>
+    <!-- ═══ v0.38.0 — Guide de sécurité pour le nouvel utilisateur ═══ -->
+    <string name="guide_title">Guide de sécurité</string>
+    <string name="guide_footer_hint">Huit sections qui protègent vos fichiers dès le premier jour — touchez une section pour la marquer comme lue</string>
+    <string name="guide_progress">%2$d sections lues sur %3$d (%1$d%%)</string>
+    <string name="guide_complete">Guide de sécurité terminé — vos fichiers sont entre de bonnes mains</string>
+    <string name="severity_essential">Essentiel</string>
+    <string name="severity_recommended">Recommandé</string>
+    <string name="severity_advanced">Avancé</string>
+    <string name="settings_security_guide">Guide de sécurité</string>
+    <string name="settings_security_guide_hint">Huit sections qui protègent vos fichiers dès le premier jour</string>
+    <string name="guide_s_vault_pin_t">Activez le Coffre avec un code fort</string>
+    <string name="guide_s_vault_pin_b">Le Coffre chiffre vos fichiers sensibles en AES-256-GCM avec des clés Keystore matérielles. Choisissez au moins 6 chiffres imprévisibles — ne réutilisez jamais le code de déverrouillage du téléphone.</string>
+    <string name="guide_s_encryption_t">Comprenez le chiffrement avant d\'en avoir besoin</string>
+    <string name="guide_s_encryption_b">Les dossiers du Coffre dérivent les clés HKDF de votre code et d\'une clé matérielle, et les identifiants cloud restent dans un coffre AES/GCM local. Aucune clé ne quitte jamais votre appareil.</string>
+    <string name="guide_s_recovery_t">Gardez votre phrase de récupération hors de l\'appareil</string>
+    <string name="guide_s_recovery_b">La phrase BIP39 de 12 mots est votre seule voie de retour si le code est oublié. Écrivez-la sur papier et conservez-la en lieu sûr — ne la photographiez ni ne l\'envoyez jamais.</string>
+    <string name="guide_s_network_t">Partagez sur le réseau avec des identifiants solides</string>
+    <string name="guide_s_network_b">Les serveurs FTP et WebDAV intégrés sont protégés par mot de passe par défaut. Changez immédiatement les valeurs nova/nova, gardez la synchronisation planifiée en Wi-Fi uniquement, et validez l\'empreinte TOFU à la première connexion.</string>
+    <string name="guide_s_cloud_t">Connectez le cloud avec le moins de privilèges</string>
+    <string name="guide_s_cloud_b">OAuth avec PKCE n\'accorde qu\'un accès aux fichiers. Revoyez régulièrement les connexions liées dans les réglages du fournisseur et révoquez celles devenues inutiles.</string>
+    <string name="guide_s_perms_t">Vérifiez les permissions dès l\'installation</string>
+    <string name="guide_s_perms_b">NovaFiles demande l\'accès à tous les fichiers pour gérer tout votre stockage — rien de plus. Pas de réseau sans votre action, aucun pistage, aucune statistique d\'usage envoyée.</string>
+    <string name="guide_s_safedelete_t">Utilisez l\'effacement sécurisé pour les fichiers sensibles</string>
+    <string name="guide_s_safedelete_b">Une suppression ordinaire peut être annulée par des outils de récupération. L\'effacement sécurisé écrase les données avant de retirer le fichier de la corbeille .NovaFilesTrash — à utiliser pour les documents officiels et photos privées.</string>
+    <string name="guide_s_updates_t">Mettez à jour depuis la source officielle uniquement</string>
+    <string name="guide_s_updates_b">NovaFiles est 100% open source — les builds sont reproductibles et le hash de l\'APK vérifiable avant installation. Mettez à jour depuis F-Droid ou GitHub Releases uniquement.</string>
 </resources>

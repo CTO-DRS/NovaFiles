@@ -161,9 +161,9 @@ class StringsParityTest {
             "انتهاكات التكافؤ (${issues.size}): ${issues.take(10)}",
             issues.isEmpty(),
         )
-        // أرضية السلاسل: 930 سلسلة في كل لغة من العشر (بعد دمج خط v0.30–v0.36 المتكامل)
+        // أرضية السلاسل: 955 سلسلة في كل لغة من العشر (بعد بند الدليل الأمني v0.38)
         parsed.forEach { (locale, p) ->
-            assertEquals("عدد سلاسل $locale", 930, p.entries.size)
+            assertEquals("عدد سلاسل $locale", 955, p.entries.size)
         }
     }
 }

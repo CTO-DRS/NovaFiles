@@ -69,7 +69,7 @@ import java.io.File
  * v0.19 — قسم «الأمان»: بوابة الخزنة بعد نقلها من الشريط السفلي.
  */
 @Composable
-fun SettingsScreen(onOpenVault: () -> Unit = {}) {
+fun SettingsScreen(onOpenVault: () -> Unit = {}, onOpenSecurityGuide: () -> Unit = {}) {
     val context = LocalContext.current
     val container = context.novaContainer
     val scope = rememberCoroutineScope()
@@ -255,14 +255,14 @@ fun SettingsScreen(onOpenVault: () -> Unit = {}) {
             }
         }
 
-        // ----- الأمان: الخزنة (v0.19) -----
+        // ----- الأمان: الخزنة + الدليل الأمني (v0.19 + v0.38) -----
         IOSGroupHeader(stringResource(R.string.settings_security))
         IOSGroupCard {
             IOSListRow(
                 title = stringResource(R.string.nav_vault),
                 subtitle = stringResource(R.string.vault_row_hint),
                 showChevron = true,
-                showSeparator = false,
+                showSeparator = true,
                 onClick = onOpenVault,
                 leading = {
                     // بلاطة أيقونة بأسلوب إعدادات iOS
@@ -281,6 +281,13 @@ fun SettingsScreen(onOpenVault: () -> Unit = {}) {
                         )
                     }
                 },
+            )
+            IOSListRow(
+                title = stringResource(R.string.settings_security_guide),
+                subtitle = stringResource(R.string.settings_security_guide_hint),
+                showChevron = true,
+                showSeparator = false,
+                onClick = onOpenSecurityGuide,
             )
         }
 

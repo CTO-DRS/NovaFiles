@@ -985,4 +985,30 @@
     <string name="report_export_duplicates">Yinelemeleri dışa aktar (CSV)</string>
     <string name="report_export_junk">Temizlikçi sonuçlarını dışa aktar (CSV)</string>
     <string name="report_share_cleanup">Önce/sonra raporunu paylaş (JSON)</string>
+    <!-- ═══ v0.38.0 — Yeni kullanıcı için güvenlik rehberi ═══ -->
+    <string name="guide_title">Güvenlik Rehberi</string>
+    <string name="guide_footer_hint">Dosyalarınızı ilk günden koruyan sekiz bölüm — okundu işaretlemek için bir bölüme dokunun</string>
+    <string name="guide_progress">%3$d bölümün %2$d tanesi okundu (%1$d%%)</string>
+    <string name="guide_complete">Güvenlik rehberi tamamlandı — dosyalarınız emin ellerde</string>
+    <string name="severity_essential">Temel</string>
+    <string name="severity_recommended">Önerilen</string>
+    <string name="severity_advanced">İleri</string>
+    <string name="settings_security_guide">Güvenlik Rehberi</string>
+    <string name="settings_security_guide_hint">Dosyalarınızı ilk günden koruyan sekiz bölüm</string>
+    <string name="guide_s_vault_pin_t">Kasa\'yı güçlü bir PIN ile açın</string>
+    <string name="guide_s_vault_pin_b">Kasa, hassas dosyaları donanım Keystore anahtarlarıyla desteklenen AES-256-GCM ile şifreler. En az 6 öngörülemez basamak seçin — telefonun kilit kodunu asla yeniden kullanmayın.</string>
+    <string name="guide_s_encryption_t">Şifrelemeye ihtiyaç duymadan önce anlayın</string>
+    <string name="guide_s_encryption_b">Kasa klasörleri HKDF anahtarlarını PIN\'iniz ve bir donanım anahtarından türetir, bulut kimlik bilgileri yerel AES/GCM kasasında kalır. Hiçbir anahtar cihazınızdan ayrılmaz.</string>
+    <string name="guide_s_recovery_t">Kurtarma ifadenizi cihazdan uzak tutun</string>
+    <string name="guide_s_recovery_b">12 kelimelik BIP39 ifadesi PIN\'i unutursanız tek yolunuzdur. Kağıda yazın ve güvenli bir yerde saklayın — asla fotoğraflamayın veya göndermeyin.</string>
+    <string name="guide_s_network_t">Ağda güçlü kimlik bilgileriyle paylaşın</string>
+    <string name="guide_s_network_b">Yerleşik FTP ve WebDAV sunucuları varsayılan olarak şifre korumalıdır. nova/nova varsayılanlarını hemen değiştirin, zamanlanmış eşitlemeyi yalnızca Wi-Fi\'da tutun ve ilk bağlantıda TOFU parmak izini onaylayın.</string>
+    <string name="guide_s_cloud_t">Bulutu en az ayrıcalıkla bağlayın</string>
+    <string name="guide_s_cloud_b">PKCE\'li OAuth yalnızca dosya kapsamlı erişim verir. Bağlantıları sağlayıcı ayarlarında düzenli gözden geçirin ve kullanmadıklarınızı iptal edin.</string>
+    <string name="guide_s_perms_t">Kurulumdan hemen sonra izinleri inceleyin</string>
+    <string name="guide_s_perms_b">NovaFiles tüm depolamanızı yönetmek için tüm dosyalara erişim ister — başka hiçbir şey. Sizin eyleminiz olmadan ağ yok, izleme yok, kullanım istatistiği gönderilmez.</string>
+    <string name="guide_s_safedelete_t">Hassas dosyalar için güvenli silme kullanın</string>
+    <string name="guide_s_safedelete_b">Normal silme, kurtarma araçlarıyla geri alınabilir. Güvenli silme, dosya .NovaFilesTrash çöpünden çıkarılmadan önce verisini üzerine yazar — resmi belgeler ve özel fotoğraflar için kullanın.</string>
+    <string name="guide_s_updates_t">Yalnızca resmi kaynaktan güncelleyin</string>
+    <string name="guide_s_updates_b">NovaFiles %100 açık kaynaktır — derlemeler yeniden üretilebilir ve APK karması kurulum öncesi doğrulanabilir. Yalnızca F-Droid veya GitHub Releases\'dan güncelleyin.</string>
 </resources>

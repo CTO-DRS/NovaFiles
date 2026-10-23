@@ -992,4 +992,30 @@
     <string name="report_export_duplicates">تصدير نتيجة المكررات (CSV)</string>
     <string name="report_export_junk">تصدير نتيجة المنظّف (CSV)</string>
     <string name="report_share_cleanup">مشاركة تقرير قبل/بعد (JSON)</string>
+    <!-- ═══ v0.38.0 — الدليل الأمني للمستخدم الجديد ═══ -->
+    <string name="guide_title">الدليل الأمني</string>
+    <string name="guide_footer_hint">ثمانية أقسام تحمي ملفاتك من اليوم الأول — انقر القسم لتسجيله مُقرأاً</string>
+    <string name="guide_progress">قرأت %2$d من %3$d أقسام (%1$d%%)</string>
+    <string name="guide_complete">أتممت الدليل الأمني — ملفاتك بأيدٍ أمينة</string>
+    <string name="severity_essential">جوهرية</string>
+    <string name="severity_recommended">مستحسنة</string>
+    <string name="severity_advanced">متقدمة</string>
+    <string name="settings_security_guide">الدليل الأمني</string>
+    <string name="settings_security_guide_hint">ثمانية أقسام تحمي ملفاتك من اليوم الأول</string>
+    <string name="guide_s_vault_pin_t">فعّل الخزنة برمز PIN قوي</string>
+    <string name="guide_s_vault_pin_b">الخزنة تشفّر ملفاتك الحساسة AES-256-GCM عبر مفاتيح Keystore العتادية. اختر رمزاً من 6 خانات فأكثر غير متوقع، ولا تعِد استخدام رمز فتح هاتفك.</string>
+    <string name="guide_s_encryption_t">افهم التشفير قبل أن تحتاجه</string>
+    <string name="guide_s_encryption_b">مجلدات الخزنة تشتق مفاتيح HKDF من رمزك ومفتاح عتادي، واعتماديات السحابة محفوظة في خزنة AES/GCM محلية. لا يغادر أي مفتاح جهازك أبداً.</string>
+    <string name="guide_s_recovery_t">احفظ عبارة الاسترجاع بعيداً عن الجهاز</string>
+    <string name="guide_s_recovery_b">عبارة BIP39 من 12 كلمة هي طريقك الوحيد للاسترجاع إن نسيت الرمز. اكتبها على ورق واحفظها في مكان آمن — لا تصوّرها ولا ترسلها لنفسك.</string>
+    <string name="guide_s_network_t">شارك عبر الشبكة ببيانات دخول قوية</string>
+    <string name="guide_s_network_b">خادما FTP وWebDAV المدمجان محميان بكلمة مرور افتراضياً. غيّر nova/nova الافتراضية فوراً، وفعّل «Wi-Fi فقط» للمزامنة المجدولة، ووثّق بصمة المضيف TOFU عند أول اتصال.</string>
+    <string name="guide_s_cloud_t">اربط السحابة بأقل صلاحيات</string>
+    <string name="guide_s_cloud_b">OAuth مع PKCE يمنح صلاحية ملفات فقط. راجع الاتصالات المرتبطة من إعدادات المزود دورياً، وألغِ ما لا تستخدمه.</string>
+    <string name="guide_s_perms_t">افحص الأذونات فور التثبيت</string>
+    <string name="guide_s_perms_b">يطلب NovaFiles «الوصول لكل الملفات» ليدير مخزنك كاملاً — لا شيء غير ذلك. لا شبكة دون طلبك، ولا تتبّع، ولا إحصاءات استخدام تُرسل لأي جهة.</string>
+    <string name="guide_s_safedelete_t">استخدم المسح الآمن للملفات الحساسة</string>
+    <string name="guide_s_safedelete_b">الحذف العادي قابل للاستعادة بأدوات الاسترجاع. المسح الآمن يكتب فوق بيانات الملف قبل حذفه من سلة .NovaFilesTrash — استخدمه للمستندات الرسمية والصور الشخصية.</string>
+    <string name="guide_s_updates_t">حدّث من المصدر الرسمي فقط</string>
+    <string name="guide_s_updates_b">NovaFiles مفتوح المصدر 100% — بناؤه قابل لإعادة الإنتاج ويمكن التحقق من بصمة APK قبل التثبيت. حدّث من F-Droid أو GitHub Releases فقط.</string>
 </resources>
