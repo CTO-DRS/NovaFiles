@@ -85,6 +85,20 @@ class AppContainer(appContext: Context) {
         com.novafiles.app.core.cloud.CameraSyncManager(ctx, db, cloudAccounts, ::cloudClientId)
     }
 
+    /** v0.35 — قواعد الأتمتة: مستودع الحفظ + سجل التنفيذ + المحرك الخالص */
+    val rulesRepo: com.novafiles.app.core.rules.RulesRepository by lazy {
+        com.novafiles.app.core.rules.RulesRepository(ctx)
+    }
+    val ruleLog: com.novafiles.app.core.rules.RuleExecutionLog by lazy {
+        com.novafiles.app.core.rules.RuleExecutionLog(200)
+    }
+    val ruleEngine: com.novafiles.app.core.rules.WatchRuleEngine by lazy {
+        com.novafiles.app.core.rules.WatchRuleEngine(
+            host = com.novafiles.app.core.rules.RuleActionHostImpl(ctx, db, cloudAccounts, ::cloudClientId),
+            log = ruleLog,
+        )
+    }
+
     /** معرّف عميل OAuth لكل مزوّد — يضبطه المُطوّر عبر gradle.properties */
     fun cloudClientId(provider: String): String = when (provider) {
         "drive" -> com.novafiles.app.BuildConfig.DRIVE_CLIENT_ID
