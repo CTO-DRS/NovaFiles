@@ -31,7 +31,7 @@ class AppContainer(appContext: Context) {
 
     val db: NovaDb by lazy {
         Room.databaseBuilder(ctx, NovaDb::class.java, "nova.db")
-            .addMigrations(NovaDb.MIGRATION_4_5)
+            .addMigrations(NovaDb.MIGRATION_4_5, NovaDb.MIGRATION_5_6)
             .fallbackToDestructiveMigration()
             .build()
     }
@@ -41,6 +41,11 @@ class AppContainer(appContext: Context) {
     /** v0.33 — الوسوم الملوّنة والرفوف الذكية: مستودع الوسوم */
     val tags: com.novafiles.app.data.tags.TagsRepository by lazy {
         com.novafiles.app.data.tags.TagsRepository(db)
+    }
+
+    /** v0.32 — أزواج المزامنة المجدولة: مستودع الأزواج والجولات */
+    val sync: com.novafiles.app.data.sync.SyncRepository by lazy {
+        com.novafiles.app.data.sync.SyncRepository(ctx, db)
     }
 
     val vault: VaultManager by lazy { VaultManager(ctx, settings) }

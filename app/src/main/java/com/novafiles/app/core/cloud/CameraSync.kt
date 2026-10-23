@@ -30,6 +30,8 @@ object CameraSync {
         val isVideo: Boolean,
         /** يفتح محتوى العنصر للتدفق (الهاش ثم الرفع) */
         val open: () -> InputStream,
+        /** v0.32 — المصدر المُصنّف (يحدد المجلد الفرعي عند تعدد المصادر) */
+        val source: CameraSource = CameraSource.CAMERA,
     )
 
     /** سجل دفترة — عنصر مُزامَن سابقاً */
@@ -83,11 +85,60 @@ object CameraSync {
     /** استراتيجية تسمية الوجهة */
     enum class Naming { FLAT, YEAR_MONTH }
 
+    /**
+     * v0.32 — مصادر مزامنة الكاميرا المتعددة: بدل مصدر واحد (الكاميرا)،
+     * تُصنّف الوسائط حسب RELATIVE_PATH إلى كاميرا / واتساب / لقطات شاشة،
+     * ويُحفظ اسم المصدر كمجلد فرعي تحت الهدف (نفس ضمانة exact-once).
+     */
+    enum class CameraSource(val id: String) {
+        CAMERA("CAMERA"),
+        WHATSAPP("WHATSAPP"),
+        SCREENSHOTS("SCREENSHOTS"),
+        ;
+
+        /** مجلد فرعي ثابت ASCII تحت الهدف (سلامة عبر المزودات) */
+        val folderLabel: String
+            get() = when (this) {
+                CAMERA -> "Camera"
+                WHATSAPP -> "WhatsApp"
+                SCREENSHOTS -> "Screenshots"
+            }
+
+        companion object {
+            /** تحليل CSV مخزن — الفارغ/الغريب يعود للكاميرا (توافق v0.16) */
+            fun fromCsv(csv: String?): Set<CameraSource> {
+                val parsed = csv.orEmpty().split(',')
+                    .mapNotNull { s -> entries.firstOrNull { it.id == s.trim() } }
+                    .toSet()
+                return parsed.ifEmpty { setOf(CAMERA) }
+            }
+
+            fun toCsv(sources: Set<CameraSource>): String =
+                sources.joinToString(",") { it.id }
+
+            /**
+             * تصنيف مسار نسبي من MediaStore — قاعدة حتمية:
+             * مسار واتساب ← WHATSAPP، لقطات شاشة/تسجيل ← SCREENSHOTS،
+             * وكل ما عدا ذلك (DCIM/Camera أو غير معروف) ← الكاميرا.
+             */
+            fun classify(relativePath: String): CameraSource {
+                val p = relativePath.replace('\\', '/').lowercase()
+                return when {
+                    p.contains("whatsapp") -> WHATSAPP
+                    p.contains("screenshot") || p.contains("screencast") || p.endsWith("/screens") -> SCREENSHOTS
+                    else -> CAMERA
+                }
+            }
+        }
+    }
+
     /** سياسة المزامنة كاملة */
     data class SyncPolicy(
         val targetFolder: String,      // المسار السحابي الهدف
         val naming: Naming = Naming.YEAR_MONTH,
         val constraints: SyncConstraints = SyncConstraints(),
+        /** v0.32 — مجلد فرعي لكل مصدر (عند تعدد المصادر فقط) */
+        val multiSource: Boolean = false,
     )
 
     /** تقرير جولة مزامنة */
@@ -185,15 +236,21 @@ object CameraSync {
         return SyncReport(uploaded, skipped, failed)
     }
 
-    /** المجلد الهدف لكل عنصر — FLAT أو yyyy/MM (بتوقيت UTC للاستقرار) */
+    /** المجلد الهدف لكل عنصر — FLAT أو yyyy/MM (بتوقيت UTC للاستقرار)، ومجلد المصدر عند تعدد المصادر */
     fun targetFolderFor(policy: SyncPolicy, item: MediaItem): String {
-        if (policy.naming == Naming.FLAT) return policy.targetFolder
+        val base = policy.targetFolder.trimEnd('/')
+        val withSource = if (policy.multiSource) {
+            if (base.isBlank()) "/${item.source.folderLabel}" else "$base/${item.source.folderLabel}"
+        } else {
+            base
+        }
+        if (policy.naming == Naming.FLAT) return withSource
         val cal = java.util.Calendar.getInstance(java.util.TimeZone.getTimeZone("UTC"))
             .apply { timeInMillis = item.lastModified }
         val y = cal.get(java.util.Calendar.YEAR)
         val m = cal.get(java.util.Calendar.MONTH) + 1
         val sub = "$y/${"%02d".format(m)}"
-        return if (policy.targetFolder.isBlank()) "/$sub" else "${policy.targetFolder.trimEnd('/')}/$sub"
+        return if (withSource.isBlank()) "/$sub" else "$withSource/$sub"
     }
 
     /** ينشئ سلسلة مجلدات على المزوّد — متسامح مع الوجود المسبق */

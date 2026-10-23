@@ -9,6 +9,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
 import androidx.room.Query
+import androidx.room.Update
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
@@ -230,6 +231,8 @@ data class CloudAccountEntity(
     val naming: String = "YEAR_MONTH",
     /** مزامنة الكاميرا مفعلة لهذا الحساب؟ */
     val syncEnabled: Boolean = false,
+    /** v0.32 — مصادر مزامنة الكاميرا المفعّلة CSV (CAMERA,WHATSAPP,SCREENSHOTS) */
+    val cameraSources: String = "CAMERA",
     val lastSyncAt: Long = 0L,
     val createdAt: Long = System.currentTimeMillis(),
     val lastUsedAt: Long = 0L,
@@ -285,9 +288,121 @@ interface SyncLedgerDao {
     suspend fun count(): Int
 }
 
+// ═══════════════ v0.32 — أزواج المزامنة المجدولة وسجل جولاتها ═══════════════
+
+/** زوج مزامنة — مصدر ووجهة فوق تجريد المخازن (محلي أو سحابي) */
+@Entity(tableName = "sync_pairs", indices = [Index(value = ["name"], unique = true)])
+data class SyncPairEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val name: String,
+    // المصدر: local | cloud
+    val sourceType: String,
+    /** مسار مطلق محلي، أو مسار سحابي داخل الحساب */
+    val sourcePath: String,
+    /** معرف الحساب السحابي (صفر للمحلي) */
+    val sourceAccountId: Long = 0,
+    // الوجهة: local | cloud
+    val destType: String,
+    val destPath: String,
+    val destAccountId: Long = 0,
+    /** ONE_WAY | MIRROR | TWO_WAY */
+    val direction: String,
+    /** NEWER_WINS | KEEP_BOTH */
+    val conflictPolicy: String = "NEWER_WINS",
+    /** MANUAL | HOURLY | EVERY_6_HOURS | EVERY_12_HOURS | DAILY | WEEKLY */
+    val interval: String = "MANUAL",
+    val wifiOnly: Boolean = true,
+    val requireCharging: Boolean = false,
+    /** تحقق بالبصمة بعد النسخ (SHA-256 عبر نمط v0.29) */
+    val verifyChecksums: Boolean = false,
+    val enabled: Boolean = true,
+    /** لقطة أساس ثنائي الاتجاه (JSON) — من آخر جولة ناجحة */
+    val baselineJson: String? = null,
+    val lastRunAt: Long? = null,
+    val createdAt: Long = System.currentTimeMillis(),
+)
+
+/** جولة مزامنة واحدة — سجل حلقي محدود لكل زوج (نمط ConnectionLog) */
+@Entity(tableName = "sync_runs", indices = [Index("pairId")])
+data class SyncRunEntity(
+    @PrimaryKey(autoGenerate = true) val id: Long = 0,
+    val pairId: Long,
+    val startedAt: Long,
+    val finishedAt: Long? = null,
+    /** RUNNING | SUCCESS | PARTIAL | FAILED | CANCELLED | BLOCKED */
+    val status: String,
+    val copied: Int = 0,
+    val updated: Int = 0,
+    val deleted: Int = 0,
+    val skipped: Int = 0,
+    val conflicts: Int = 0,
+    val failed: Int = 0,
+    val bytes: Long = 0,
+    val verifiedOk: Int = 0,
+    val verifyFailed: Int = 0,
+)
+
+@Dao
+interface SyncPairsDao {
+    @Query("SELECT * FROM sync_pairs ORDER BY createdAt DESC, id DESC")
+    fun observeAll(): Flow<List<SyncPairEntity>>
+
+    @Query("SELECT * FROM sync_pairs WHERE id = :id")
+    suspend fun byId(id: Long): SyncPairEntity?
+
+    @Query("SELECT * FROM sync_pairs WHERE enabled = 1 AND interval != 'MANUAL'")
+    suspend fun scheduled(): List<SyncPairEntity>
+
+    @Insert(onConflict = OnConflictStrategy.ABORT)
+    suspend fun insert(pair: SyncPairEntity): Long
+
+    @Update
+    suspend fun update(pair: SyncPairEntity)
+
+    @Query("DELETE FROM sync_pairs WHERE id = :id")
+    suspend fun remove(id: Long)
+
+    @Query("UPDATE sync_pairs SET enabled = :enabled WHERE id = :id")
+    suspend fun setEnabled(id: Long, enabled: Boolean)
+
+    @Query("UPDATE sync_pairs SET lastRunAt = :lastRunAt, baselineJson = :baselineJson WHERE id = :id")
+    suspend fun touchRun(id: Long, lastRunAt: Long, baselineJson: String?)
+
+    @Query("SELECT COUNT(*) FROM sync_pairs")
+    suspend fun count(): Int
+}
+
+@Dao
+interface SyncRunsDao {
+    @Insert
+    suspend fun insert(run: SyncRunEntity): Long
+
+    @Update
+    suspend fun update(run: SyncRunEntity)
+
+    @Query("SELECT * FROM sync_runs WHERE id = :id")
+    suspend fun byId(id: Long): SyncRunEntity?
+
+    @Query("SELECT * FROM sync_runs WHERE pairId = :pairId ORDER BY id DESC LIMIT :limit")
+    fun observeRecent(pairId: Long, limit: Int = 10): Flow<List<SyncRunEntity>>
+
+    @Query("SELECT * FROM sync_runs WHERE pairId = :pairId ORDER BY id DESC LIMIT :limit")
+    suspend fun recent(pairId: Long, limit: Int = 10): List<SyncRunEntity>
+
+    /** حلق الجولات القديمة — يحفظ آخر [keep] جولة لكل زوج */
+    @Query(
+        "DELETE FROM sync_runs WHERE pairId = :pairId AND id NOT IN " +
+            "(SELECT id FROM sync_runs WHERE pairId = :pairId ORDER BY id DESC LIMIT :keep)",
+    )
+    suspend fun trim(pairId: Long, keep: Int = 20)
+
+    @Query("DELETE FROM sync_runs WHERE pairId = :pairId")
+    suspend fun clearFor(pairId: Long)
+}
+
 @Database(
-    entities = [FavoriteEntity::class, TagDefEntity::class, TagFileEntity::class, FileIndexEntity::class, FileIndexFtsEntity::class, ConnectionEntity::class, CloudAccountEntity::class, SyncLedgerEntity::class],
-    version = 5,
+    entities = [FavoriteEntity::class, TagDefEntity::class, TagFileEntity::class, FileIndexEntity::class, FileIndexFtsEntity::class, ConnectionEntity::class, CloudAccountEntity::class, SyncLedgerEntity::class, SyncPairEntity::class, SyncRunEntity::class],
+    version = 6,
     exportSchema = false,
 )
 abstract class NovaDb : RoomDatabase() {
@@ -298,6 +413,8 @@ abstract class NovaDb : RoomDatabase() {
     abstract fun connectionsDao(): ConnectionsDao
     abstract fun cloudAccountsDao(): CloudAccountsDao
     abstract fun syncLedgerDao(): SyncLedgerDao
+    abstract fun syncPairsDao(): SyncPairsDao
+    abstract fun syncRunsDao(): SyncRunsDao
 
     companion object {
         /**
@@ -357,6 +474,38 @@ abstract class NovaDb : RoomDatabase() {
                 }
                 // 5) إسقاط الجدول القديم
                 db.execSQL("DROP TABLE IF EXISTS `tags_legacy_v4`")
+            }
+        }
+
+        /**
+         * v0.32 — 5→6: جداول أزواج المزامنة وسجل جولاتها + عمود مصادر
+         * مزامنة الكاميرا المتعددة في cloud_accounts — كلها إضافات بلا
+         * مسّ لأي بيانات موجودة.
+         */
+        val MIGRATION_5_6: Migration = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `sync_pairs` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                        "`name` TEXT NOT NULL, `sourceType` TEXT NOT NULL, `sourcePath` TEXT NOT NULL, " +
+                        "`sourceAccountId` INTEGER NOT NULL, `destType` TEXT NOT NULL, `destPath` TEXT NOT NULL, " +
+                        "`destAccountId` INTEGER NOT NULL, `direction` TEXT NOT NULL, `conflictPolicy` TEXT NOT NULL, " +
+                        "`interval` TEXT NOT NULL, `wifiOnly` INTEGER NOT NULL, `requireCharging` INTEGER NOT NULL, " +
+                        "`verifyChecksums` INTEGER NOT NULL, `enabled` INTEGER NOT NULL, `baselineJson` TEXT, " +
+                        "`lastRunAt` INTEGER, `createdAt` INTEGER NOT NULL)",
+                )
+                db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS `index_sync_pairs_name` ON `sync_pairs` (`name`)")
+                db.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `sync_runs` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                        "`pairId` INTEGER NOT NULL, `startedAt` INTEGER NOT NULL, `finishedAt` INTEGER, " +
+                        "`status` TEXT NOT NULL, `copied` INTEGER NOT NULL, `updated` INTEGER NOT NULL, " +
+                        "`deleted` INTEGER NOT NULL, `skipped` INTEGER NOT NULL, `conflicts` INTEGER NOT NULL, " +
+                        "`failed` INTEGER NOT NULL, `bytes` INTEGER NOT NULL, `verifiedOk` INTEGER NOT NULL, " +
+                        "`verifyFailed` INTEGER NOT NULL)",
+                )
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_sync_runs_pairId` ON `sync_runs` (`pairId`)")
+                db.execSQL(
+                    "ALTER TABLE `cloud_accounts` ADD COLUMN `cameraSources` TEXT NOT NULL DEFAULT 'CAMERA'",
+                )
             }
         }
     }

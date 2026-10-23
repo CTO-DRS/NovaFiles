@@ -34,6 +34,8 @@ class CameraSyncManager(
         val size: Long,
         val dateModified: Long,
         val isVideo: Boolean,
+        /** v0.32 — المصدر المُصنّف من RELATIVE_PATH */
+        val source: CameraSync.CameraSource = CameraSync.CameraSource.CAMERA,
     )
 
     /** فحص بيئة الجهاز الآن */
@@ -54,10 +56,15 @@ class CameraSyncManager(
     }
 
     /**
-     * مسح وسائط الكاميرا الجديدة — كل الصور/الفيديوهات المضافة بعد [sinceMs]
-     * (بثواني Unix كما يعطي MediaStore)، مرتبة الأقدم أولاً.
+     * مسح وسائط المصادر المختارة المضافة بعد [sinceMs] (بثواني Unix كما
+     * يعطي MediaStore) — v0.32: تصنيف كل صف بمصدره من RELATIVE_PATH
+     * وتصفية بالمصادر المفعّلة، مرتبة الأقدم أولاً.
      */
-    suspend fun scanNewMedia(sinceMs: Long, limit: Int = 200): List<MediaRow> =
+    suspend fun scanNewMedia(
+        sinceMs: Long,
+        limit: Int = 200,
+        sources: Set<CameraSync.CameraSource> = setOf(CameraSync.CameraSource.CAMERA),
+    ): List<MediaRow> =
         withContext(Dispatchers.IO) {
             val out = ArrayList<MediaRow>()
             val projection = arrayOf(
@@ -65,6 +72,7 @@ class CameraSyncManager(
                 MediaStore.MediaColumns.DISPLAY_NAME,
                 MediaStore.MediaColumns.SIZE,
                 MediaStore.MediaColumns.DATE_MODIFIED,
+                MediaStore.MediaColumns.RELATIVE_PATH,
             )
             val sinceSec = sinceMs / 1000
             for (collection in listOf(
@@ -82,10 +90,14 @@ class CameraSyncManager(
                     val nameCol = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME)
                     val sizeCol = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.SIZE)
                     val modCol = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_MODIFIED)
+                    val relCol = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.RELATIVE_PATH)
                     while (cursor.moveToNext() && out.size < limit) {
                         val name = cursor.getString(nameCol) ?: continue
                         val isVideo = collection == MediaStore.Video.Media.EXTERNAL_CONTENT_URI
                         if (!CameraSync.isSyncableMedia(name, isVideo)) continue
+                        val relativePath = cursor.getString(relCol) ?: ""
+                        val source = CameraSync.CameraSource.classify(relativePath)
+                        if (source !in sources) continue
                         out.add(
                             MediaRow(
                                 id = cursor.getLong(idCol),
@@ -94,6 +106,7 @@ class CameraSyncManager(
                                 size = cursor.getLong(sizeCol),
                                 dateModified = cursor.getLong(modCol) * 1000,
                                 isVideo = isVideo,
+                                source = source,
                             ),
                         )
                     }
@@ -119,7 +132,9 @@ class CameraSyncManager(
             }.getOrNull() ?: return@withContext null
 
             val fs = (provider as CloudFsProvider).unwrap()
-            val media = scanNewMedia(account.lastSyncAt)
+            // v0.32 — مصادر متعددة: الكاميرا + واتساب + لقطات الشاشة حسب الحساب
+            val sources = CameraSync.CameraSource.fromCsv(account.cameraSources)
+            val media = scanNewMedia(account.lastSyncAt, sources = sources)
 
             val items = media.map { row ->
                 CameraSync.MediaItem(
@@ -128,6 +143,7 @@ class CameraSyncManager(
                     size = row.size,
                     lastModified = row.dateModified,
                     isVideo = row.isVideo,
+                    source = row.source,
                     open = {
                         context.contentResolver.openInputStream(android.net.Uri.parse(row.uri))
                             ?: throw java.io.IOException("cannot open $row.uri")
@@ -142,6 +158,7 @@ class CameraSyncManager(
                     targetFolder = account.targetFolder,
                     naming = if (account.naming == "FLAT") CameraSync.Naming.FLAT else CameraSync.Naming.YEAR_MONTH,
                     constraints = constraints,
+                    multiSource = sources.size > 1,
                 ),
                 ledger = ledger,
                 environment = env,

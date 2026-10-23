@@ -36,9 +36,18 @@ class RecoveryPhraseTest {
     @Test
     fun validate_rejectsChecksumFlip() {
         val words = RecoveryPhrase.generate()
-        // غيّر كلمة واحدة لكلمة صالحة أخرى — checksum يكشف
-        val flipped = words.mapIndexed { i, w -> if (i == 5) "zebra" else w }
-        assertFalse(RecoveryPhrase.validate(flipped))
+        // غيّر كلمة واحدة لمرشحات صالحة أخرى — checksum يكشف.
+        // v0.32 إصلاح عشوائية قديمة: تبديل كلمة واحدة قد يمر بالصدفة
+        // (فرصة 1/16 لكل مرشح)، لذا نفحص 8 مرشحات ونتطلب ألا تمر كلها —
+        // احتمال الفشل (1/16)^8 ≈ 2e-10 عملياً صفر.
+        val candidates = Bip39Wordlist.WORDS.take(32).filter { it != words[5] }.take(8)
+        val accepted = candidates.count { c ->
+            RecoveryPhrase.validate(words.mapIndexed { i, w -> if (i == 5) c else w })
+        }
+        assertTrue(
+            "checksum must reject word swaps (accepted $accepted of ${candidates.size})",
+            accepted < candidates.size,
+        )
     }
 
     @Test
