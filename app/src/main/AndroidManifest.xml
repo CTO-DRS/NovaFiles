@@ -103,6 +103,12 @@
             android:exported="false"
             android:foregroundServiceType="dataSync" />
 
+        <!-- v0.35 — مراقبة مجلدات قواعد الأتمتة كخدمة أمامية -->
+        <service
+            android:name=".core.rules.RuleWatcherService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync" />
+
         <!-- v0.17 — ودجات سطح المكتب الأربعة -->
         <receiver
             android:name=".widget.RecentFilesWidget"

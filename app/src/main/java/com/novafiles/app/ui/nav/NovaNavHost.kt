@@ -76,6 +76,7 @@ object Routes {
     const val PDF = "pdf?path={path}"              // v0.31 — عارض PDF المدمج
     const val MEDIA_TOOLS = "mediatools?path={path}" // v0.31 — أدوات الوسائط (صور)
     const val SYNC = "sync?path={path}"              // v0.32 — المزامنة المجدولة
+    const val RULES = "rules?path={path}"      // v0.35 — قواعد الأتمتة
     const val NETWORK = "network"
     const val CONN_FORM = "connform?connId={connId}"
     const val REMOTE = "remote?connId={connId}"
@@ -96,6 +97,7 @@ object Routes {
     fun pdf(path: String) = "pdf?path=${android.net.Uri.encode(path)}"
     fun mediaTools(path: String) = "mediatools?path=${android.net.Uri.encode(path)}"
     fun sync(path: String) = "sync?path=${android.net.Uri.encode(path)}"
+    fun rules(path: String) = "rules?path=${android.net.Uri.encode(path)}"
     fun connForm(connId: Long) = "connform?connId=$connId"
     fun remote(connId: Long) = "remote?connId=$connId"
     fun direct(sendMode: Boolean) = "direct?mode=${if (sendMode) "send" else "receive"}"
@@ -240,6 +242,7 @@ private fun NovaNavHost(nav: NavHostController) {
                 onOpenChecksums = { nav.navigate(Routes.checksums(it)) },
                 onOpenMediaTools = { nav.navigate(Routes.mediaTools(it)) },
                 onOpenSync = { nav.navigate(Routes.SYNC) },
+                onOpenRules = { nav.navigate(Routes.rules(it)) },
             )
         }
         composable(Routes.SEARCH) {
@@ -310,6 +313,20 @@ private fun NovaNavHost(nav: NavHostController) {
         ) { entry ->
             com.novafiles.app.ui.media.MediaToolsScreen(
                 folderPath = entry.arguments?.getString("path"),
+                onBack = { nav.popBackStack() },
+            )
+        }
+        // v0.35 — قواعد الأتمتة «عند حدوث X افعل Y»
+        composable(
+            Routes.RULES,
+            arguments = listOf(navArgument("path") {
+                type = NavType.StringType
+                nullable = true
+                defaultValue = null
+            }),
+        ) { entry ->
+            com.novafiles.app.ui.rules.RulesScreen(
+                initialPath = entry.arguments?.getString("path"),
                 onBack = { nav.popBackStack() },
             )
         }
