@@ -46,6 +46,7 @@ import androidx.core.os.LocaleListCompat
 import com.novafiles.app.R
 import com.novafiles.app.core.gesture.GestureConfig
 import com.novafiles.app.core.gesture.SwipeAction
+import com.novafiles.app.core.l10n.LanguageCatalog
 import com.novafiles.app.core.theme.IconPackEngine
 import com.novafiles.app.core.theme.PaletteEngine
 import com.novafiles.app.data.prefs.ThemeMode
@@ -89,7 +90,7 @@ fun SettingsScreen(onOpenVault: () -> Unit = {}) {
     }
     LaunchedEffect(Unit) {
         val current = AppCompatDelegate.getApplicationLocales().toLanguageTags()
-        localeTag = if (current.isBlank()) "ar" else current.substringBefore("-")
+        localeTag = if (current.isBlank()) LanguageCatalog.BASE_CODE else current.substringBefore("-")
     }
 
     Column(
@@ -104,27 +105,22 @@ fun SettingsScreen(onOpenVault: () -> Unit = {}) {
             collapsed = scrollState.value > 24,
         )
 
-        // ----- اللغة -----
+        // ----- اللغة (v0.37 — العشر لغات) -----
         IOSGroupHeader(stringResource(R.string.settings_language))
         IOSGroupCard {
-            IOSListRow(
-                title = "العربية",
-                onClick = {
-                    localeTag = "ar"
-                    AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("ar"))
-                },
-                showSeparator = true,
-                trailing = { if (localeTag == "ar") IOSCheckMark() },
-            )
-            IOSListRow(
-                title = "English",
-                onClick = {
-                    localeTag = "en"
-                    AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags("en"))
-                },
-                showSeparator = false,
-                trailing = { if (localeTag == "en") IOSCheckMark() },
-            )
+            val languages = LanguageCatalog.ALL
+            languages.forEachIndexed { index, locale ->
+                IOSListRow(
+                    title = locale.nativeName,
+                    subtitle = locale.englishName,
+                    onClick = {
+                        localeTag = locale.code
+                        AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(locale.code))
+                    },
+                    showSeparator = index != languages.lastIndex,
+                    trailing = { if (localeTag == locale.code) IOSCheckMark() },
+                )
+            }
         }
 
         // ----- السمة -----

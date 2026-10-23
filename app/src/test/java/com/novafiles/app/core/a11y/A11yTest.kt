@@ -55,6 +55,57 @@ class A11yTest {
         assertTrue(findings.none { it.level == ContrastLevel.FAIL })
     }
 
+    // ---------- v0.37 — تدقيق عائلات الألوان الـ12 (وضعا فاتح/داكن) ----------
+
+    @Test
+    fun `onAccent passes AA over accent for all presets and both modes`() {
+        val presets = com.novafiles.app.core.theme.PaletteEngine.PRESETS
+        assertEquals(12, presets.size)
+        for (preset in presets) for (dark in listOf(false, true)) {
+            val family = com.novafiles.app.core.theme.PaletteEngine.family(preset, dark)
+            val findings = ContrastAuditor.auditAccentFamily(
+                com.novafiles.app.core.a11y.AccentPairSpec(family.accent, family.onAccent, family.accentDeep),
+            )
+            val onAccent = findings.first { it.pair == "onAccent/accent" }
+            assertTrue(
+                "${preset.id} dark=$dark: onAccent نسبة ${onAccent.ratio}",
+                onAccent.level == ContrastLevel.AA || onAccent.level == ContrastLevel.AAA,
+            )
+        }
+    }
+
+    @Test
+    fun `accentDeep keeps or improves contrast over white in light mode`() {
+        val engine = com.novafiles.app.core.theme.PaletteEngine
+        for (preset in engine.PRESETS) {
+            val family = engine.family(preset, dark = false)
+            val accentRatio = engine.contrastRatio(family.accent, 0xFFFFFFFF.toInt())
+            val deepRatio = engine.contrastRatio(family.accentDeep, 0xFFFFFFFF.toInt())
+            assertTrue(
+                "${preset.id}: النسخة الأعمق (${deepRatio}) يجب ألا تقل عن الأصل (${accentRatio})",
+                deepRatio >= accentRatio - 0.01,
+            )
+        }
+    }
+
+    @Test
+    fun `black label on grouped background reaches AAA`() {
+        // النص الأساسي الأسود على خلفية iOS المجمّعة — يبلغ AAA في الوضعين
+        assertTrue(ContrastAuditor.passesAAA(0xFF000000.toInt(), 0xFFF2F2F7.toInt()))
+        assertTrue(ContrastAuditor.passesAA(0xFF000000.toInt(), 0xFFF2F2F7.toInt()))
+    }
+
+    @Test
+    fun `onAccent construction always picks the passing side`() {
+        // محرك onColor يختار الأبيض أو الأسود بحيث يحقق الزوج 4.5+ حتماً
+        val engine = com.novafiles.app.core.theme.PaletteEngine
+        for (preset in engine.PRESETS) for (dark in listOf(false, true)) {
+            val family = engine.family(preset, dark)
+            val ratio = engine.contrastRatio(family.onAccent, family.accent)
+            assertTrue("${preset.id} dark=$dark نسبة $ratio", ratio >= 4.5)
+        }
+    }
+
     // ---------- Dynamic type scale ----------
 
     @Test
