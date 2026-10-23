@@ -75,7 +75,12 @@ fun SettingsScreen(onOpenVault: () -> Unit = {}) {
     var themeMode by remember { mutableStateOf(ThemeMode.SYSTEM) }
     var localeTag by remember { mutableStateOf("ar") }
     var cleared by remember { mutableStateOf(false) }
+    var smartOn by remember { mutableStateOf(true) }
     val scrollState = rememberScrollState()
+
+    LaunchedEffect(Unit) {
+        container.settings.smartEnabled.collect { smartOn = it }
+    }
 
     LaunchedEffect(Unit) {
         container.settings.themeMode.collect {
@@ -302,6 +307,25 @@ fun SettingsScreen(onOpenVault: () -> Unit = {}) {
         }
         if (cleared) {
             IOSGroupFooter(stringResource(R.string.settings_trash_cleared))
+        }
+
+        // ----- الطبقة الذكية (v0.34) -----
+        IOSGroupHeader(stringResource(R.string.settings_smart))
+        IOSGroupCard {
+            IOSListRow(
+                title = stringResource(R.string.settings_smart),
+                subtitle = stringResource(R.string.settings_smart_desc),
+                showSeparator = false,
+                trailing = {
+                    com.novafiles.app.ui.ios.IOSSwitch(
+                        checked = smartOn,
+                        onCheckedChange = { on ->
+                            smartOn = on
+                            scope.launch { container.settings.setSmartEnabled(on) }
+                        },
+                    )
+                },
+            )
         }
 
         // ----- عن التطبيق -----

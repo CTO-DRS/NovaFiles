@@ -56,6 +56,9 @@ class SettingsStore(private val context: Context) {
         val GESTURES = stringPreferencesKey("gesture_config")
         val DOUBLE_TAP_NAV = booleanPreferencesKey("double_tap_navigate")
         val OPEN_WITH_DEFAULTS = stringPreferencesKey("open_with_defaults")
+
+        // v0.34 — الطبقة الذكية: إيقافها يخفي نبضة التخزين ويوقف التقاط النقاط
+        val SMART_ENABLED = booleanPreferencesKey("smart_enabled")
     }
 
     val viewGrid: Flow<Boolean> = context.dataStore.data.map { it[Keys.VIEW_GRID] ?: false }
@@ -102,6 +105,10 @@ class SettingsStore(private val context: Context) {
     suspend fun setGestures(raw: String) = context.dataStore.edit { it[Keys.GESTURES] = raw }
     suspend fun setDoubleTapNavigate(on: Boolean) = context.dataStore.edit { it[Keys.DOUBLE_TAP_NAV] = on }
     suspend fun setOpenWithDefaults(raw: String) = context.dataStore.edit { it[Keys.OPEN_WITH_DEFAULTS] = raw }
+
+    // v0.34 — الطبقة الذكية (مفعلة افتراضياً؛ الإيقاف يحترم دائماً)
+    val smartEnabled: Flow<Boolean> = context.dataStore.data.map { it[Keys.SMART_ENABLED] ?: true }
+    suspend fun setSmartEnabled(on: Boolean) = context.dataStore.edit { it[Keys.SMART_ENABLED] = on }
 
     /** وصول خام للتخزين (تستخدمه الخزنة لحفظ ملح وتجزئة PIN) */
     suspend fun peekRaw(): Preferences = context.dataStore.data.first()
