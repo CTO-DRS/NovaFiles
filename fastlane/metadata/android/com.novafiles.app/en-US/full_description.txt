@@ -1,0 +1,27 @@
+NovaFiles is a professional, privacy-first file manager built entirely as open source — no ads, no tracking, no network without your explicit action.
+
+BROWSING
+Full-storage access with list/grid, iPad-style dual pane with drag & drop, sidebar folder tree, path bookmarks, favorites and recents.
+
+SEARCH
+Instant Room-FTS full-store indexing with live type/size/date filters.
+
+VAULT
+AES-256-GCM encrypted folders (hardware-backed Keystore, HKDF-derived keys), BIP39 recovery phrase, PIN/biometric lock, decoy calculator disguise, intrusion log, secure wipe.
+
+CLOUD (unified)
+Google Drive, Dropbox and OneDrive via OAuth PKCE, plus any WebDAV server — unified browse, transfer and camera sync with exact-once dedupe.
+
+NETWORK
+Built-in FTP and WebDAV servers (no dependencies), FTP/SFTP/SMB2-3/WebDAV clients with TOFU host protection, Wi-Fi Direct transfer and QR pairing.
+
+ARCHIVES
+Create ZIP/7z/TAR.GZ/BZ2/XZ (AES-256 ZIP passwords, split volumes), read/extract ZIP/7z/TAR/RAR4+5 with Zip-Slip protection and Arabic-safe names.
+
+SMART LAYER (on-device, optional)
+Download classification, storage-full forecasting, explained maintenance suggestions, and When-X-Do-Y automation rules — every suggestion shows its reason. Zero cloud, zero tracking, switchable off.
+
+PLUS
+Storage analyzer with treemap and duplicate finder, batch rename, media tools and player, PDF viewer, text editor with syntax highlighting, checksums (MD5/SHA-1/SHA-256, GNU coreutils manifests), integrated terminal, app manager, 4 widgets, 10 languages (Arabic-first RTL), 12 contrast-audited palettes.
+
+Reproducible builds: verify your APK hash against the source. Security guide included for new users.

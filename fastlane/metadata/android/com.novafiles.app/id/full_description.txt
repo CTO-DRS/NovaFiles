@@ -1,0 +1,27 @@
+NovaFiles adalah pengelola berkas profesional yang menghormati privasi — 100% sumber terbuka: tanpa iklan, tanpa pelacakan, tanpa jaringan tanpa tindakan eksplisit Anda.
+
+NAVIGASI
+Akses penyimpanan penuh dalam daftar/kisi, panel ganda gaya iPad dengan seret & lepas, pohon folder samping, penanda jalur, favorit dan terbaru.
+
+PENCARIAN
+Pengindeksan instan seluruh penyimpanan (Room-FTS) dengan filter hidup jenis/ukuran/tanggal.
+
+BRANKAS
+Folder terenkripsi AES-256-GCM (Keystore berbasis perangkat keras, HKDF), frasa pemulihan BIP39, kunci sidik jari/PIN, penyamaran kalkulator, log penyusupan, dan penghapusan aman.
+
+AWAN TERPADU
+Google Drive, Dropbox, dan OneDrive via OAuth PKCE, plus server WebDAV apa pun — jelajah, transfer, dan sinkronisasi kamera tanpa duplikat.
+
+JARINGAN
+Server FTP dan WebDAV bawaan tanpa dependensi, klien FTP/SFTP/SMB2-3/WebDAV dengan perlindungan TOFU, transfer Wi-Fi Direct dan pemasangan QR.
+
+ARSIP
+Membuat ZIP/7z/TAR.GZ/BZ2/XZ (kata sandi AES-256, volume terpisah), membaca ZIP/7z/TAR/RAR4+5 dengan pengaman Zip-Slip dan nama Arab yang benar.
+
+LAPISAN PINTAR (di perangkat, opsional)
+Klasifikasi unduhan, prakiraan penyimpanan penuh, saran pemeliharaan yang dijelaskan, dan aturan «jika X lakukan Y» — setiap saran menampilkan alasannya. Nol awan, nol pelacakan, bisa dimatikan.
+
+JUGA
+Penganalisis penyimpanan dengan treemap dan pencari duplikat, ganti nama massal, alat dan pemutar media, penampil PDF, editor dengan penyorotan sintaks, checksum MD5/SHA-1/SHA-256, terminal bawaan, pengelola aplikasi, 4 widget, 10 bahasa (Arab dulu), 12 palet teraudit.
+
+Build dapat direproduksi: verifikasi hash APK Anda. Panduan keamanan disertakan.

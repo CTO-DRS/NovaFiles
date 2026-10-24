@@ -1011,4 +1011,41 @@
     <string name="guide_s_safedelete_b">Penghapusan biasa bisa dibatalkan alat pemulihan. Hapus aman menimpa data berkas sebelum dikeluarkan dari tempat sampah .NovaFilesTrash — pakai untuk dokumen resmi dan foto pribadi.</string>
     <string name="guide_s_updates_t">Perbarui hanya dari sumber resmi</string>
     <string name="guide_s_updates_b">NovaFiles 100% sumber terbuka — build dapat direproduksi dan hash APK dapat diverifikasi sebelum dipasang. Perbarui hanya dari F-Droid atau GitHub Releases.</string>
+
+    <!-- ═══ v0.39 — الترحيب والنسخ الاحتياطي وحول التطبيق (مسودة آلية) ═══ -->
+    <string name="onboarding_welcome_t">Selamat datang di NovaFiles</string>
+    <string name="onboarding_welcome_b">Pengelola berkas sumber terbuka dengan kekuatan profesional: brankas terenkripsi, awan terpadu, arsip segala format, terminal bawaan, dan kecerdasan 100% di perangkat — tanpa iklan, tanpa pelacakan.</string>
+    <string name="onboarding_perm_t">Akses penyimpanan penuh</string>
+    <string name="onboarding_perm_b">NovaFiles akan meminta izin "Semua berkas" untuk mengelola seluruh penyimpanan Anda: transfer, pembersihan, dan pengindeksan instan. Semuanya tetap di perangkat Anda — tidak ada yang daring tanpa tindakan eksplisit Anda.</string>
+    <string name="onboarding_vault_t">Brankas dan keamanan dulu</string>
+    <string name="onboarding_vault_b">Sembunyikan berkas sensitif di brankas terenkripsi AES-256 yang dibuka dengan sidik jari atau PIN, dan cadangkan frasa pemulihan BIP39 Anda. Baca panduan keamanan delapan bagian dari Pengaturan setelah ini.</string>
+    <string name="onboarding_smart_t">Lapisan pintar yang menghormati privasi</string>
+    <string name="onboarding_smart_b">Klasifikasi unduhan, prakiraan penyimpanan penuh, dan saran pemeliharaan yang dijelaskan dengan alasannya serta penghematan yang diharapkan — aturan deterministik di perangkat Anda, bisa dimatikan di Pengaturan.</string>
+    <string name="onboarding_next">Lanjut</string>
+    <string name="onboarding_skip">Lewati</string>
+    <string name="onboarding_start">Mulai</string>
+    <string name="onboarding_step">Langkah %1$d dari %2$d</string>
+    <string name="settings_backup">Cadangan pengaturan</string>
+    <string name="settings_backup_export">Ekspor pengaturan</string>
+    <string name="settings_backup_export_hint">Salinan JSON preferensi dan penanda Anda — ditulis ke folder laporan dan dibagikan untuk dipindah ke perangkat lain. Kata sandi server tidak pernah diekspor.</string>
+    <string name="settings_backup_import">Impor pengaturan</string>
+    <string name="settings_backup_import_hint">Pilih berkas cadangan nova-settings JSON untuk memulihkan preferensi dan penanda Anda</string>
+    <string name="settings_backup_done">Cadangan diekspor: %1$s</string>
+    <string name="settings_backup_import_ok">Terimpor: %1$d pengaturan dan %2$d penanda</string>
+    <string name="settings_backup_import_bad">Impor gagal: %1$s</string>
+    <string name="settings_backup_choose_policy">Kebijakan impor</string>
+    <string name="settings_backup_merge">Gabungkan — pertahankan yang ada, isi yang kurang</string>
+    <string name="settings_backup_replace">Ganti — salinan impor mengatur ulang yang tumpang tindih</string>
+    <string name="settings_backup_apply">Terapkan</string>
+    <string name="settings_backup_bad_empty">Berkas kosong atau tidak terbaca</string>
+    <string name="settings_backup_bad_write">Gagal menulis berkas cadangan ke folder laporan</string>
+    <string name="about_title">Tentang</string>
+    <string name="about_version">Versi</string>
+    <string name="about_licenses">Lisensi sumber terbuka</string>
+    <string name="about_licenses_hint">NovaFiles dibangun di atas pustaka sumber terbuka yang hebat — ketuk pustaka untuk detail dan lisensinya</string>
+    <string name="about_github">Proyek di GitHub</string>
+    <string name="about_github_hint">Laporkan bug, usulkan fitur, atau berkontribusi</string>
+    <string name="about_open_source">100% sumber terbuka — tanpa iklan, tanpa pelacakan, tanpa jaringan tanpa permintaan Anda</string>
+    <string name="about_license">Lisensi</string>
+    <string name="about_view_guide">Panduan keamanan</string>
 </resources>

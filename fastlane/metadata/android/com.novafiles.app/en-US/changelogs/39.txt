@@ -1,0 +1,1 @@
+Launch readiness: first-run onboarding, settings backup & device transfer (JSON export/import with merge/replace, no secrets), About screen with open-source licenses, and F-Droid/Play metadata in ten languages.

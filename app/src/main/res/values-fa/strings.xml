@@ -1011,4 +1011,41 @@
     <string name="guide_s_safedelete_b">حذف عادی با ابزارهای بازیابی برگشت‌پذیر است. پاک‌سازی امن داده‌های فایل را پیش از خارج‌شدن از سطل .NovaFilesTrash بازنویسی می‌کند — برای اسناد رسمی و عکس‌های خصوصی به کار ببرید.</string>
     <string name="guide_s_updates_t">فقط از منبع رسمی به‌روزرسانی کنید</string>
     <string name="guide_s_updates_b">NovaFiles صد درصد متن‌باز است — ساخت‌ها بازتولیدپذیرند و هش APK پیش از نصب قابل راستی‌آزمایی است. فقط از F-Droid یا GitHub Releases به‌روزرسانی کنید.</string>
+
+    <!-- ═══ v0.39 — الترحيب والنسخ الاحتياطي وحول التطبيق (مسودة آلية) ═══ -->
+    <string name="onboarding_welcome_t">به NovaFiles خوش آمدید</string>
+    <string name="onboarding_welcome_b">مدیر فایلی متن‌باز با توان حرفه‌ای: گاوصندوق رمزنگاری‌شده، ابر یکپارچه، آرشیو با همه قالب‌ها، ترمینال داخلی، و هوش 100% روی دستگاه — بدون تبلیغ و بدون ردیابی.</string>
+    <string name="onboarding_perm_t">دسترسی کامل به حافظه</string>
+    <string name="onboarding_perm_b">NovaFiles برای مدیریت کامل حافظه شما اجازه «همه فایل‌ها» را درخواست می‌کند: انتقال، پاکسازی و نمایه‌گذاری فوری. همه‌چیز روی دستگاه شما می‌ماند — بدون اقدام صریح شما هیچ‌چیز به اینترنت نمی‌رود.</string>
+    <string name="onboarding_vault_t">اول گاوصندوق و امنیت</string>
+    <string name="onboarding_vault_b">فایل‌های حساس را در گاوصندوق رمزنگاری‌شده AES-256 که با اثر انگشت یا PIN باز می‌شود پنهان کنید و عبارت بازیابی BIP39 خود را نگه دارید. پس از آن راهنمای امنیت هشت‌بخشی را از تنظیمات بخوانید.</string>
+    <string name="onboarding_smart_t">لایه‌ای هوشمند که حریم خصوصی را گرامی می‌دارد</string>
+    <string name="onboarding_smart_b">دسته‌بندی دانلودها، پیش‌بینی پرشدن حافظه، و پیشنهادهای نگهداری با توضیح دلیل و صرفه مورد انتظار — قواعد قطعی روی دستگاه شما، از تنظیمات قابل خاموش‌کردن.</string>
+    <string name="onboarding_next">بعدی</string>
+    <string name="onboarding_skip">رد کردن</string>
+    <string name="onboarding_start">شروع کنید</string>
+    <string name="onboarding_step">گام %1$d از %2$d</string>
+    <string name="settings_backup">پشتیبان تنظیمات</string>
+    <string name="settings_backup_export">برون‌بری تنظیمات</string>
+    <string name="settings_backup_export_hint">یک نسخه JSON از ترجیحات و نشانک‌های شما — در پوشه گزارش‌ها نوشته و برای انتقال به دستگاه دیگر به اشتراک گذاشته می‌شود. رمزهای سرور هرگز برون‌بری نمی‌شوند.</string>
+    <string name="settings_backup_import">درون‌بری تنظیمات</string>
+    <string name="settings_backup_import_hint">فایل پشتیبان nova-settings JSON را برگزینید تا ترجیحات و نشانک‌های شما بازیابی شوند</string>
+    <string name="settings_backup_done">پشتیبان برون‌بری شد: %1$s</string>
+    <string name="settings_backup_import_ok">درون‌بری شد: %1$d تنظیم و %2$d نشانک</string>
+    <string name="settings_backup_import_bad">درون‌بری ناموفق: %1$s</string>
+    <string name="settings_backup_choose_policy">سیاست درون‌بری</string>
+    <string name="settings_backup_merge">ادغام — تنظیمات فعلی بماند و ناقص‌ها پر شود</string>
+    <string name="settings_backup_replace">جایگزینی — نسخه درون‌بری‌شده موارد هم‌پوشان را بازنشانی می‌کند</string>
+    <string name="settings_backup_apply">اعمال</string>
+    <string name="settings_backup_bad_empty">فایل خالی است یا خواندنی نیست</string>
+    <string name="settings_backup_bad_write">نوشتن فایل پشتیبان در پوشه گزارش‌ها ناموفق بود</string>
+    <string name="about_title">درباره</string>
+    <string name="about_version">نسخه</string>
+    <string name="about_licenses">مجوزهای متن‌باز</string>
+    <string name="about_licenses_hint">NovaFiles بر کتابخانه‌های متن‌باز عالی بنا شده — برای جزئیات و مجوز روی هر کتابخانه بزنید</string>
+    <string name="about_github">پروژه در GitHub</string>
+    <string name="about_github_hint">خطا گزارش دهید، ویژگی پیشنهاد دهید، یا مشارکت کنید</string>
+    <string name="about_open_source">100% متن‌باز — بدون تبلیغ، بدون ردیابی، بدون شبکه بدون درخواست شما</string>
+    <string name="about_license">مجوز</string>
+    <string name="about_view_guide">راهنمای امنیت</string>
 </resources>

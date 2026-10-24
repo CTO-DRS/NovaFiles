@@ -1,0 +1,1 @@
+Préparation du lancement : accueil de première exécution, sauvegarde et transfert des réglages (export/import JSON avec fusion/remplacement, sans secrets), écran À propos avec licences open source, et métadonnées F-Droid/Play en dix langues.

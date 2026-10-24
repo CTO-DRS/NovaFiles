@@ -1018,4 +1018,41 @@
     <string name="guide_s_safedelete_b">Ordinary deletion can be undone by recovery tools. Secure wipe overwrites the file data before removing it from the .NovaFilesTrash bin — use it for official documents and private photos.</string>
     <string name="guide_s_updates_t">Update from the official source only</string>
     <string name="guide_s_updates_b">NovaFiles is 100% open source — builds are reproducible and the APK hash can be verified before install. Update from F-Droid or GitHub Releases only.</string>
+
+    <!-- ═══ v0.39 — الترحيب والنسخ الاحتياطي وحول التطبيق (مسودة آلية) ═══ -->
+    <string name="onboarding_welcome_t">Welcome to NovaFiles</string>
+    <string name="onboarding_welcome_b">An open-source file manager with pro power: encrypted vault, unified cloud, archives in every format, a built-in terminal, and 100% on-device intelligence — no ads, no tracking.</string>
+    <string name="onboarding_perm_t">Full storage access</string>
+    <string name="onboarding_perm_b">NovaFiles will ask for the "All files" permission to manage your entire storage: transfer, cleanup and instant indexing. Everything stays on your device — nothing goes online without your explicit action.</string>
+    <string name="onboarding_vault_t">Vault and security first</string>
+    <string name="onboarding_vault_b">Hide sensitive files in an AES-256 encrypted vault unlocked by your fingerprint or a PIN, and back up your BIP39 recovery phrase. Read the eight-section security guide from Settings afterwards.</string>
+    <string name="onboarding_smart_t">A smart layer that respects privacy</string>
+    <string name="onboarding_smart_b">Download classification, storage-full forecasts, and maintenance suggestions explained by reason and expected savings — deterministic rules on your device, switchable off in Settings.</string>
+    <string name="onboarding_next">Next</string>
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_start">Get started</string>
+    <string name="onboarding_step">Step %1$d of %2$d</string>
+    <string name="settings_backup">Settings backup</string>
+    <string name="settings_backup_export">Export settings</string>
+    <string name="settings_backup_export_hint">A JSON copy of your preferences and bookmarks — written to the reports folder and shared for transfer to another device. Server passwords are never exported.</string>
+    <string name="settings_backup_import">Import settings</string>
+    <string name="settings_backup_import_hint">Pick a nova-settings JSON backup file to restore your preferences and bookmarks</string>
+    <string name="settings_backup_done">Backup exported: %1$s</string>
+    <string name="settings_backup_import_ok">Imported: %1$d settings and %2$d bookmarks</string>
+    <string name="settings_backup_import_bad">Import failed: %1$s</string>
+    <string name="settings_backup_choose_policy">Import policy</string>
+    <string name="settings_backup_merge">Merge — keep current settings, fill the missing</string>
+    <string name="settings_backup_replace">Replace — the imported copy resets overlapping items</string>
+    <string name="settings_backup_apply">Apply</string>
+    <string name="settings_backup_bad_empty">File is empty or unreadable</string>
+    <string name="settings_backup_bad_write">Failed to write the backup file to the reports folder</string>
+    <string name="about_title">About</string>
+    <string name="about_version">Version</string>
+    <string name="about_licenses">Open-source licenses</string>
+    <string name="about_licenses_hint">NovaFiles is built on excellent open-source libraries — tap any library for its details and license</string>
+    <string name="about_github">Project on GitHub</string>
+    <string name="about_github_hint">Report a bug, suggest a feature, or contribute</string>
+    <string name="about_open_source">100% open source — no ads, no tracking, no network without your request</string>
+    <string name="about_license">License</string>
+    <string name="about_view_guide">Security guide</string>
 </resources>

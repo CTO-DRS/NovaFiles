@@ -62,6 +62,9 @@ class SettingsStore(private val context: Context) {
 
         // v0.38 — الدليل الأمني: الأقسام المُقرأة CSV حسب SecurityGuide.serialize
         val SECURITY_GUIDE_READ = stringPreferencesKey("security_guide_read")
+
+        // v0.39 — الترحيب: الخطوات المنجزة CSV حسب OnboardingEngine.serialize
+        val ONBOARDING_DONE = stringPreferencesKey("onboarding_done")
     }
 
     val viewGrid: Flow<Boolean> = context.dataStore.data.map { it[Keys.VIEW_GRID] ?: false }
@@ -116,6 +119,47 @@ class SettingsStore(private val context: Context) {
     // v0.38 — تقدّم الدليل الأمني (CSV من معرفات الأقسام المُقرأة)
     val securityGuideRead: Flow<String> = context.dataStore.data.map { it[Keys.SECURITY_GUIDE_READ] ?: "" }
     suspend fun setSecurityGuideRead(raw: String) = context.dataStore.edit { it[Keys.SECURITY_GUIDE_READ] = raw }
+
+    // v0.39 — تقدّم الترحيب (CSV من معرفات الخطوات المنجزة)
+    val onboardingDone: Flow<String> = context.dataStore.data.map { it[Keys.ONBOARDING_DONE] ?: "" }
+    suspend fun setOnboardingDone(raw: String) = context.dataStore.edit { it[Keys.ONBOARDING_DONE] = raw }
+
+    /**
+     * v0.39 — لقطة التفضيلات القابلة للتصدير: يقرأ الخام ويُبقي مفاتيح
+     * القائمة القابلة للتصدير فقط (لا أسرار — راجع SettingsExportEngine).
+     */
+    suspend fun exportPrefs(): Map<String, String> {
+        val raw = peekRaw()
+        val out = linkedMapOf<String, String>()
+        for (key in raw.asMap().keys) {
+            val name = key.name
+            if (name in com.novafiles.app.core.backup.SettingsExportEngine.EXPORTABLE_PREF_KEYS) {
+                val value = raw[key]
+                if (value != null) out[name] = value.toString()
+            }
+        }
+        return out
+    }
+
+    /**
+     * v0.39 — تطبيق الخريطة النهائية من المحرك: يكتب مفاتيحها المعروفة
+     * ويحذف مفاتيح remove (نتيجة سياسة «استبدال» — عودة للافتراضي).
+     * سياسة الدمج نفسها انتهت في SettingsExportEngine.applyPolicy.
+     */
+    suspend fun applyImportedPrefs(target: Map<String, String>, remove: Set<String> = emptySet()) {
+        context.dataStore.edit { prefs ->
+            for ((k, v) in target) {
+                if (k in com.novafiles.app.core.backup.SettingsExportEngine.EXPORTABLE_PREF_KEYS) {
+                    prefs[stringPreferencesKey(k)] = v
+                }
+            }
+            for (k in remove) {
+                if (k in com.novafiles.app.core.backup.SettingsExportEngine.EXPORTABLE_PREF_KEYS) {
+                    prefs.remove(stringPreferencesKey(k))
+                }
+            }
+        }
+    }
 
     /** وصول خام للتخزين (تستخدمه الخزنة لحفظ ملح وتجزئة PIN) */
     suspend fun peekRaw(): Preferences = context.dataStore.data.first()

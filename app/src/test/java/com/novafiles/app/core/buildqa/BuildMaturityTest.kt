@@ -150,14 +150,14 @@ class BuildMaturityTest {
     // ---------- إصدار المستودع الفعلي ----------
 
     @Test
-    fun `repo app version is semver and matches v0_38`() {
+    fun `repo app version is semver and matches v0_39`() {
         // يقرأ app/build.gradle.kts ويتحقق من ثنائي الإصدار الحالي
         val text = repoFile("app/build.gradle.kts", "app/build.gradle.kts")
         val name = Regex("""versionName\s*=\s*"([^"]+)"""").find(text)?.groupValues?.get(1)
         val code = Regex("""versionCode\s*=\s*(\d+)""").find(text)?.groupValues?.get(1)?.toInt()
         val issues = BuildMaturityEngine.auditAppVersion(name, code)
         assertTrue("إصدار المستودع مخالف: $issues", issues.isEmpty())
-        assertEquals("0.38.0", name)
-        assertEquals(38, code)
+        assertEquals("0.39.0", name)
+        assertEquals(39, code)
     }
 }

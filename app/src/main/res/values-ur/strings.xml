@@ -1011,4 +1011,41 @@
     <string name="guide_s_safedelete_b">عام حذف کو بازیافت کے اوزار واپس لا سکتے ہیں۔ محفوظ مٹان فائل کو .NovaFilesTrash سے نکالنے سے پہلے اس کا ڈیٹا اوپر لکھ دیتا ہے — سرکاری دستاویزات اور ذاتی تصاویر کے لیے استعمال کریں۔</string>
     <string name="guide_s_updates_t">صرف سرکاری ماخذ سے اپ ڈیٹ کریں</string>
     <string name="guide_s_updates_b">NovaFiles 100% اوپن سورس ہے — بلڈز دوبارہ پیدا کیے جا سکتے ہیں اور APK ہاش تنصیب سے پہلے تصدیق کیا جا سکتا ہے۔ صرف F-Droid یا GitHub Releases سے اپ ڈیٹ کریں۔</string>
+
+    <!-- ═══ v0.39 — الترحيب والنسخ الاحتياطي وحول التطبيق (مسودة آلية) ═══ -->
+    <string name="onboarding_welcome_t">NovaFiles میں خوش آمدید</string>
+    <string name="onboarding_welcome_b">پروфейشنل طاقت کا اوپن سورس فائل مینیجر: مرموز خزانہ، متحد کلاؤڈ، ہر فارمیٹ کی آرکائیوز، شامل ٹرمینل، اور 100% آپ کے ڈیوائس پر ذہانت — نہ اشتہارات نہ ٹریکنگ۔</string>
+    <string name="onboarding_perm_t">مکمل اسٹوریج رسائی</string>
+    <string name="onboarding_perm_b">NovaFiles آپ کی پوری اسٹوریج کو سنبھالنے کے لیے «تمام فائلیں» کی اجازت مانگے گا: منتقلی، صفائی اور فوری اشاریہ سازی۔ سب کچھ آپ کے ڈیوائس پر رہتا ہے — آپ کے واضح حکم کے بغیر کچھ بھی انٹرنیٹ نہیں جاتا۔</string>
+    <string name="onboarding_vault_t">پہلے خزانہ اور حفاظت</string>
+    <string name="onboarding_vault_b">حساس فائلوں کو AES-256 مرموز خزانے میں چھپائیں جو آپ کے انگلی کے نشان یا PIN سے کھلتا ہے، اور اپنی BIP39 بحالی کی عبارت محفوظ رکھیں۔ بعد میں ترتیبات سے آٹھ حصوں کا سیکیورٹی گائیڈ پڑھیں۔</string>
+    <string name="onboarding_smart_t">پرائیویسی کا احترام کرنے والی ذہین تہہ</string>
+    <string name="onboarding_smart_b">ڈاؤن لوڈ کی درجہ بندی، اسٹوریج بھرنے کی پیش گوئی، اور وجہ و متوقع بچت کے ساتھ وضاحت شدہ بحالی کے مشورے — آپ کے ڈیوائس پر چلنے والے قطعی قواعد، ترتیبات سے بند کیے جا سکتے ہیں۔</string>
+    <string name="onboarding_next">اگلا</string>
+    <string name="onboarding_skip">چھوڑیں</string>
+    <string name="onboarding_start">آغاز کریں</string>
+    <string name="onboarding_step">مرحلہ %1$d از %2$d</string>
+    <string name="settings_backup">ترتیبات کا بیک اپ</string>
+    <string name="settings_backup_export">ترتیبات برآمد کریں</string>
+    <string name="settings_backup_export_hint">آپ کی ترجیحات اور بک مارکس کی JSON نقل — رپورٹس فولڈر میں لکھی جاتی ہے اور دوسرے ڈیوائس پر منتقل کرنے کے لیے شیئر ہوتی ہے۔ سرور پاس ورڈز کبھی برآمد نہیں ہوتے۔</string>
+    <string name="settings_backup_import">ترتیبات درآمد کریں</string>
+    <string name="settings_backup_import_hint">اپنی ترجیحات اور بک مارکس بحال کرنے کے لیے nova-settings JSON بیک اپ فائل منتخب کریں</string>
+    <string name="settings_backup_done">بیک اپ برآمد ہو گیا: %1$s</string>
+    <string name="settings_backup_import_ok">درآمد مکمل: %1$d ترتیبات اور %2$d بک مارکس</string>
+    <string name="settings_backup_import_bad">درآمد ناکام: %1$s</string>
+    <string name="settings_backup_choose_policy">درآمد کی پالیسی</string>
+    <string name="settings_backup_merge">ضم — موجودہ ترتیبات رکھیں اور کمی پوری کریں</string>
+    <string name="settings_backup_replace">تبدیل — درآمد شدہ نقل ہم پلہ اشیاء ری سیٹ کرتی ہے</string>
+    <string name="settings_backup_apply">لاگو کریں</string>
+    <string name="settings_backup_bad_empty">فائل خالی ہے یا پڑھی نہیں جا سکتی</string>
+    <string name="settings_backup_bad_write">بیک اپ فائل رپورٹس فولڈر میں لکھنے میں ناکامی</string>
+    <string name="about_title">ایپ کے بارے میں</string>
+    <string name="about_version">ورژن</string>
+    <string name="about_licenses">اوپن سورس لائسنسز</string>
+    <string name="about_licenses_hint">NovaFiles بہترین اوپن سورس لائبریریوں پر کھڑا ہے — تفصیل اور لائسنس کے لیے کسی لائبریری پر ٹیپ کریں</string>
+    <string name="about_github">GitHub پر پروجیکٹ</string>
+    <string name="about_github_hint">خرابی کی اطلاع دیں، فیچر تجویز کریں، یا حصہ ڈالیں</string>
+    <string name="about_open_source">100% اوپن سورس — نہ اشتہارات، نہ ٹریکنگ، آپ کی درخواست کے بغیر کوئی نیٹ ورک نہیں</string>
+    <string name="about_license">لائسنس</string>
+    <string name="about_view_guide">سیکیورٹی گائیڈ</string>
 </resources>

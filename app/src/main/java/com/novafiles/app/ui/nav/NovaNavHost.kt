@@ -17,6 +17,7 @@ import androidx.compose.material.icons.outlined.Star
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -78,6 +79,7 @@ object Routes {
     const val SYNC = "sync?path={path}"              // v0.32 — المزامنة المجدولة
     const val RULES = "rules?path={path}"      // v0.35 — قواعد الأتمتة
     const val SECURITY_GUIDE = "securityguide" // v0.38 — الدليل الأمني للمستخدم الجديد
+    const val ABOUT = "about"                  // v0.39 — حول التطبيق والتراخيص
     const val NETWORK = "network"
     const val CONN_FORM = "connform?connId={connId}"
     const val REMOTE = "remote?connId={connId}"
@@ -130,6 +132,21 @@ fun NovaRoot() {
     val palette = LocalIOSPalette.current
     val context = androidx.compose.ui.platform.LocalContext.current
     val scope = androidx.compose.runtime.rememberCoroutineScope()
+
+    // v0.39 — الترحيب للمستخدم الجديد: يُعرض فقط ما لم تُتم خطواته الأربع
+    // (قرار OnboardingEngine.shouldShow الحتمي — الإتمام يعني عدم العودة أبداً)
+    var showOnboarding by androidx.compose.runtime.remember {
+        androidx.compose.runtime.mutableStateOf(false)
+    }
+    var onboardingResolved by androidx.compose.runtime.remember {
+        androidx.compose.runtime.mutableStateOf(false)
+    }
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+        context.novaContainer.settings.onboardingDone.collect { raw ->
+            showOnboarding = com.novafiles.app.core.onboarding.OnboardingEngine.shouldShow(raw)
+            onboardingResolved = true
+        }
+    }
 
     // v0.12 — استهلاك حمولة nova-direct:// القادمة من مسح QR:
     // إنشاء اتصال FTP مؤقت للجهاز المرسل ثم فتح متصفح الخادم البعيد
@@ -188,8 +205,20 @@ fun NovaRoot() {
             .background(palette.groupedBg),
     ) {
         NovaNavHost(nav = nav)
+        // ═══ v0.39 — طبقة الترحيب فوق كل شيء حتى الإتمام ═══
+        if (onboardingResolved && showOnboarding) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(palette.groupedBg),
+            ) {
+                com.novafiles.app.ui.onboarding.OnboardingScreen(
+                    onFinished = { showOnboarding = false },
+                )
+            }
+        }
         // ═══ شريط التبويبات السفلي العائم الشفاف فوق المحتوى ═══
-        if (showBottomBar) {
+        if (showBottomBar && !(onboardingResolved && showOnboarding)) {
             IOSBottomBar(
                 items = tabs.map { tab ->
                     IOSBarItem(
@@ -263,11 +292,19 @@ private fun NovaNavHost(nav: NavHostController) {
             SettingsScreen(
                 onOpenVault = { nav.navigate(Routes.VAULT) },
                 onOpenSecurityGuide = { nav.navigate(Routes.SECURITY_GUIDE) },
+                onOpenAbout = { nav.navigate(Routes.ABOUT) },
             )
         }
         // v0.38 — الدليل الأمني للمستخدم الجديد
         composable(Routes.SECURITY_GUIDE) {
             com.novafiles.app.ui.settings.SecurityGuideScreen(onBack = { nav.popBackStack() })
+        }
+        // v0.39 — حول التطبيق والتراخيص
+        composable(Routes.ABOUT) {
+            com.novafiles.app.ui.about.AboutScreen(
+                onBack = { nav.popBackStack() },
+                onOpenSecurityGuide = { nav.navigate(Routes.SECURITY_GUIDE) },
+            )
         }
         composable(Routes.FTP) {
             FtpScreen(onBack = { nav.popBackStack() })

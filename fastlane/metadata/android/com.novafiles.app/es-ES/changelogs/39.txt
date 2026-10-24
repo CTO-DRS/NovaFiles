@@ -1,0 +1,1 @@
+Preparación del lanzamiento: bienvenida inicial, copia y transferencia de ajustes (exportación/importación JSON con fusión/reemplazo, sin secretos), pantalla Acerca de con licencias de código abierto y metadatos F-Droid/Play en diez idiomas.
