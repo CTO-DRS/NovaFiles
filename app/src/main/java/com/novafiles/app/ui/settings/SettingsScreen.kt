@@ -78,11 +78,13 @@ import java.io.File
  * وعلامة ✓ زرقاء للخيار المحدد (اللغة والسمة).
  * v0.19 — قسم «الأمان»: بوابة الخزنة بعد نقلها من الشريط السفلي.
  * v0.39 — قسم «نسخ الإعدادات»: نقل بين الأجهزة بلا سحابة.
+ * v0.40 — صف «دليل المستخدم»: عشرة فصول ببحث حي وتتبّع تقدّم.
  */
 @Composable
 fun SettingsScreen(
     onOpenVault: () -> Unit = {},
     onOpenSecurityGuide: () -> Unit = {},
+    onOpenUserGuide: () -> Unit = {},
     onOpenAbout: () -> Unit = {},
 ) {
     val context = LocalContext.current
@@ -296,6 +298,13 @@ fun SettingsScreen(
                         )
                     }
                 },
+            )
+            IOSListRow(
+                title = stringResource(R.string.settings_user_guide),
+                subtitle = stringResource(R.string.settings_user_guide_hint),
+                showChevron = true,
+                showSeparator = true,
+                onClick = onOpenUserGuide,
             )
             IOSListRow(
                 title = stringResource(R.string.settings_security_guide),
