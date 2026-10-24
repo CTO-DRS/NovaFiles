@@ -1,0 +1,1 @@
+Launch-Vorbereitung: Erststart-Begrüßung, Sicherung und Geräteübertragung der Einstellungen (JSON-Export/Import mit Zusammenführen/Ersetzen, ohne Geheimnisse), Über-Bildschirm mit Open-Source-Lizenzen und F-Droid/Play-Metadaten in zehn Sprachen.

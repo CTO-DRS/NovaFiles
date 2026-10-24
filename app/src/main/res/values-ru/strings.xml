@@ -1011,4 +1011,41 @@
     <string name="guide_s_safedelete_b">Обычное удаление можно отменить инструментами восстановления. Безопасное стирание перезаписывает данные файла перед удалением из корзины .NovaFilesTrash — для официальных документов и личных фотографий.</string>
     <string name="guide_s_updates_t">Обновляйтесь только из официального источника</string>
     <string name="guide_s_updates_b">NovaFiles на 100% открытый код — сборки воспроизводимы, хеш APK проверяем до установки. Обновляйтесь только из F-Droid или GitHub Releases.</string>
+
+    <!-- ═══ v0.39 — الترحيب والنسخ الاحتياطي وحول التطبيق (مسودة آلية) ═══ -->
+    <string name="onboarding_welcome_t">Добро пожаловать в NovaFiles</string>
+    <string name="onboarding_welcome_b">Файловый менеджер с открытым кодом и профессиональной мощью: шифрованное хранилище, единое облако, архивы всех форматов, встроенный терминал и интеллект 100% на устройстве — без рекламы и слежки.</string>
+    <string name="onboarding_perm_t">Полный доступ к хранилищу</string>
+    <string name="onboarding_perm_b">NovaFiles запросит разрешение «Все файлы», чтобы управлять всем вашим хранилищем: перенос, очистка и мгновенная индексация. Всё остаётся на вашем устройстве — в сеть без вашего явного действия не уходит ничего.</string>
+    <string name="onboarding_vault_t">Сначала хранилище и безопасность</string>
+    <string name="onboarding_vault_b">Прячьте чувствительные файлы в шифрованное AES-256 хранилище, открываемое отпечатком или PIN-кодом, и сохраните фразу восстановления BIP39. После этого прочтите руководство по безопасности из восьми разделов в Настройках.</string>
+    <string name="onboarding_smart_t">Умный слой, уважающий приватность</string>
+    <string name="onboarding_smart_b">Классификация загрузок, прогноз заполнения хранилища и предложения по обслуживанию с объяснением причины и ожидаемой экономии — детерминированные правила на вашем устройстве, отключаются в Настройках.</string>
+    <string name="onboarding_next">Далее</string>
+    <string name="onboarding_skip">Пропустить</string>
+    <string name="onboarding_start">Начать</string>
+    <string name="onboarding_step">Шаг %1$d из %2$d</string>
+    <string name="settings_backup">Резерв настроек</string>
+    <string name="settings_backup_export">Экспорт настроек</string>
+    <string name="settings_backup_export_hint">JSON-копия ваших настроек и закладок — пишется в папку отчётов и отправляется для переноса на другое устройство. Пароли серверов никогда не экспортируются.</string>
+    <string name="settings_backup_import">Импорт настроек</string>
+    <string name="settings_backup_import_hint">Выберите резервный файл nova-settings JSON, чтобы восстановить настройки и закладки</string>
+    <string name="settings_backup_done">Резерв экспортирован: %1$s</string>
+    <string name="settings_backup_import_ok">Импортировано: настроек %1$d, закладок %2$d</string>
+    <string name="settings_backup_import_bad">Импорт не удался: %1$s</string>
+    <string name="settings_backup_choose_policy">Политика импорта</string>
+    <string name="settings_backup_merge">Слияние — сохранить текущее, дополнить недостающее</string>
+    <string name="settings_backup_replace">Замена — импортированная копия сбрасывает совпадающее</string>
+    <string name="settings_backup_apply">Применить</string>
+    <string name="settings_backup_bad_empty">Файл пуст или не читается</string>
+    <string name="settings_backup_bad_write">Не удалось записать резервный файл в папку отчётов</string>
+    <string name="about_title">О приложении</string>
+    <string name="about_version">Версия</string>
+    <string name="about_licenses">Лицензии открытого кода</string>
+    <string name="about_licenses_hint">NovaFiles построен на превосходных open-source библиотеках — коснитесь библиотеки, чтобы увидеть детали и лицензию</string>
+    <string name="about_github">Проект на GitHub</string>
+    <string name="about_github_hint">Сообщите об ошибке, предложите функцию или внесите вклад</string>
+    <string name="about_open_source">100% открытый код — без рекламы, без слежки, без сети без вашего запроса</string>
+    <string name="about_license">Лицензия</string>
+    <string name="about_view_guide">Руководство по безопасности</string>
 </resources>

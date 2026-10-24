@@ -1,0 +1,27 @@
+NovaFiles es un gestor de archivos profesional que respeta tu privacidad, 100% de código abierto — sin anuncios, sin rastreo, sin red sin tu acción explícita.
+
+NAVEGACIÓN
+Acceso completo al almacenamiento en lista/cuadrícula, doble panel estilo iPad con arrastrar y soltar, árbol lateral, marcadores de carpetas, favoritos y recientes.
+
+BÚSQUEDA
+Indexación instantánea de todo el almacenamiento (Room-FTS) con filtros vivos de tipo/tamaño/fecha.
+
+BÓVEDA
+Carpetas cifradas AES-256-GCM (claves de Keystore con respaldo de hardware, derivadas por HKDF), frase de recuperación BIP39, desbloqueo biométrico o PIN, disfraz de calculadora, registro de intrusiones y borrado seguro.
+
+NUBE UNIFICADA
+Google Drive, Dropbox y OneDrive vía OAuth PKCE, más cualquier servidor WebDAV — navegación, transferencia y sincronización de cámara sin duplicados.
+
+RED
+Servidores FTP y WebDAV integrados sin dependencias, clientes FTP/SFTP/SMB2-3/WebDAV con protección TOFU, transferencia Wi-Fi Direct y emparejamiento por QR.
+
+ARCHIVOS COMPRIMIDOS
+Creación ZIP/7z/TAR.GZ/BZ2/XZ (contraseñas AES-256, volúmenes divididos), lectura ZIP/7z/TAR/RAR4+5 con protección Zip-Slip y nombres árabes correctos.
+
+CAPA INTELIGENTE (en el dispositivo, opcional)
+Clasificación de descargas, previsión de llenado, sugerencias de mantenimiento explicadas y reglas «cuando X haz Y» — cada sugerencia muestra su motivo. Cero nube, cero rastreo, desactivable.
+
+ADEMÁS
+Analizador de almacenamiento con treemap y duplicados, renombrado por lotes, herramientas y reproductor multimedia, visor PDF, editor con resaltado, sumas MD5/SHA-1/SHA-256, terminal integrada, gestor de aplicaciones, 4 widgets, 10 idiomas (árabe primero) y 12 paletas auditadas.
+
+Compilaciones reproducibles: verifica el hash de tu APK. Guía de seguridad incluida.

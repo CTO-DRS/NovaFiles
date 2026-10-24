@@ -1011,4 +1011,41 @@
     <string name="guide_s_safedelete_b">Normal silme, kurtarma araçlarıyla geri alınabilir. Güvenli silme, dosya .NovaFilesTrash çöpünden çıkarılmadan önce verisini üzerine yazar — resmi belgeler ve özel fotoğraflar için kullanın.</string>
     <string name="guide_s_updates_t">Yalnızca resmi kaynaktan güncelleyin</string>
     <string name="guide_s_updates_b">NovaFiles %100 açık kaynaktır — derlemeler yeniden üretilebilir ve APK karması kurulum öncesi doğrulanabilir. Yalnızca F-Droid veya GitHub Releases\'dan güncelleyin.</string>
+
+    <!-- ═══ v0.39 — الترحيب والنسخ الاحتياطي وحول التطبيق (مسودة آلية) ═══ -->
+    <string name="onboarding_welcome_t">NovaFiles\'e hoş geldiniz</string>
+    <string name="onboarding_welcome_b">Profesyonel gücünde açık kaynaklı bir dosya yöneticisi: şifreli kasa, birleşik bulut, her biçimde arşivler, yerleşik terminal ve %100 cihaz üstü zeka — reklam yok, izleme yok.</string>
+    <string name="onboarding_perm_t">Tam depolama erişimi</string>
+    <string name="onboarding_perm_b">NovaFiles, tüm deponuzu yönetmek için «Tüm dosyalar» iznini isteyecek: aktarım, temizlik ve anında dizinleme. Her şey cihazınızda kalır — açık eyleminiz olmadan hiçbir şey ağa çıkmaz.</string>
+    <string name="onboarding_vault_t">Önce kasa ve güvenlik</string>
+    <string name="onboarding_vault_b">Hassas dosyaları parmak iziniz veya PIN ile açılan AES-256 şifreli kasada saklayın ve BIP39 kurtarma ifadenizi yedekleyin. Ardından Ayarlar\'dan sekiz bölümlük güvenlik rehberini okuyun.</string>
+    <string name="onboarding_smart_t">Gizliliğe saygılı akıllı katman</string>
+    <string name="onboarding_smart_b">İndirme sınıflandırması, depolama doluluk öngörüleri ve gerekçesiyle beklenen tasarrufuyla açıklanan bakım önerileri — cihazınızda çalışan deterministik kurallar, Ayarlar\'dan kapatılabilir.</string>
+    <string name="onboarding_next">İleri</string>
+    <string name="onboarding_skip">Atla</string>
+    <string name="onboarding_start">Başla</string>
+    <string name="onboarding_step">Adım %1$d / %2$d</string>
+    <string name="settings_backup">Ayar yedekleme</string>
+    <string name="settings_backup_export">Ayarları dışa aktar</string>
+    <string name="settings_backup_export_hint">Tercihleriniz ve yer imlerinizin JSON kopyası — raporlar klasörüne yazılır ve başka bir cihaza aktarmak için paylaşılır. Sunucu şifreleri asla dışa aktarılmaz.</string>
+    <string name="settings_backup_import">Ayarları içe aktar</string>
+    <string name="settings_backup_import_hint">Tercihlerinizi ve yer imlerinizi geri yüklemek için nova-settings JSON yedek dosyasını seçin</string>
+    <string name="settings_backup_done">Yedek dışa aktarıldı: %1$s</string>
+    <string name="settings_backup_import_ok">İçe aktarıldı: %1$d ayar ve %2$d yer imi</string>
+    <string name="settings_backup_import_bad">İçe aktarma başarısız: %1$s</string>
+    <string name="settings_backup_choose_policy">İçe aktarma politikası</string>
+    <string name="settings_backup_merge">Birleştir — mevcutları koru, eksikleri doldur</string>
+    <string name="settings_backup_replace">Değiştir — içe aktarılan kopya çakışanları sıfırlar</string>
+    <string name="settings_backup_apply">Uygula</string>
+    <string name="settings_backup_bad_empty">Dosya boş veya okunamıyor</string>
+    <string name="settings_backup_bad_write">Yedek dosyası raporlar klasörüne yazılamadı</string>
+    <string name="about_title">Hakkında</string>
+    <string name="about_version">Sürüm</string>
+    <string name="about_licenses">Açık kaynak lisansları</string>
+    <string name="about_licenses_hint">NovaFiles mükemmel açık kaynak kütüphaneleri üzerine kuruludur — ayrıntılar ve lisans için bir kütüphaneye dokunun</string>
+    <string name="about_github">GitHub\'da proje</string>
+    <string name="about_github_hint">Hata bildirin, özellik önerin veya katkı verin</string>
+    <string name="about_open_source">%100 açık kaynak — reklam yok, izleme yok, isteğiniz olmadan ağ yok</string>
+    <string name="about_license">Lisans</string>
+    <string name="about_view_guide">Güvenlik rehberi</string>
 </resources>

@@ -1,0 +1,1 @@
+Lansman hazırlığı: ilk açılış karşılaması, ayar yedekleme ve cihazlar arası aktarım (birleştir/değiştir politikalı JSON dışa/içe aktarma, sırrız), açık kaynak lisanslarıyla Hakkında ekranı ve on dilde F-Droid/Play üst verileri.

@@ -1,0 +1,27 @@
+NovaFiles est un gestionnaire de fichiers professionnel et respectueux de la vie privée, open source à 100% — sans publicité, sans traçage, sans réseau sans votre action explicite.
+
+NAVIGATION
+Accès complet au stockage en liste/grille, double volet façon iPad avec glisser-déposer, arborescence latérale, signets de dossiers, favoris et récents.
+
+RECHERCHE
+Indexation instantanée de tout le stockage (Room-FTS) avec filtres vivants type/taille/date.
+
+COFFRE
+Dossiers chiffrés AES-256-GCM (clés matérielles Keystore, dérivées HKDF), phrase de récupération BIP39, déverrouillage biométrique ou PIN, déguisement calculatrice, journal d'intrusion, effacement sécurisé.
+
+CLOUD UNIFIÉ
+Google Drive, Dropbox et OneDrive via OAuth PKCE, plus tout serveur WebDAV — navigation, transfert et synchronisation photo sans doublon.
+
+RÉSEAU
+Serveurs FTP et WebDAV intégrés sans dépendances, clients FTP/SFTP/SMB2-3/WebDAV avec protection TOFU, transfert Wi-Fi Direct et appairage QR.
+
+ARCHIVES
+Création ZIP/7z/TAR.GZ/BZ2/XZ (mots de passe AES-256, volumes fractionnés), lecture ZIP/7z/TAR/RAR4+5 avec protection Zip-Slip et noms arabes corrects.
+
+COUCHE INTELLIGENTE (sur l'appareil, optionnelle)
+Classement des téléchargements, prévision de remplissage, suggestions de maintenance expliquées et règles « quand X alors Y » — chaque suggestion affiche sa raison. Zéro cloud, zéro traçage, désactivable.
+
+ET AUSSI
+Analyseur de stockage avec treemap et doublons, renommage par lot, outils et lecteur multimédia, lecteur PDF, éditeur avec coloration, empreintes MD5/SHA-1/SHA-256, terminal intégré, gestionnaire d'applications, 4 widgets, 10 langues (arabe d'abord), 12 palettes auditées.
+
+Builds reproductibles : vérifiez l'empreinte de votre APK. Guide de sécurité inclus.

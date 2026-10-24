@@ -1018,4 +1018,45 @@
     <string name="guide_s_safedelete_b">الحذف العادي قابل للاستعادة بأدوات الاسترجاع. المسح الآمن يكتب فوق بيانات الملف قبل حذفه من سلة .NovaFilesTrash — استخدمه للمستندات الرسمية والصور الشخصية.</string>
     <string name="guide_s_updates_t">حدّث من المصدر الرسمي فقط</string>
     <string name="guide_s_updates_b">NovaFiles مفتوح المصدر 100% — بناؤه قابل لإعادة الإنتاج ويمكن التحقق من بصمة APK قبل التثبيت. حدّث من F-Droid أو GitHub Releases فقط.</string>
+
+    <!-- ═══ v0.39 — الترحيب للمستخدم الجديد ═══ -->
+    <string name="onboarding_welcome_t">أهلاً بك في NovaFiles</string>
+    <string name="onboarding_welcome_b">مدير ملفات مفتوح المصدر بقوة المحترفين: خزنة مشفرة، سحابة موحدة، أرشيفات بكل الصيغ، طرفية مدمجة، وذكاء محلي 100% على جهازك — بلا إعلانات وبلا تتبّع.</string>
+    <string name="onboarding_perm_t">إذن التخزين الكامل</string>
+    <string name="onboarding_perm_b">سيطلب NovaFiles إذن «كل الملفات» ليدبّر مخزنك كاملاً: نقل وتنظيف وفهرسة فورية. كل شيء يبقى على جهازك — لا شيء يُرسل للإنترنت إلا بطلبك الصريح.</string>
+    <string name="onboarding_vault_t">الخزنة والأمان أولاً</string>
+    <string name="onboarding_vault_b">أخفِ ملفاتك الحساسة في خزنة مشفرة AES-256 تُفتح ببصمتك أو برمز PIN، واحفظ عبارة استرجاع BIP39. اقرأ الدليل الأمني الثماني الأقسام من الإعدادات بعد الترحيب.</string>
+    <string name="onboarding_smart_t">طبقة ذكية تحترم خصوصيتك</string>
+    <string name="onboarding_smart_b">تصنيف التنزيلات، توقعات امتلاء التخزين، واقتراحات صيانة مُفسَّرة بالسبب والوفر المتوقع — كلها قواعد حتمية تعمل على جهازك وقابلة للإيقاف من الإعدادات.</string>
+    <string name="onboarding_next">التالي</string>
+    <string name="onboarding_skip">تخطّي</string>
+    <string name="onboarding_start">ابدأ الاستخدام</string>
+    <string name="onboarding_step">خطوة %1$d من %2$d</string>
+
+    <!-- ═══ v0.39 — نسخ الإعدادات ونقلها بين الأجهزة ═══ -->
+    <string name="settings_backup">نسخ الإعدادات</string>
+    <string name="settings_backup_export">تصدير الإعدادات</string>
+    <string name="settings_backup_export_hint">نسخة JSON من تفضيلاتك وإشاراتك المرجعية — تُكتب في مجلد التقارير وتُشارك لنقلها لجهاز آخر. كلمات مرور الخوادم لا تُصدَّر أبداً.</string>
+    <string name="settings_backup_import">استيراد الإعدادات</string>
+    <string name="settings_backup_import_hint">اختر ملف نسخة nova-settings JSON لاستعادة تفضيلاتك وإشاراتك المرجعية</string>
+    <string name="settings_backup_done">تم تصدير النسخة: %1$s</string>
+    <string name="settings_backup_import_ok">تم الاستيراد: %1$d إعداداً و%2$d إشارة مرجعية</string>
+    <string name="settings_backup_import_bad">تعذّر الاستيراد: %1$s</string>
+    <string name="settings_backup_choose_policy">سياسة الاستيراد</string>
+    <string name="settings_backup_merge">دمج — احتفظ بالإعدادات الحالية واملأ الناقص</string>
+    <string name="settings_backup_replace">استبدال — النسخة المستوردة تُعيد ضبط المتشابه</string>
+    <string name="settings_backup_apply">تطبيق</string>
+    <string name="settings_backup_bad_empty">الملف فارغ أو غير قابل للقراءة</string>
+    <string name="settings_backup_bad_write">فشل كتابة ملف النسخة في مجلد التقارير</string>
+
+    <!-- ═══ v0.39 — حول التطبيق والتراخيص ═══ -->
+    <string name="about_title">حول التطبيق</string>
+    <string name="about_version">الإصدار</string>
+    <string name="about_licenses">تراخيص المصدر المفتوح</string>
+    <string name="about_licenses_hint">NovaFiles يبني فوق مكتبات مفتوحة ممتازة — انقر أي مكتبة لعرض تفاصيلها ورخصتها</string>
+    <string name="about_github">المشروع على GitHub</string>
+    <string name="about_github_hint">أبلغ عن عيب، اقترح ميزة، أو ساهم في التطوير</string>
+    <string name="about_open_source">مفتوح المصدر 100% — بلا إعلانات ولا تتبّع ولا شبكة دون طلبك</string>
+    <string name="about_license">الرخصة</string>
+    <string name="about_view_guide">الدليل الأمني</string>
 </resources>

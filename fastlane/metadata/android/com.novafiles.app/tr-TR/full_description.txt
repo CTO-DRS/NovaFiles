@@ -1,0 +1,27 @@
+NovaFiles, gizliliğe saygılı profesyonel bir dosya yöneticisidir — %100 açık kaynak: reklam yok, izleme yok, açık eyleminiz olmadan ağ yok.
+
+GEZİNME
+Liste/ızgara ile tam depolama erişimi, iPad tarzı çift panel ve sürükle-bırak, kenar klasör ağacı, klasör yer imleri, favoriler ve son kullanılanlar.
+
+ARAMA
+Tüm depolamanın anında dizinlenmesi (Room-FTS) ve canlı tür/boyut/tarih filtreleri.
+
+KASA
+AES-256-GCM şifreli klasörler (donanım destekli Keystore, HKDF), BIP39 kurtarma ifadesi, parmak izi/PIN kilidi, hesap makinesi kılığı, izinsiz giriş kaydı ve güvenli silme.
+
+BİRLEŞİK BULUT
+Google Drive, Dropbox ve OneDrive (OAuth PKCE) artı her WebDAV sunucusu — tek arayüzle gezinme, aktarım ve kamera senkronizasyonu.
+
+AĞ
+Bağımlılıksız gömülü FTP ve WebDAV sunucuları, TOFU korumalı FTP/SFTP/SMB2-3/WebDAV istemcileri, Wi-Fi Direct aktarımı ve QR eşleştirme.
+
+ARŞİVLER
+ZIP/7z/TAR.GZ/BZ2/XZ oluşturma (AES-256 parolalar, bölünmüş hacimler), Zip-Slip korumalı ZIP/7z/TAR/RAR4+5 okuma ve doğru Arapça adlar.
+
+AKILLI KATMAN (cihazda, isteğe bağlı)
+İndirme sınıflandırması, doluluk öngörüsü, gerekçesiyle açıklanan bakım önerileri ve «X olursa Y yap» kuralları — her öneri nedenini gösterir. Sıfır bulut, sıfır izleme, kapatılabilir.
+
+AYRICA
+Treemap'li depolama çözümleyicisi ve kopya bulucu, toplu yeniden adlandırma, medya araçları ve oynatıcı, PDF görüntüleyici, sözdizimi vurgulu düzenleyici, MD5/SHA-1/SHA-256 sağlamaları, gömülü terminal, uygulama yöneticisi, 4 widget, 10 dil (önce Arapça), 12 denetlenmiş palet.
+
+Yeniden üretilebilir derlemeler: APK karmasını doğrulayın. Güvenlik rehberi dahildir.

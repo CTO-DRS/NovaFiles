@@ -1,0 +1,27 @@
+NovaFiles ist ein professioneller, datenschutzfreundlicher Dateimanager — 100% Open Source: keine Werbung, kein Tracking, kein Netzwerk ohne Ihre ausdrückliche Aktion.
+
+NAVIGATION
+Voller Speicherzugriff in Liste/Raster, Dual-Pane im iPad-Stil mit Drag & Drop, Seitenbaum, Lesezeichen, Favoriten und Zuletzt.
+
+SUCHE
+Sofort-Indexierung des gesamten Speichers (Room-FTS) mit Live-Filtern für Typ/Größe/Datum.
+
+TRESOR
+AES-256-GCM-verschlüsselte Ordner (Hardware-Keystore, HKDF), BIP39-Wiederherstellungsphrase, Fingerabdruck/PIN, Taschenrechner-Tarnung, Intrusionsprotokoll, sicheres Löschen.
+
+EINHEITLICHE CLOUD
+Google Drive, Dropbox und OneDrive per OAuth PKCE, dazu jeder WebDAV-Server — gemeinsames Browsen, Übertragen und Kamera-Sync ohne Duplikate.
+
+NETZWERK
+Eingebaute FTP- und WebDAV-Server ohne Abhängigkeiten, FTP/SFTP/SMB2-3/WebDAV-Clients mit TOFU-Schutz, Wi-Fi-Direct-Übertragung und QR-Kopplung.
+
+ARCHIVE
+ZIP/7z/TAR.GZ/BZ2/XZ erstellen (AES-256-Passwörter, geteilte Volumes), ZIP/7z/TAR/RAR4+5 lesen mit Zip-Slip-Schutz und korrekten arabischen Namen.
+
+SMARTE EBENE (auf dem Gerät, optional)
+Download-Klassifizierung, Füll-Prognosen, erklärte Wartungsvorschläge und „Wenn X, dann Y“-Regeln — jeder Vorschlag nennt seinen Grund. Null Cloud, null Tracking, abschaltbar.
+
+AUSSERDEM
+Speicheranalyse mit Treemap und Duplikatsuche, Stapelumbenennung, Medienwerkzeuge und -player, PDF-Betrachter, Editor mit Syntax-Highlighting, Prüfsummen (MD5/SHA-1/SHA-256), integriertes Terminal, App-Manager, 4 Widgets, 10 Sprachen (Arabisch zuerst), 12 geprüfte Paletten.
+
+Reproduzierbare Builds: prüfen Sie Ihren APK-Hash. Sicherheitsleitfaden inklusive.

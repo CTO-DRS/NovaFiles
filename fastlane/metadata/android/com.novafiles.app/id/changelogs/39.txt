@@ -1,0 +1,1 @@
+Kesiapan peluncuran: sambutan pertama, cadangan & transfer pengaturan antar perangkat (ekspor/impor JSON dengan gabung/ganti, tanpa rahasia), layar Tentang dengan lisensi sumber terbuka, dan metadata F-Droid/Play dalam sepuluh bahasa.

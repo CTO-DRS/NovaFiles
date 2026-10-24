@@ -2,6 +2,8 @@
 
 package com.novafiles.app.ui.settings
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import android.os.Environment
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.background
@@ -44,6 +46,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.os.LocaleListCompat
 import com.novafiles.app.R
+import com.novafiles.app.core.backup.BookmarkRef
+import com.novafiles.app.core.backup.DecodeResult
+import com.novafiles.app.core.backup.ExportPayload
+import com.novafiles.app.core.backup.ImportPolicy
+import com.novafiles.app.core.backup.SettingsExportEngine
 import com.novafiles.app.core.gesture.GestureConfig
 import com.novafiles.app.core.gesture.SwipeAction
 import com.novafiles.app.core.l10n.LanguageCatalog
@@ -59,6 +66,9 @@ import com.novafiles.app.ui.ios.rememberBottomBarClearance
 import com.novafiles.app.ui.ios.IOSListRow
 import com.novafiles.app.ui.ios.IOSNavBar
 import com.novafiles.app.ui.ios.LocalIOSPalette
+import com.novafiles.app.util.Intents
+import com.novafiles.app.util.ReportFiles
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -67,9 +77,14 @@ import java.io.File
  * عنوان كبير، قوائم مجمّعة بحواف دائرية، فاصل شعري داخلي،
  * وعلامة ✓ زرقاء للخيار المحدد (اللغة والسمة).
  * v0.19 — قسم «الأمان»: بوابة الخزنة بعد نقلها من الشريط السفلي.
+ * v0.39 — قسم «نسخ الإعدادات»: نقل بين الأجهزة بلا سحابة.
  */
 @Composable
-fun SettingsScreen(onOpenVault: () -> Unit = {}, onOpenSecurityGuide: () -> Unit = {}) {
+fun SettingsScreen(
+    onOpenVault: () -> Unit = {},
+    onOpenSecurityGuide: () -> Unit = {},
+    onOpenAbout: () -> Unit = {},
+) {
     val context = LocalContext.current
     val container = context.novaContainer
     val scope = rememberCoroutineScope()
@@ -331,17 +346,185 @@ fun SettingsScreen(onOpenVault: () -> Unit = {}, onOpenSecurityGuide: () -> Unit
             )
         }
 
-        // ----- عن التطبيق -----
+        // ----- نسخ الإعدادات (v0.39 — نقل بين الأجهزة بلا سحابة) -----
+        var backupStatus by remember { mutableStateOf<String?>(null) }
+        var pendingImport by remember { mutableStateOf<DecodeResult.Ok?>(null) }
+
+        val pickJson = rememberLauncherForActivityResult(
+            ActivityResultContracts.OpenDocument(),
+        ) { uri ->
+            if (uri != null) {
+                scope.launch {
+                    val text = runCatching {
+                        context.contentResolver.openInputStream(uri)?.bufferedReader()?.readText()
+                    }.getOrNull()
+                    when (val result = text?.let { SettingsExportEngine.decode(it) }) {
+                        is DecodeResult.Ok -> pendingImport = result
+                        is DecodeResult.Rejected ->
+                            backupStatus = context.getString(R.string.settings_backup_import_bad, result.reason)
+                        else ->
+                            backupStatus = context.getString(
+                                R.string.settings_backup_import_bad,
+                                context.getString(R.string.settings_backup_bad_empty),
+                            )
+                    }
+                }
+            }
+        }
+
+        IOSGroupHeader(stringResource(R.string.settings_backup))
+        IOSGroupCard {
+            IOSListRow(
+                title = stringResource(R.string.settings_backup_export),
+                subtitle = stringResource(R.string.settings_backup_export_hint),
+                showChevron = true,
+                showSeparator = true,
+                onClick = {
+                    scope.launch {
+                        val prefs = container.settings.exportPrefs()
+                        val bms = container.bookmarks.bookmarks.first()
+                            .map { BookmarkRef(it.name, it.path) }
+                        val payload = ExportPayload(
+                            schema = SettingsExportEngine.SUPPORTED_SCHEMA,
+                            exportedAt = java.time.Instant.now().toString(),
+                            prefs = prefs,
+                            bookmarks = bms,
+                        )
+                        val f = ReportFiles.write("settings", "json", SettingsExportEngine.encode(payload))
+                        if (f != null) {
+                            backupStatus = context.getString(R.string.settings_backup_done, f.name)
+                            Intents.share(context, f)
+                        } else {
+                            backupStatus = context.getString(
+                                R.string.settings_backup_import_bad,
+                                context.getString(R.string.settings_backup_bad_write),
+                            )
+                        }
+                    }
+                },
+            )
+            IOSListRow(
+                title = stringResource(R.string.settings_backup_import),
+                subtitle = stringResource(R.string.settings_backup_import_hint),
+                showChevron = true,
+                showSeparator = false,
+                onClick = { pickJson.launch(arrayOf("application/json", "text/*")) },
+            )
+        }
+        backupStatus?.let { IOSGroupFooter(it) }
+
+        // ورقة سياسة الاستيراد — قرار صريح لا صمت
+        pendingImport?.let { ok ->
+            ImportPolicySheet(
+                onDismiss = { pendingImport = null },
+                onApply = { policy ->
+                    pendingImport = null
+                    scope.launch {
+                        val current = container.settings.exportPrefs()
+                        val (target, summary) = SettingsExportEngine.applyPolicy(current, ok.payload, policy)
+                        val remove = current.keys - target.keys
+                        container.settings.applyImportedPrefs(target, remove)
+                        val added = when (policy) {
+                            ImportPolicy.MERGE -> {
+                                var n = 0
+                                for (b in ok.payload.bookmarks) {
+                                    if (container.bookmarks.add(b.path, b.name)) n++
+                                }
+                                n
+                            }
+                            ImportPolicy.REPLACE -> {
+                                container.bookmarks.replaceAll(
+                                    ok.payload.bookmarks.map { b ->
+                                        com.novafiles.app.core.fs.Bookmark(b.path, b.name, System.currentTimeMillis())
+                                    },
+                                )
+                            }
+                        }
+                        backupStatus = context.getString(
+                            R.string.settings_backup_import_ok,
+                            summary.appliedPrefs,
+                            added,
+                        )
+                    }
+                },
+            )
+        }
+
+        // ----- عن التطبيق (v0.39 — صفوف حية بدل نص ثابت) -----
         IOSGroupHeader(stringResource(R.string.settings_about))
         IOSGroupCard {
-            androidx.compose.material3.Text(
-                stringResource(R.string.settings_about_body),
-                style = TextStyle(fontSize = 13.sp),
-                color = LocalIOSPalette.current.secondaryLabel,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            val versionName = runCatching {
+                context.packageManager.getPackageInfo(context.packageName, 0).versionName
+            }.getOrNull().orEmpty()
+            val versionCode = runCatching {
+                context.packageManager.getPackageInfo(context.packageName, 0).let {
+                    @Suppress("DEPRECATION") it.versionCode
+                }
+            }.getOrNull() ?: 0
+            IOSListRow(
+                title = stringResource(R.string.about_version),
+                subtitle = "$versionName ($versionCode)",
+                showSeparator = true,
+            )
+            IOSListRow(
+                title = stringResource(R.string.about_licenses),
+                subtitle = stringResource(R.string.about_licenses_hint),
+                showChevron = true,
+                showSeparator = false,
+                onClick = onOpenAbout,
             )
         }
         Spacer(Modifier.height(32.dp))
+    }
+}
+
+/**
+ * v0.39 — ورقة اختيار سياسة الاستيراد: دمج (الحالي يفوز) أو استبدال
+ * (المستورد يفوز) — قرار صريح بلا قيمة افتراضية خفية.
+ */
+@Composable
+private fun ImportPolicySheet(onDismiss: () -> Unit, onApply: (ImportPolicy) -> Unit) {
+    var policy by remember { mutableStateOf(ImportPolicy.MERGE) }
+    androidx.compose.material3.AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.settings_backup_choose_policy)) },
+        text = {
+            Column {
+                PolicyRow(
+                    label = stringResource(R.string.settings_backup_merge),
+                    selected = policy == ImportPolicy.MERGE,
+                    onClick = { policy = ImportPolicy.MERGE },
+                )
+                PolicyRow(
+                    label = stringResource(R.string.settings_backup_replace),
+                    selected = policy == ImportPolicy.REPLACE,
+                    onClick = { policy = ImportPolicy.REPLACE },
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = { onApply(policy) }) {
+                Text(stringResource(R.string.settings_backup_apply))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.dialog_cancel)) }
+        },
+    )
+}
+
+@Composable
+private fun PolicyRow(label: String, selected: Boolean, onClick: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        androidx.compose.material3.RadioButton(selected = selected, onClick = onClick)
+        Spacer(Modifier.width(8.dp))
+        Text(label, style = TextStyle(fontSize = 14.sp))
     }
 }
 

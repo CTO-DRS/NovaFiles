@@ -121,6 +121,7 @@ object A11ySourceAudit {
         A11yAllow("network/ConnectionFormScreen.kt", 3, "أيقونات بروتوكول بجوار حقل مُسمّى"),
         A11yAllow("network/NetworkScreen.kt", 2, "أيقونات حالة اتصال بجوار نص الحالة"),
         A11yAllow("network/RemoteBrowserScreen.kt", 1, "أيقونة خادم بجوار اسم الاتصال"),
+        A11yAllow("onboarding/OnboardingScreen.kt", 1, "أيقونة الخطوة الكبيرة زخرفية — عنوان الخطوة وشرحها نصان كاملان أسفلها"),
         A11yAllow("ops/OpsScreen.kt", 1, "أيقونة نوع العملية بجوار عنوان العملية"),
         A11yAllow("recents/RecentScreen.kt", 3, "أيقونات رفوف بجوار عناوين الرفوف"),
         A11yAllow("settings/SettingsScreen.kt", 1, "أيقونة قفل الخزنة داخل صف له عنوان"),

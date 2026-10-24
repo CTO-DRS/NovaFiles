@@ -48,6 +48,17 @@ class BookmarksStore(private val context: Context) {
         save(BookmarksEngine.move(current, path, delta))
     }
 
+    /**
+     * v0.39 — استبدال كامل من نسخة مستوردة: إزالة التكرار بالمحافظة
+     * على الأول والالتزام بالسقف حتماً (24) — الترتيب كما ورد.
+     * يعيد عدد الإشارات المحفوظة فعلاً.
+     */
+    suspend fun replaceAll(list: List<Bookmark>): Int {
+        val kept = list.distinctBy { it.path }.take(24)
+        save(kept)
+        return kept.size
+    }
+
     private suspend fun save(list: List<Bookmark>) {
         context.bookmarksDataStore.edit { prefs ->
             prefs[Keys.BOOKMARKS] = BookmarksCodec.encode(list)

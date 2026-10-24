@@ -1011,4 +1011,41 @@
     <string name="guide_s_safedelete_b">Une suppression ordinaire peut être annulée par des outils de récupération. L\'effacement sécurisé écrase les données avant de retirer le fichier de la corbeille .NovaFilesTrash — à utiliser pour les documents officiels et photos privées.</string>
     <string name="guide_s_updates_t">Mettez à jour depuis la source officielle uniquement</string>
     <string name="guide_s_updates_b">NovaFiles est 100% open source — les builds sont reproductibles et le hash de l\'APK vérifiable avant installation. Mettez à jour depuis F-Droid ou GitHub Releases uniquement.</string>
+
+    <!-- ═══ v0.39 — الترحيب والنسخ الاحتياطي وحول التطبيق (مسودة آلية) ═══ -->
+    <string name="onboarding_welcome_t">Bienvenue dans NovaFiles</string>
+    <string name="onboarding_welcome_b">Un gestionnaire de fichiers open source à la puissance pro : coffre chiffré, cloud unifié, archives de tous formats, terminal intégré et intelligence 100% sur l\'appareil — sans pub ni traçage.</string>
+    <string name="onboarding_perm_t">Accès complet au stockage</string>
+    <string name="onboarding_perm_b">NovaFiles demandera l\'autorisation « Tous les fichiers » pour gérer tout votre stockage : transfert, nettoyage et indexation instantanée. Tout reste sur votre appareil — rien ne part en ligne sans votre action explicite.</string>
+    <string name="onboarding_vault_t">Le coffre et la sécurité d\'abord</string>
+    <string name="onboarding_vault_b">Masquez vos fichiers sensibles dans un coffre chiffré AES-256 déverrouillé par empreinte ou code PIN, et sauvegardez votre phrase de récupération BIP39. Lisez ensuite le guide de sécurité en huit sections depuis les Réglages.</string>
+    <string name="onboarding_smart_t">Une couche intelligente qui respecte la vie privée</string>
+    <string name="onboarding_smart_b">Classement des téléchargements, prévisions de remplissage et suggestions de maintenance expliquées par leur raison et leur gain attendu — des règles déterministes sur votre appareil, désactivables dans les Réglages.</string>
+    <string name="onboarding_next">Suivant</string>
+    <string name="onboarding_skip">Ignorer</string>
+    <string name="onboarding_start">Commencer</string>
+    <string name="onboarding_step">Étape %1$d sur %2$d</string>
+    <string name="settings_backup">Sauvegarde des réglages</string>
+    <string name="settings_backup_export">Exporter les réglages</string>
+    <string name="settings_backup_export_hint">Une copie JSON de vos préférences et signets — écrite dans le dossier des rapports et partagée pour transfert vers un autre appareil. Les mots de passe des serveurs ne sont jamais exportés.</string>
+    <string name="settings_backup_import">Importer les réglages</string>
+    <string name="settings_backup_import_hint">Choisissez un fichier de sauvegarde nova-settings JSON pour restaurer vos préférences et signets</string>
+    <string name="settings_backup_done">Sauvegarde exportée : %1$s</string>
+    <string name="settings_backup_import_ok">Importé : %1$d réglages et %2$d signets</string>
+    <string name="settings_backup_import_bad">Échec de l\'import : %1$s</string>
+    <string name="settings_backup_choose_policy">Politique d\'import</string>
+    <string name="settings_backup_merge">Fusion — conserver l\'existant et compléter le manquant</string>
+    <string name="settings_backup_replace">Remplacer — la copie importée réinitialise les éléments communs</string>
+    <string name="settings_backup_apply">Appliquer</string>
+    <string name="settings_backup_bad_empty">Fichier vide ou illisible</string>
+    <string name="settings_backup_bad_write">Échec d\'écriture du fichier de sauvegarde dans le dossier des rapports</string>
+    <string name="about_title">À propos</string>
+    <string name="about_version">Version</string>
+    <string name="about_licenses">Licences open source</string>
+    <string name="about_licenses_hint">NovaFiles repose sur d\'excellentes bibliothèques open source — touchez une bibliothèque pour ses détails et sa licence</string>
+    <string name="about_github">Projet sur GitHub</string>
+    <string name="about_github_hint">Signaler un bug, proposer une fonctionnalité ou contribuer</string>
+    <string name="about_open_source">100% open source — sans pub, sans traçage, sans réseau sans votre demande</string>
+    <string name="about_license">Licence</string>
+    <string name="about_view_guide">Guide de sécurité</string>
 </resources>
