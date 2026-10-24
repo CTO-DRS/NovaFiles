@@ -14,8 +14,8 @@ android {
         minSdk = 26
         targetSdk = 35
 
-        versionCode = 40
-        versionName = "0.40.0"
+        versionCode = 41
+        versionName = "0.41.0"
 
         // v0.16 — معرّفات عملاء OAuth للسحابة: يضبطها كل مُطوّر عبر gradle.properties
         // (NOVA_DRIVE_CLIENT_ID=...) — فارغة افتراضياً ليعمل البناء دون أسرار

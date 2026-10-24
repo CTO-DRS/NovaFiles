@@ -1085,4 +1085,19 @@
     <string name="ug_c_settings_b">ترجیحات و نشانک‌های خود را در پروندهٔ nova-settings.json برون‌سپاری کنید و به دستگاه دیگری ببرید — بدون ابر و بدون گذرواژهٔ کارساز، با چک‌سومی که دستکاری بیرونی را آشکار می‌کند.</string>
     <string name="settings_user_guide">راهنمای کاربر</string>
     <string name="settings_user_guide_hint">ده فصل کوتاه هر قابلیت را توضیح می‌دهد — با جست‌وجوی زنده و پیگیری پیشرفت</string>
+
+
+    <!-- v0.41 — Nova Intelligence (المساعد المحلي) -->
+    <string name="ai_title">نوا اینتلیجنس</string>
+    <string name="ai_subtitle">دستیار روی دستگاه — کاملاً آفلاین</string>
+    <string name="ai_input_hint">درباره فایل‌هایتان بپرسید…</string>
+    <string name="ai_send">ارسال</string>
+    <string name="ai_empty_state">درباره فایل‌هایتان بپرسید — بدون اینترنت.</string>
+    <string name="ai_suggestions_title">امتحان کنید:</string>
+    <string name="ai_history_toggle">تاریخچه گفتگو</string>
+    <string name="ai_settings_hint">جست‌وجو، تحلیل و سازمان‌دهی — کاملاً روی دستگاه</string>
+    <string name="ai_confirm_save_rule">تأیید ذخیرهٔ قانون</string>
+    <string name="ai_risk_read">فقط خواندن</string>
+    <string name="ai_risk_plan">پیش‌نمایش</string>
+    <string name="ai_risk_write">نوشتن — نیازمند تأیید شما</string>
 </resources>

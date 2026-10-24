@@ -1,4 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    v0.41 — قواعد النسخ الاحتياطي الكامل (API <= 30): نفس سياسة Android 12+
+    في data_extraction_rules.xml — كل مخازن الأسرار مستثناة من النسخ والاستعادة.
+-->
 <full-backup-content>
     <exclude domain="root" path="vault_key_notes.txt" />
+    <exclude domain="sharedpref" path="nova_vault.xml" />
+    <exclude domain="sharedpref" path="nova_vault2.xml" />
+    <exclude domain="sharedpref" path="nova_known_hosts.xml" />
+    <exclude domain="file" path="datastore/nova_settings.preferences_pb" />
 </full-backup-content>

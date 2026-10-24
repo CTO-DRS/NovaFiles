@@ -1096,4 +1096,19 @@
     <string name="ug_c_settings_b">صدّر تفضيلاتك وإشاراتك المرجعية في ملف nova-settings.json ونقله إلى جهاز آخر — بلا سحابة وبلا كلمات مرور خوادم، مع بصمة تكشف أي تعديل خارجي على الملف.</string>
     <string name="settings_user_guide">دليل المستخدم</string>
     <string name="settings_user_guide_hint">عشرة فصول قصيرة تشرح كل ميزات التطبيق — ببحث حي وتتبّع تقدّم</string>
+
+
+    <!-- v0.41 — Nova Intelligence (المساعد المحلي) -->
+    <string name="ai_title">المساعد الذكي</string>
+    <string name="ai_subtitle">مساعد على جهازك — بلا إنترنت نهائياً</string>
+    <string name="ai_input_hint">اسأل عن ملفاتك…</string>
+    <string name="ai_send">إرسال</string>
+    <string name="ai_empty_state">اسألني عن ملفاتك — بلا إنترنت أبداً.</string>
+    <string name="ai_suggestions_title">جرّب:</string>
+    <string name="ai_history_toggle">سجل المحادثة</string>
+    <string name="ai_settings_hint">بحث وتحليل وتنظيم — محلي بالكامل</string>
+    <string name="ai_confirm_save_rule">تأكيد حفظ القاعدة</string>
+    <string name="ai_risk_read">قراءة فقط</string>
+    <string name="ai_risk_plan">معاينة</string>
+    <string name="ai_risk_write">كتابة — تتطلب تأكيدك</string>
 </resources>

@@ -1085,4 +1085,19 @@
     <string name="ug_c_settings_b">Экспортируйте настройки и закладки в файл nova-settings.json и перенесите на другое устройство — без облака и паролей серверов, с контрольной суммой, выявляющей внешние изменения.</string>
     <string name="settings_user_guide">Руководство пользователя</string>
     <string name="settings_user_guide_hint">Десять коротких глав объясняют каждую функцию — с живым поиском и отслеживанием прогресса</string>
+
+
+    <!-- v0.41 — Nova Intelligence (المساعد المحلي) -->
+    <string name="ai_title">Nova Intelligence</string>
+    <string name="ai_subtitle">Ассистент на устройстве — полностью офлайн</string>
+    <string name="ai_input_hint">Спросите о своих файлах…</string>
+    <string name="ai_send">Отправить</string>
+    <string name="ai_empty_state">Спросите о своих файлах — интернет не нужен.</string>
+    <string name="ai_suggestions_title">Попробуйте:</string>
+    <string name="ai_history_toggle">История чата</string>
+    <string name="ai_settings_hint">Поиск, анализ и организация — полностью на устройстве</string>
+    <string name="ai_confirm_save_rule">Подтвердить сохранение правила</string>
+    <string name="ai_risk_read">Только чтение</string>
+    <string name="ai_risk_plan">Предпросмотр</string>
+    <string name="ai_risk_write">Запись — требуется подтверждение</string>
 </resources>

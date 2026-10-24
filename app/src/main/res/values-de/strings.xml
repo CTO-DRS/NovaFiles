@@ -1085,4 +1085,19 @@
     <string name="ug_c_settings_b">Exportiere Einstellungen und Lesezeichen in eine nova-settings.json und bringe sie auf ein anderes Gerät — ohne Cloud und ohne Serverkennwörter, mit Prüfsumme gegen externe Manipulation.</string>
     <string name="settings_user_guide">Benutzerhandbuch</string>
     <string name="settings_user_guide_hint">Zehn kurze Kapitel erklären jede Funktion — mit Live-Suche und Fortschrittsverfolgung</string>
+
+
+    <!-- v0.41 — Nova Intelligence (المساعد المحلي) -->
+    <string name="ai_title">Nova Intelligence</string>
+    <string name="ai_subtitle">Assistent auf dem Gerät — komplett offline</string>
+    <string name="ai_input_hint">Frag nach deinen Dateien …</string>
+    <string name="ai_send">Senden</string>
+    <string name="ai_empty_state">Frag mich nach deinen Dateien — ohne Internet.</string>
+    <string name="ai_suggestions_title">Vorschläge:</string>
+    <string name="ai_history_toggle">Chatverlauf</string>
+    <string name="ai_settings_hint">Suchen, analysieren und organisieren — komplett auf dem Gerät</string>
+    <string name="ai_confirm_save_rule">Regel speichern bestätigen</string>
+    <string name="ai_risk_read">Nur Lesen</string>
+    <string name="ai_risk_plan">Vorschau</string>
+    <string name="ai_risk_write">Schreiben — Bestätigung nötig</string>
 </resources>

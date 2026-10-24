@@ -85,6 +85,7 @@ fun SettingsScreen(
     onOpenVault: () -> Unit = {},
     onOpenSecurityGuide: () -> Unit = {},
     onOpenUserGuide: () -> Unit = {},
+    onOpenAssistant: () -> Unit = {},
     onOpenAbout: () -> Unit = {},
 ) {
     val context = LocalContext.current
@@ -305,6 +306,13 @@ fun SettingsScreen(
                 showChevron = true,
                 showSeparator = true,
                 onClick = onOpenUserGuide,
+            )
+            IOSListRow(
+                title = stringResource(R.string.ai_title),
+                subtitle = stringResource(R.string.ai_settings_hint),
+                showChevron = true,
+                showSeparator = false,
+                onClick = onOpenAssistant,
             )
             IOSListRow(
                 title = stringResource(R.string.settings_security_guide),
