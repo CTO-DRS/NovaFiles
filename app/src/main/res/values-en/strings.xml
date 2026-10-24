@@ -1092,4 +1092,19 @@
     <string name="ug_c_settings_b">Export your preferences and bookmarks into a nova-settings.json file and move it to another device — no cloud and no server passwords, with a checksum that detects any external tampering.</string>
     <string name="settings_user_guide">User Guide</string>
     <string name="settings_user_guide_hint">Ten short chapters explaining every feature — with live search and progress tracking</string>
+
+
+    <!-- v0.41 — Nova Intelligence (المساعد المحلي) -->
+    <string name="ai_title">Nova Intelligence</string>
+    <string name="ai_subtitle">On-device assistant — fully offline</string>
+    <string name="ai_input_hint">Ask about your files…</string>
+    <string name="ai_send">Send</string>
+    <string name="ai_empty_state">Ask me about your files — no internet, ever.</string>
+    <string name="ai_suggestions_title">Try:</string>
+    <string name="ai_history_toggle">Chat history</string>
+    <string name="ai_settings_hint">Search, analyze and organize — fully on-device</string>
+    <string name="ai_confirm_save_rule">Confirm saving rule</string>
+    <string name="ai_risk_read">Read-only</string>
+    <string name="ai_risk_plan">Preview</string>
+    <string name="ai_risk_write">Write — needs your confirmation</string>
 </resources>

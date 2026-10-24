@@ -1,0 +1,8 @@
+v0.41.0 — Nova Intelligence: fully offline on-device assistant + deep security audit
+
+• Assistant: deterministic Arabic/English intent engine (character-level normalization) handling the six reference commands: filtered file search, storage analysis, duplicates report, organize suggestions, automation rule creation after explicit preview, and error explanations
+• Security by design: allowlisted tools with no delete/upload capability, canonical path validation against allowed roots, write actions require explicit confirmation, saved rules start in dry-run mode
+• iOS-style chat screen with plan preview cards, risk chips (read/preview/write), and opt-in local history that is disabled by default and wiped on disable
+• Security audit: backup rules previously included app secrets in cloud backup and device transfer on Android 12+ — all sensitive stores are now excluded in both rule sets (vault keys, OAuth tokens, SFTP host fingerprints, PIN hashes, FTP/WebDAV passwords)
+• FileProvider previously exposed the filesystem root (root-path=".") — now restricted to explicit scopes that fail closed
+• +45 new tests including negative security tests: deletion prevention, path traversal, symlink escapes, filename injection, transcript injection — strings now 1,030+ keys × 10 locales

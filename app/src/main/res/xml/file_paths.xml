@@ -1,5 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    v0.41 — نطاق FileProvider مقيد (إصلاح P0): حذف root-path="." الذي كان يكشف
+    جذر نظام الملفات بالكامل (/) عبر روابط content://، والاستبدال بنطاقات صريحة:
+      - external-path       : تخزين المستخدم /storage/emulated/0 (ملفات المستخدم والتقارير)
+      - files-path          : filesDir الداخلي (مخرجات قد تُشارك)
+      - cache-path          : cacheDir الداخلي (مؤقتات التصدير)
+      - external-files-path : getExternalFilesDir (مجلد الخزنة Vault2 عند التصدير)
+      - external-cache-path : ذاكرة التخزين الخارجية المؤقتة
+    أي مسار خارج هذه النطاقات يفشل بإغلاق (IllegalArgumentException) بدل التسريب.
+-->
 <paths>
     <external-path name="external_files" path="." />
-    <root-path name="root" path="." />
+    <files-path name="internal_files" path="." />
+    <cache-path name="internal_cache" path="." />
+    <external-files-path name="app_external_files" path="." />
+    <external-cache-path name="app_external_cache" path="." />
 </paths>

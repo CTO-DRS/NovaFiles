@@ -1085,4 +1085,19 @@
     <string name="ug_c_settings_b">اپنی ترجیحات اور بک مارکس کو nova-settings.json فائل میں برآمد کریں اور دوسرے آلے پر لے جائیں — بغیر کلاؤڈ اور بغیر سرور پاس ورڈ، خارجی تبدیلی پکڑنے والی چیکسم کے ساتھ۔</string>
     <string name="settings_user_guide">صارف گائیڈ</string>
     <string name="settings_user_guide_hint">دس مختصر ابواب ہر خصوصیت کی وضاحت کرتے ہیں — براہ راست تلاش اور پیش رفت کی نگرانی کے ساتھ</string>
+
+
+    <!-- v0.41 — Nova Intelligence (المساعد المحلي) -->
+    <string name="ai_title">نوا انٹیلیجنس</string>
+    <string name="ai_subtitle">آپ کے ڈیوائس پر اسسٹنٹ — مکمل آف لائن</string>
+    <string name="ai_input_hint">اپنی فائلوں کے بارے میں پوچھیں…</string>
+    <string name="ai_send">بھیجیں</string>
+    <string name="ai_empty_state">اپنی فائلوں کے بارے میں پوچھیں — انٹرنیٹ کے بغیر۔</string>
+    <string name="ai_suggestions_title">آزمائیں:</string>
+    <string name="ai_history_toggle">چیٹ ہسٹری</string>
+    <string name="ai_settings_hint">تلاش، تجزیہ اور تنظیم — مکمل طور پر ڈیوائس پر</string>
+    <string name="ai_confirm_save_rule">قاعدہ محفوظ کرنے کی تصدیق</string>
+    <string name="ai_risk_read">صرف پڑھنا</string>
+    <string name="ai_risk_plan">پیش نظارہ</string>
+    <string name="ai_risk_write">لکھنا — تصدیق درکار</string>
 </resources>

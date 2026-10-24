@@ -90,6 +90,25 @@ class AppContainer(appContext: Context) {
         com.novafiles.app.core.rules.RulesRepository(ctx)
     }
 
+    /** v0.41 — Nova Intelligence: المساعد المحلي الحتمي (نوايا/أدوات/تحقق) */
+    val assistant: com.novafiles.app.core.ai.AssistantEngine by lazy {
+        com.novafiles.app.core.ai.AssistantEngine(
+            validator = com.novafiles.app.core.ai.PlanValidator(
+                listOf("/storage/emulated/0", "/sdcard"),
+            ),
+        )
+    }
+
+    /** v0.41 — مخزن المساعد: سجل اختياري محلي (معطّل افتراضياً) */
+    val assistantStore: com.novafiles.app.data.prefs.AssistantStore by lazy {
+        com.novafiles.app.data.prefs.AssistantStore(ctx)
+    }
+
+    /** v0.41 — منفّذ أدوات المساعد فوق المحركات الحقيقية (فهرس/تحليل/مكررات/قواعد) */
+    val assistantExecutor: com.novafiles.app.ui.assistant.AssistantExecutor by lazy {
+        com.novafiles.app.ui.assistant.AssistantExecutor(db, rulesRepo)
+    }
+
     /** v0.36 — إشارات مرجعية للمسارات: مجلدات العمل اليومية في الشجرة الجانبية */
     val bookmarks: com.novafiles.app.data.prefs.BookmarksStore by lazy {
         com.novafiles.app.data.prefs.BookmarksStore(ctx)

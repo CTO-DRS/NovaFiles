@@ -1085,4 +1085,19 @@
     <string name="ug_c_settings_b">Tercihlerini ve yer imlerini nova-settings.json dosyasına aktar ve başka bir cihaza taşı — bulutsuz ve sunucu parolasız, dış müdahaleyi fark eden sağlama toplamıyla.</string>
     <string name="settings_user_guide">Kullanıcı Kılavuzu</string>
     <string name="settings_user_guide_hint">Her özelliği anlatan on kısa bölüm — canlı arama ve ilerleme takibiyle</string>
+
+
+    <!-- v0.41 — Nova Intelligence (المساعد المحلي) -->
+    <string name="ai_title">Nova Intelligence</string>
+    <string name="ai_subtitle">Cihaz üzerinde asistan — tamamen çevrimdışı</string>
+    <string name="ai_input_hint">Dosyalarını sorun…</string>
+    <string name="ai_send">Gönder</string>
+    <string name="ai_empty_state">Dosyalarını bana sor — internet yok, hiç.</string>
+    <string name="ai_suggestions_title">Dene:</string>
+    <string name="ai_history_toggle">Sohbet geçmişi</string>
+    <string name="ai_settings_hint">Ara, analiz et ve düzenle — tamamen cihazda</string>
+    <string name="ai_confirm_save_rule">Kural kaydını onayla</string>
+    <string name="ai_risk_read">Salt okunur</string>
+    <string name="ai_risk_plan">Önizleme</string>
+    <string name="ai_risk_write">Yazma — onay gerekir</string>
 </resources>
