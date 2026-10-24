@@ -79,6 +79,7 @@ object Routes {
     const val SYNC = "sync?path={path}"              // v0.32 — المزامنة المجدولة
     const val RULES = "rules?path={path}"      // v0.35 — قواعد الأتمتة
     const val SECURITY_GUIDE = "securityguide" // v0.38 — الدليل الأمني للمستخدم الجديد
+    const val USER_GUIDE = "userguide"         // v0.40 — دليل المستخدم المدمج
     const val ABOUT = "about"                  // v0.39 — حول التطبيق والتراخيص
     const val NETWORK = "network"
     const val CONN_FORM = "connform?connId={connId}"
@@ -292,12 +293,17 @@ private fun NovaNavHost(nav: NavHostController) {
             SettingsScreen(
                 onOpenVault = { nav.navigate(Routes.VAULT) },
                 onOpenSecurityGuide = { nav.navigate(Routes.SECURITY_GUIDE) },
+                onOpenUserGuide = { nav.navigate(Routes.USER_GUIDE) },
                 onOpenAbout = { nav.navigate(Routes.ABOUT) },
             )
         }
         // v0.38 — الدليل الأمني للمستخدم الجديد
         composable(Routes.SECURITY_GUIDE) {
             com.novafiles.app.ui.settings.SecurityGuideScreen(onBack = { nav.popBackStack() })
+        }
+        // v0.40 — دليل المستخدم المدمج
+        composable(Routes.USER_GUIDE) {
+            com.novafiles.app.ui.guide.UserGuideScreen(onBack = { nav.popBackStack() })
         }
         // v0.39 — حول التطبيق والتراخيص
         composable(Routes.ABOUT) {

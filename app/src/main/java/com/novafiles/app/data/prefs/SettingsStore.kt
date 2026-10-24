@@ -65,6 +65,9 @@ class SettingsStore(private val context: Context) {
 
         // v0.39 — الترحيب: الخطوات المنجزة CSV حسب OnboardingEngine.serialize
         val ONBOARDING_DONE = stringPreferencesKey("onboarding_done")
+
+        // v0.40 — دليل المستخدم: الفصول المُقرأة CSV حسب UserGuide.serialize
+        val USER_GUIDE_READ = stringPreferencesKey("user_guide_read")
     }
 
     val viewGrid: Flow<Boolean> = context.dataStore.data.map { it[Keys.VIEW_GRID] ?: false }
@@ -119,6 +122,10 @@ class SettingsStore(private val context: Context) {
     // v0.38 — تقدّم الدليل الأمني (CSV من معرفات الأقسام المُقرأة)
     val securityGuideRead: Flow<String> = context.dataStore.data.map { it[Keys.SECURITY_GUIDE_READ] ?: "" }
     suspend fun setSecurityGuideRead(raw: String) = context.dataStore.edit { it[Keys.SECURITY_GUIDE_READ] = raw }
+
+    // v0.40 — تقدّم دليل المستخدم (CSV من معرفات الفصول المُقرأة)
+    val userGuideRead: Flow<String> = context.dataStore.data.map { it[Keys.USER_GUIDE_READ] ?: "" }
+    suspend fun setUserGuideRead(raw: String) = context.dataStore.edit { it[Keys.USER_GUIDE_READ] = raw }
 
     // v0.39 — تقدّم الترحيب (CSV من معرفات الخطوات المنجزة)
     val onboardingDone: Flow<String> = context.dataStore.data.map { it[Keys.ONBOARDING_DONE] ?: "" }

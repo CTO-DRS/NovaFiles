@@ -1,0 +1,1 @@
+In-app user guide: ten short chapters covering every feature with live search (Arabic/English normalization) and reading progress tracking — plus a User Guide row in Settings.
