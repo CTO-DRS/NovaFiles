@@ -46,26 +46,13 @@ class AesGcmVault(
             store.remove(id)
             return
         }
-        val iv = ByteArray(IV_LEN).also { SecureRandom().nextBytes(it) }
-        val cipher = Cipher.getInstance(TRANSFORM)
-        cipher.init(Cipher.ENCRYPT_MODE, key, GCMParameterSpec(TAG_BITS, iv))
-        val encrypted = cipher.doFinal(secret.toByteArray(Charsets.UTF_8))
-        val ivB64 = Base64.getEncoder().encodeToString(iv)
-        val dataB64 = Base64.getEncoder().encodeToString(encrypted)
-        store[id] = "$MAGIC:$ivB64:$dataB64"
+        // v0.41.1 — النواة المشتركة sealTo/unsealFrom (نفس الصيغة تخدم ختم إعدادات الخوادم)
+        store[id] = sealTo(key, secret)
     }
 
     override fun load(id: String): String? {
         val raw = store[id] ?: return null
-        val parts = raw.split(':')
-        if (parts.size != 3 || parts[0] != MAGIC) return null
-        return runCatching {
-            val iv = Base64.getDecoder().decode(parts[1])
-            val data = Base64.getDecoder().decode(parts[2])
-            val cipher = Cipher.getInstance(TRANSFORM)
-            cipher.init(Cipher.DECRYPT_MODE, key, GCMParameterSpec(TAG_BITS, iv))
-            String(cipher.doFinal(data), Charsets.UTF_8)
-        }.getOrNull() // بصمة GCM لا تمر — السر فاسد أو المفتاح تغير → null آمن
+        return unsealFrom(key, raw) // بصمة GCM لا تمر — السر فاسد أو المفتاح تغير → null آمن
     }
 
     override fun delete(id: String) {
@@ -77,10 +64,39 @@ class AesGcmVault(
     override fun close() { /* لا موارد */ }
 
     companion object {
-        private const val MAGIC = "NFCV1"
+        internal const val MAGIC = "NFCV1"
         private const val TRANSFORM = "AES/GCM/NoPadding"
         private const val IV_LEN = 12
         private const val TAG_BITS = 128
+
+        /**
+         * v0.41.1 — ختم نصي صريح بصيغة «NFCV1:<iv b64>:<cipher b64>» — النواة المشتركة
+         * بين خزنة بيانات الاعتماد وختم كلمات مرور الخوادم في DataStore (ServerPassSealer).
+         * يرفض الفراغ (احذف المفتاح بدل ختمه) ويولّد IV عشوائياً لكل عملية.
+         */
+        fun sealTo(key: SecretKey, secret: String): String {
+            require(secret.isNotEmpty()) { "sealTo يرفض النص الفارغ — احذف المفتاح بدل ختمه" }
+            val iv = ByteArray(IV_LEN).also { SecureRandom().nextBytes(it) }
+            val cipher = Cipher.getInstance(TRANSFORM)
+            cipher.init(Cipher.ENCRYPT_MODE, key, GCMParameterSpec(TAG_BITS, iv))
+            val encrypted = cipher.doFinal(secret.toByteArray(Charsets.UTF_8))
+            val ivB64 = Base64.getEncoder().encodeToString(iv)
+            val dataB64 = Base64.getEncoder().encodeToString(encrypted)
+            return "$MAGIC:$ivB64:$dataB64"
+        }
+
+        /** يفك ختم NFCV1 — null عند أي عطب أو صيغة غريبة (بصمة GCM لا تمر) */
+        fun unsealFrom(key: SecretKey, raw: String): String? {
+            val parts = raw.split(':')
+            if (parts.size != 3 || parts[0] != MAGIC) return null
+            return runCatching {
+                val iv = Base64.getDecoder().decode(parts[1])
+                val data = Base64.getDecoder().decode(parts[2])
+                val cipher = Cipher.getInstance(TRANSFORM)
+                cipher.init(Cipher.DECRYPT_MODE, key, GCMParameterSpec(TAG_BITS, iv))
+                String(cipher.doFinal(data), Charsets.UTF_8)
+            }.getOrNull()
+        }
     }
 }
 

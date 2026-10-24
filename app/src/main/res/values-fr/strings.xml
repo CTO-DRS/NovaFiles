@@ -1014,7 +1014,7 @@
 
     <!-- ═══ v0.39 — الترحيب والنسخ الاحتياطي وحول التطبيق (مسودة آلية) ═══ -->
     <string name="onboarding_welcome_t">Bienvenue dans NovaFiles</string>
-    <string name="onboarding_welcome_b">Un gestionnaire de fichiers open source à la puissance pro : coffre chiffré, cloud unifié, archives de tous formats, terminal intégré et intelligence 100% sur l\'appareil — sans pub ni traçage.</string>
+    <string name="onboarding_welcome_b" formatted="false">Un gestionnaire de fichiers open source à la puissance pro : coffre chiffré, cloud unifié, archives de tous formats, terminal intégré et intelligence 100% sur l\'appareil — sans pub ni traçage.</string>
     <string name="onboarding_perm_t">Accès complet au stockage</string>
     <string name="onboarding_perm_b">NovaFiles demandera l\'autorisation « Tous les fichiers » pour gérer tout votre stockage : transfert, nettoyage et indexation instantanée. Tout reste sur votre appareil — rien ne part en ligne sans votre action explicite.</string>
     <string name="onboarding_vault_t">Le coffre et la sécurité d\'abord</string>
@@ -1089,7 +1089,7 @@
 
     <!-- v0.41 — Nova Intelligence (المساعد المحلي) -->
     <string name="ai_title">Nova Intelligence</string>
-    <string name="ai_subtitle">Assistant sur l’appareil — 100 % hors ligne</string>
+    <string name="ai_subtitle" formatted="false">Assistant sur l’appareil — 100 % hors ligne</string>
     <string name="ai_input_hint">Interrogez vos fichiers…</string>
     <string name="ai_send">Envoyer</string>
     <string name="ai_empty_state">Interrogez vos fichiers — sans Internet, jamais.</string>

@@ -36,6 +36,21 @@ object KeystoreVault {
         return gen.generateKey()
     }
 
+    /**
+     * v0.41.1 — مفتاح ختم أسرار الخوادم مع ذاكرة عملية: Keystore ثابت خلال العملية
+     * فلا داعي لإعادة فتحه مع كل انبعاث Flow. يُعيد null إن فشل فتح Keystore
+     * (عطل نظام نادر) — المستدعي يطبق سياسة الفشل المغلق، لا استثناءات هنا.
+     */
+    @Volatile
+    private var cachedServerKey: SecretKey? = null
+
+    fun serverKey(): SecretKey? {
+        cachedServerKey?.let { return it }
+        val key = runCatching { androidKey() }.getOrNull() ?: return null
+        cachedServerKey = key
+        return key
+    }
+
     /** خزنة جاهزة للتطبيق: AES/GCM بمفتاح Keystore + تخزين SharedPreferences */
     fun open(context: Context): AesGcmVault {
         val prefs: SharedPreferences = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)

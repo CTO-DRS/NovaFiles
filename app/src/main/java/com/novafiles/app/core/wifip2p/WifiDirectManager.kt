@@ -106,7 +106,9 @@ class WifiDirectManager(
             runCatching { context.unregisterReceiver(receiver) }
             registered = false
         }
-        runCatching { channel?.close() }
+        // v0.41.1 — Channel.close متاح من API 27 فقط؛ على API 26 تُحرّر القناة مع إلغاء
+        // تسجيل المستقبل وموت العملية (لا تسريب موارد ملموس في دورة حياة الخدمة)
+        runCatching { if (android.os.Build.VERSION.SDK_INT >= 27) channel?.close() }
         channel = null
     }
 

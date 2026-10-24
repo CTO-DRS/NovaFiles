@@ -41,9 +41,13 @@ sealed class ParityIssue {
 
 object StringsParity {
 
-    /** سطر/كتلة سلسلة واحدة: <string name="key">القيمة</string> */
+    /**
+     * سطر/كتلة سلسلة واحدة: <string name="key">القيمة</string>.
+     * v0.41.1 — يقبل سمات string القياسية (formatted="false"، translatable…)
+     * بعد name — سمات أندرويد المشروعة لا تؤثر على التكافؤ.
+     */
     private val STRING_RE =
-        Regex("""<string\s+name="([^"]+)"\s*>(.*?)</string>""", setOf(RegexOption.DOT_MATCHES_ALL, RegexOption.MULTILINE))
+        Regex("""<string\s+name="([^"]+)"[^>]*>(.*?)</string>""", setOf(RegexOption.DOT_MATCHES_ALL, RegexOption.MULTILINE))
 
     private val COMMENT_RE = Regex("""<!--.*?-->""", setOf(RegexOption.DOT_MATCHES_ALL))
 

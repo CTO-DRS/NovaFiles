@@ -169,7 +169,11 @@ class SettingsExportEngineTest {
 
     @Test
     fun `exportable keys never contain server credentials`() {
-        val forbidden = listOf("ftp_user", "ftp_pass", "dav_user", "dav_pass")
+        // v0.41.1 — الأختام الجديدة ممنوعة كذلك (التصدير لا يحمل أسراراً حتى المشفرة منها)
+        val forbidden = listOf(
+            "ftp_user", "ftp_pass", "dav_user", "dav_pass",
+            "ftp_pass_enc", "dav_pass_enc",
+        )
         for (key in forbidden) {
             assertTrue("المفتاح السري $key ممنوع من التصدير", key !in SettingsExportEngine.EXPORTABLE_PREF_KEYS)
         }
