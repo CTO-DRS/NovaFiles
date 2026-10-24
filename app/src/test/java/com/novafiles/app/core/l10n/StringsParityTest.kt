@@ -94,6 +94,21 @@ class StringsParityTest {
     // ---------- التدقيق ----------
 
     @Test
+    fun `parse accepts standard android string attributes`() {
+        // v0.41.1 — formatted="false" سمة قياسية (سلاسل % الحرفية) يجب ألا تكسر التكافؤ
+        val parsed = StringsParity.parse(
+            """<resources>
+                <string name="with_percent" formatted="false">100% open</string>
+                <string name="translatable_off" translatable="false">Nova</string>
+                <string name="plain">عادي</string>
+            </resources>""",
+        )
+        assertEquals(3, parsed.entries.size)
+        assertEquals("100% open", parsed.entries.first { it.name == "with_percent" }.value)
+        assertEquals("عادي", parsed.entries.first { it.name == "plain" }.value)
+    }
+
+    @Test
     fun `audit finds missing extra and placeholder mismatch`() {
         val base = StringsParity.parse(
             """<resources>

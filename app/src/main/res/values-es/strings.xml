@@ -1014,7 +1014,7 @@
 
     <!-- ═══ v0.39 — الترحيب والنسخ الاحتياطي وحول التطبيق (مسودة آلية) ═══ -->
     <string name="onboarding_welcome_t">Bienvenido a NovaFiles</string>
-    <string name="onboarding_welcome_b">Un gestor de archivos de código abierto con potencia profesional: bóveda cifrada, nube unificada, archivos comprimidos de todos los formatos, terminal integrada e inteligencia 100% en el dispositivo — sin anuncios ni rastreo.</string>
+    <string name="onboarding_welcome_b" formatted="false">Un gestor de archivos de código abierto con potencia profesional: bóveda cifrada, nube unificada, archivos comprimidos de todos los formatos, terminal integrada e inteligencia 100% en el dispositivo — sin anuncios ni rastreo.</string>
     <string name="onboarding_perm_t">Acceso completo al almacenamiento</string>
     <string name="onboarding_perm_b">NovaFiles pedirá el permiso «Todos los archivos» para gestionar todo tu almacenamiento: transferencia, limpieza e indexación instantánea. Todo queda en tu dispositivo — nada sale a la red sin tu acción explícita.</string>
     <string name="onboarding_vault_t">Primero la bóveda y la seguridad</string>
@@ -1045,7 +1045,7 @@
     <string name="about_licenses_hint">NovaFiles se construye sobre excelentes bibliotecas de código abierto — toca una biblioteca para ver sus detalles y licencia</string>
     <string name="about_github">Proyecto en GitHub</string>
     <string name="about_github_hint">Informa de un fallo, sugiere una función o contribuye</string>
-    <string name="about_open_source">100% código abierto — sin anuncios, sin rastreo, sin red sin tu petición</string>
+    <string name="about_open_source" formatted="false">100% código abierto — sin anuncios, sin rastreo, sin red sin tu petición</string>
     <string name="about_license">Licencia</string>
     <string name="about_view_guide">Guía de seguridad</string>
     <!-- ═══ v0.40 — دليل المستخدم المدمج ═══ -->

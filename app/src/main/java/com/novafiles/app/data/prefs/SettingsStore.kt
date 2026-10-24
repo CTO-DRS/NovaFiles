@@ -4,15 +4,19 @@ import android.content.Context
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.preferencesDataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
+import com.novafiles.app.core.security.KeystoreVault
+import com.novafiles.app.core.security.ServerPassSealer
+import com.novafiles.app.core.security.planServerPassMigration
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import javax.crypto.SecretKey
 
 private val Context.dataStore by preferencesDataStore(name = "nova_settings")
 
@@ -32,7 +36,17 @@ class ClipboardState {
 enum class ClipboardOp { COPY, MOVE }
 
 /** إعدادات التطبيق المحفوظة عبر DataStore */
-class SettingsStore(private val context: Context) {
+class SettingsStore(
+    private val context: Context,
+    /**
+     * v0.41.1 — مفتاح ختم كلمات مرور الخوادم: الافتراضي مفتاح Keystore (مموه خلال
+     * العملية). الاختبارات الجاهزية تمرر مفتاحاً خاصاً بها؛ null يمنع أي كتابة سر
+     * (فشل مغلق) وترجع القراءات الافتراضي للقيم المختومة.
+     */
+    private val serverKeyProvider: () -> SecretKey? = { KeystoreVault.serverKey() },
+) {
+
+    private fun serverKey(): SecretKey? = runCatching { serverKeyProvider() }.getOrNull()
 
     private object Keys {
         val VIEW_GRID = booleanPreferencesKey("view_grid")
@@ -48,6 +62,10 @@ class SettingsStore(private val context: Context) {
         val DAV_USER = stringPreferencesKey("dav_user")
         val DAV_PASS = stringPreferencesKey("dav_pass")
         val FTP_SPEED_KB = intPreferencesKey("ftp_speed_kb")
+
+        // v0.41.1 — أختام كلمات مرور الخوادم (NFCV1 بمفتاح Keystore — لا نص صريح على القرص)
+        val FTP_PASS_ENC = stringPreferencesKey("ftp_pass_enc")
+        val DAV_PASS_ENC = stringPreferencesKey("dav_pass_enc")
 
         // v0.17 — الثيمات والإيماءات والارتباطات
         val PALETTE = stringPreferencesKey("palette_id")
@@ -75,15 +93,19 @@ class SettingsStore(private val context: Context) {
     val sortMode: Flow<String> = context.dataStore.data.map { it[Keys.SORT] ?: "name" }
     val themeMode: Flow<String> = context.dataStore.data.map { it[Keys.THEME] ?: ThemeMode.SYSTEM.name }
 
-    // إعدادات المشاركة عبر WiFi (خادم FTP)
+    // إعدادات المشاركة عبر WiFi (خادم FTP) — v0.41.1: كلمة المرور تُقرأ من الختم
     val ftpPort: Flow<Int> = context.dataStore.data.map { it[Keys.FTP_PORT] ?: 2121 }
     val ftpUser: Flow<String> = context.dataStore.data.map { it[Keys.FTP_USER] ?: "nova" }
-    val ftpPass: Flow<String> = context.dataStore.data.map { it[Keys.FTP_PASS] ?: "nova" }
+    val ftpPass: Flow<String> = context.dataStore.data.map {
+        ServerPassSealer.decode(serverKey(), it[Keys.FTP_PASS_ENC], it[Keys.FTP_PASS], DEFAULT_SERVER_PASS)
+    }
 
-    // v0.27 — إعدادات خادم WebDAV وحد سرعة FTP (0 = بلا حد)
+    // v0.27 — إعدادات خادم WebDAV وحد سرعة FTP (0 = بلا حد) — v0.41.1: الختم كذلك
     val davPort: Flow<Int> = context.dataStore.data.map { it[Keys.DAV_PORT] ?: 8888 }
     val davUser: Flow<String> = context.dataStore.data.map { it[Keys.DAV_USER] ?: "nova" }
-    val davPass: Flow<String> = context.dataStore.data.map { it[Keys.DAV_PASS] ?: "nova" }
+    val davPass: Flow<String> = context.dataStore.data.map {
+        ServerPassSealer.decode(serverKey(), it[Keys.DAV_PASS_ENC], it[Keys.DAV_PASS], DEFAULT_SERVER_PASS)
+    }
     val ftpSpeedKb: Flow<Int> = context.dataStore.data.map { it[Keys.FTP_SPEED_KB] ?: 0 }
 
     suspend fun setViewGrid(grid: Boolean) = context.dataStore.edit { it[Keys.VIEW_GRID] = grid }
@@ -92,13 +114,52 @@ class SettingsStore(private val context: Context) {
     suspend fun setThemeMode(mode: ThemeMode) = context.dataStore.edit { it[Keys.THEME] = mode.name }
     suspend fun setFtpPort(port: Int) = context.dataStore.edit { it[Keys.FTP_PORT] = port }
     suspend fun setFtpUser(user: String) = context.dataStore.edit { it[Keys.FTP_USER] = user }
-    suspend fun setFtpPass(pass: String) = context.dataStore.edit { it[Keys.FTP_PASS] = pass }
+    suspend fun setFtpPass(pass: String) = writeServerSecret(Keys.FTP_PASS_ENC, Keys.FTP_PASS, pass)
 
     // v0.27
     suspend fun setDavPort(port: Int) = context.dataStore.edit { it[Keys.DAV_PORT] = port }
     suspend fun setDavUser(user: String) = context.dataStore.edit { it[Keys.DAV_USER] = user }
-    suspend fun setDavPass(pass: String) = context.dataStore.edit { it[Keys.DAV_PASS] = pass }
+    suspend fun setDavPass(pass: String) = writeServerSecret(Keys.DAV_PASS_ENC, Keys.DAV_PASS, pass)
     suspend fun setFtpSpeedKb(kb: Int) = context.dataStore.edit { it[Keys.FTP_SPEED_KB] = kb }
+
+    /**
+     * v0.41.1 — كتابة سر خادم: يُختم NFCV1 في المفتاح المشفر ويُباد النص الموروث
+     * فوراً في نفس المعاملة. الفراغ يعني «تصفير للافتراضي» فيحذف المفتاحين.
+     * بلا مفتاح (Keystore منهك) لا تُكتب القيمة الجديدة ولا يُمس القديم — فشل مغلق.
+     */
+    private suspend fun writeServerSecret(
+        encKey: Preferences.Key<String>,
+        legacyKey: Preferences.Key<String>,
+        value: String,
+    ) {
+        context.dataStore.edit { prefs ->
+            if (value.isBlank()) {
+                prefs.remove(encKey)
+                prefs.remove(legacyKey)
+                return@edit
+            }
+            val key = serverKey() ?: return@edit
+            prefs[encKey] = ServerPassSealer.seal(key, value)
+            prefs.remove(legacyKey)
+        }
+    }
+
+    /**
+     * v0.41.1 — ترحيل أسرار الخوادم من النص الصريح (ما قبل v0.41.1) إلى ختم Keystore:
+     * ختم القيمة الموروثة ثم إبادة النص في نفس المعاملة، لكل من FTP وWebDAV.
+     * استدعاء تكراري آمن (idempotent) — بلا نص موروث لا يفعل شيئاً.
+     * بلا مفتاح يعود بلا فعل ويُعاد المحاولة في الإقلاع التالي.
+     */
+    suspend fun migrateLegacyServerPasswords() {
+        val key = serverKey() ?: return
+        context.dataStore.edit { prefs ->
+            for ((encKey, legacyKey) in listOf(Keys.FTP_PASS_ENC to Keys.FTP_PASS, Keys.DAV_PASS_ENC to Keys.DAV_PASS)) {
+                val plan = planServerPassMigration(key, prefs[legacyKey], prefs[encKey]) ?: continue
+                if (plan.sealValue != null) prefs[encKey] = plan.sealValue
+                prefs.remove(legacyKey)
+            }
+        }
+    }
 
     // v0.17 — الثيمات والإيماءات والارتباطات
     val paletteId: Flow<String> = context.dataStore.data.map { it[Keys.PALETTE] ?: "nova" }
@@ -173,4 +234,9 @@ class SettingsStore(private val context: Context) {
 
     suspend fun putRaw(key: String, value: String) =
         context.dataStore.edit { it[stringPreferencesKey(key)] = value }
+
+    companion object {
+        /** كلمة المرور الافتراضية لخوادم FTP/WebDAV المدمجة (كما في الإصدارات السابقة) */
+        const val DEFAULT_SERVER_PASS = "nova"
+    }
 }

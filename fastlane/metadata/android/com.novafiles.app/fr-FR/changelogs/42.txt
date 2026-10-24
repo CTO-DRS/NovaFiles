@@ -1,0 +1,7 @@
+v0.41.1 — server password hardening (P1 security fix)
+
+• Built-in FTP/WebDAV server passwords were stored as plaintext in the app settings file on disk — they are now sealed with AES-256/GCM encryption using a key generated inside AndroidKeyStore that never leaves the hardware (same unified NFCV1 format as the credential vault)
+• Automatic migration on first launch after update: existing passwords are sealed and their plaintext wiped in the same transaction — no action required and no change to saved passwords
+• Fail closed: without the encryption key no new secret is ever written, and reads fall back to the default instead of exposing an unopenable value
+• Encrypted passwords remain excluded from settings backup export as before (updated test gate prevents any future leak)
+• No UI or feature changes — a pure security fix with zero new dependencies

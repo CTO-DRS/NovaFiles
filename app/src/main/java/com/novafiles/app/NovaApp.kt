@@ -18,6 +18,7 @@ import androidx.room.Room
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import java.io.File
 
 /**
@@ -154,6 +155,11 @@ class NovaApp : Application() {
     override fun onCreate() {
         super.onCreate()
         container = AppContainer(this)
+        // v0.41.1 — ترحيل كلمات مرور الخوادم من نص صريح إلى ختم Keystore:
+        // يعمل مرة واحدة ثم يصبح بلا فعل؛ فشله غير قاتل ويُعاد المحاولة كل إقلاع.
+        container.appScope.launch {
+            runCatching { container.settings.migrateLegacyServerPasswords() }
+        }
     }
 }
 
