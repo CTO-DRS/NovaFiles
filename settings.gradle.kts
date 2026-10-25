@@ -16,6 +16,14 @@ dependencyResolutionManagement {
     repositories {
         google()
         mavenCentral()
+        // v0.41 — مرآة احتياطية لصمود الشبكة: تُستشار فقط بعد فشل mavenCentral (مجموعات تنقصها المرآة تُستثنى)
+        maven("https://maven.aliyun.com/repository/public") {
+            content {
+                excludeGroupByRegex("com\\.android.*")
+                excludeGroupByRegex("com\\.google.*")
+                excludeGroupByRegex("androidx.*")
+            }
+        }
     }
 }
 

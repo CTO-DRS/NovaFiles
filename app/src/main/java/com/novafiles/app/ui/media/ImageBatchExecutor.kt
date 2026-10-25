@@ -92,7 +92,13 @@ object ImageBatchExecutor {
         val compressFormat = when (targetFormat) {
             ImageFormat.JPEG -> Bitmap.CompressFormat.JPEG
             ImageFormat.PNG -> Bitmap.CompressFormat.PNG
-            ImageFormat.WEBP -> Bitmap.CompressFormat.WEBP_LOSSY
+            ImageFormat.WEBP ->
+                // v0.41 — WEBP_LOSSY يتطلب API 30 (NewApi): قديمة تُستخدم قبل R بأمان
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
+                    Bitmap.CompressFormat.WEBP_LOSSY
+                } else {
+                    @Suppress("DEPRECATION") Bitmap.CompressFormat.WEBP
+                }
         }
         val qualityForFormat = if (targetFormat.supportsQuality) quality else 100
 

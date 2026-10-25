@@ -130,13 +130,15 @@ fun VaultToolsSheet(
                     subtitle = stringResource(R.string.v2_backup_export_hint),
                     showChevron = true,
                     showSeparator = true,
-                ) { exportBackup.launch("nova-vault-backup.nvbr") }
+                    onClick = { exportBackup.launch("nova-vault-backup.nvbr") },
+                )
                 IOSListRow(
                     title = stringResource(R.string.v2_backup_restore),
                     subtitle = stringResource(R.string.v2_backup_restore_hint),
                     showChevron = true,
                     showSeparator = false,
-                ) { pickBackup.launch(arrayOf("*/*")) }
+                    onClick = { pickBackup.launch(arrayOf("*/*")) },
+                )
             }
 
             IOSGroupHeader(stringResource(R.string.v2_privacy_section))
@@ -188,7 +190,8 @@ fun VaultToolsSheet(
                     subtitle = stringResource(R.string.v2_intrusion_log_hint),
                     showChevron = true,
                     showSeparator = false,
-                ) { showIntrusion = true }
+                    onClick = { showIntrusion = true },
+                )
             }
 
             IOSGroupHeader(stringResource(R.string.v2_maintenance_section))
@@ -198,18 +201,20 @@ fun VaultToolsSheet(
                     subtitle = stringResource(R.string.v2_legacy_import_hint),
                     showChevron = true,
                     showSeparator = true,
-                ) {
-                    scope.launch {
-                        val migrated = migrateLegacyVault(container.vault, repository)
-                        onMessage(context.getString(R.string.v2_legacy_done, migrated))
-                    }
-                }
+                    onClick = {
+                        scope.launch {
+                            val migrated = migrateLegacyVault(container.vault, repository)
+                            onMessage(context.getString(R.string.v2_legacy_done, migrated))
+                        }
+                    },
+                )
                 IOSListRow(
                     title = stringResource(R.string.v2_wipe_all),
                     subtitle = stringResource(R.string.v2_wipe_all_hint),
                     destructive = true,
                     showSeparator = false,
-                ) { showWipeConfirm = true }
+                    onClick = { showWipeConfirm = true },
+                )
             }
         }
     }

@@ -14,14 +14,30 @@ android {
         minSdk = 26
         targetSdk = 35
 
-        versionCode = 40
-        versionName = "0.40.0"
+        versionCode = 41
+        versionName = "0.41.0"
 
         // v0.16 — معرّفات عملاء OAuth للسحابة: يضبطها كل مُطوّر عبر gradle.properties
         // (NOVA_DRIVE_CLIENT_ID=...) — فارغة افتراضياً ليعمل البناء دون أسرار
         buildConfigField("String", "DRIVE_CLIENT_ID", "\"${project.findProperty("NOVA_DRIVE_CLIENT_ID") ?: ""}\"")
         buildConfigField("String", "DROPBOX_CLIENT_ID", "\"${project.findProperty("NOVA_DROPBOX_CLIENT_ID") ?: ""}\"")
         buildConfigField("String", "ONEDRIVE_CLIENT_ID", "\"${project.findProperty("NOVA_ONEDRIVE_CLIENT_ID") ?: ""}\"")
+    }
+
+    // v0.41 — التوقيع عبر متغيرات البيئة فقط: بلا أسرار في المستودع إطلاقاً
+    // (F-Droid/CI يبنيان release غير موقّع افتراضياً)
+    val envSigning = listOf(
+        "NOVA_KEYSTORE_PATH", "NOVA_KEYSTORE_PASSWORD", "NOVA_KEY_PASSWORD"
+    ).all { !System.getenv(it).isNullOrEmpty() }
+    signingConfigs {
+        if (envSigning) {
+            create("release") {
+                storeFile = file(System.getenv("NOVA_KEYSTORE_PATH"))
+                storePassword = System.getenv("NOVA_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("NOVA_KEY_ALIAS") ?: "novafiles"
+                keyPassword = System.getenv("NOVA_KEY_PASSWORD")
+            }
+        }
     }
 
     buildTypes {
@@ -33,6 +49,9 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            if (envSigning) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
     }
     compileOptions {
@@ -50,8 +69,23 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
             excludes += "/META-INF/{INDEX.LIST,DEPENDENCIES,LICENSE,LICENSE.txt,NOTICE,NOTICE.txt}"
+            // v0.41 — تعارضات BouncyCastle 1.86 (رفع قسري لإغلاق 11 CVE)
+            excludes += "/META-INF/LICENSE.md"
+            excludes += "/META-INF/versions/9/OSGI-INF/MANIFEST.MF"
+            excludes += "/META-INF/versions/9/module-info.class"
         }
     }
+}
+
+// v0.41 — إغلاق 11 ثغرة CVE في سلسلة BouncyCastle الانتقالية (1.75 → 1.86):
+// CVE-2024-29857، CVE-2024-30171، CVE-2024-30172، CVE-2023-33201، CVE-2023-33202
+// وغيرها — رفع قسري لكل وحدات BC الثلاث لتجنب خلط إصدارات غير متوافقة
+configurations.configureEach {
+    resolutionStrategy.force(
+        "org.bouncycastle:bcprov-jdk18on:1.86",
+        "org.bouncycastle:bcpkix-jdk18on:1.86",
+        "org.bouncycastle:bcutil-jdk18on:1.86"
+    )
 }
 
 dependencies {

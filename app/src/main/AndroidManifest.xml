@@ -15,12 +15,16 @@
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES" android:usesPermissionFlags="neverForLocation" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" android:maxSdkVersion="32" />
+    <!-- v0.41 — CoarseFineLocation: COARSE بجانب FINE قبل API 33 (يتطلبه النظام عند FINE) -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" android:maxSdkVersion="32" />
 
     <!-- القفل الحيوي (بصمة/وجه) للخزنة المشفرة -->
     <uses-permission android:name="android.permission.USE_BIOMETRIC" />
 
     <!-- v0.15: التقاط صورة تسلل اختيارية عند فشل دخول الخزنة -->
     <uses-permission android:name="android.permission.CAMERA" />
+    <!-- v0.41 — الكاميرا ميزة اختيارية: لا تحجب الأجهزة بلا كاميرا (ChromeOS) -->
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
 
     <!-- المشاركة عبر WiFi: خدمة أمامية + إشعار -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
@@ -62,9 +66,12 @@
                 <data android:scheme="com.novafiles.app" />
             </intent-filter>
             <!-- v0.17: ارتباطات الملفات — «فتح باستخدام NovaFiles» للنصوص والصور والأرشيفات -->
+            <!-- v0.41 — مخططا content/file: مرشح VIEW بمimeType يتطلب تصريح المخططات (AppLinkUrlError) -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="content" />
+                <data android:scheme="file" />
                 <data android:mimeType="text/*" />
                 <data android:mimeType="image/*" />
                 <data android:mimeType="application/json" />

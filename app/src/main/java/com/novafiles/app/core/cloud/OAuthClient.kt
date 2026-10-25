@@ -153,7 +153,8 @@ class OAuthClient(
     }
 
     private fun urlDecode(s: String): String =
-        java.net.URLDecoder.decode(s.replace("+", "%20"), Charsets.UTF_8)
+        // v0.41 — overload «UTF-8» النصي: نسخة Charset تتطلب API 33 (NewApi)
+        java.net.URLDecoder.decode(s.replace("+", "%20"), "UTF-8")
 
     /**
      * تبادل رمز التفويض بزوج توكنات — RF C 6749 §4.1.3 مع PKCE verifier.

@@ -63,6 +63,12 @@ class WifiDirectManager(
     /** بدء الاكتشاف — يتطلب صلاحيات الموقع/الأجهزة القريبة حسب إصدار النظام */
     fun startDiscovery() {
         val m = manager ?: return emit(DirectEvent.Failed("p2p_unavailable"))
+        // v0.41 — فحص حرفي داخل الدالة التي تستدعي discoverPeers (lint intra-procedural):
+        val granted = if (Build.VERSION.SDK_INT >= 33)
+            androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.NEARBY_WIFI_DEVICES)
+        else
+            androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION)
+        if (granted != android.content.pm.PackageManager.PERMISSION_GRANTED) return emit(DirectEvent.Failed("p2p_no_permission"))
         ensureRegistered()
         _state.value = _state.value.copy(phase = DirectPhase.DISCOVERING, error = null)
         m.discoverPeers(channel, object : WifiP2pManager.ActionListener {
@@ -78,6 +84,12 @@ class WifiDirectManager(
     /** الاتصال بجار — كمالك للمجموعة إن كنا نرسل */
     fun connect(peer: DirectPeer, asOwner: Boolean) {
         val m = manager ?: return emit(DirectEvent.Failed("p2p_unavailable"))
+        // v0.41 — فحص حرفي داخل الدالة التي تستدعي connect
+        val granted = if (Build.VERSION.SDK_INT >= 33)
+            androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.NEARBY_WIFI_DEVICES)
+        else
+            androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION)
+        if (granted != android.content.pm.PackageManager.PERMISSION_GRANTED) return emit(DirectEvent.Failed("p2p_no_permission"))
         if (peer.address.isNullOrEmpty()) return emit(DirectEvent.Failed("peer_no_address"))
         _state.value = _state.value.copy(phase = DirectPhase.CONNECTING)
         val config = WifiP2pConfig().apply {
@@ -106,13 +118,22 @@ class WifiDirectManager(
             runCatching { context.unregisterReceiver(receiver) }
             registered = false
         }
-        runCatching { channel?.close() }
+        // v0.41 — Channel.close يتطلب API 27 (NewApi): حارس O_MR1 — قبلها يُترك للـ GC
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            runCatching { channel?.close() }
+        }
         channel = null
     }
 
     // ----- استعلامات داخلية -----
 
     private fun requestPeers() {
+        // v0.41 — فحص حرفي داخل الدالة التي تستدعي requestPeers
+        val granted = if (Build.VERSION.SDK_INT >= 33)
+            androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.NEARBY_WIFI_DEVICES)
+        else
+            androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.ACCESS_FINE_LOCATION)
+        if (granted != android.content.pm.PackageManager.PERMISSION_GRANTED) return emit(DirectEvent.Failed("p2p_no_permission"))
         manager?.requestPeers(channel) { peers: android.net.wifi.p2p.WifiP2pDeviceList ->
             val list = peers.deviceList.map { device: WifiP2pDevice ->
                 DirectPeer(

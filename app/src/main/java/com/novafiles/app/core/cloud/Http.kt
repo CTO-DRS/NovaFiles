@@ -222,5 +222,6 @@ object HttpJson {
         form.entries.joinToString("&") { (k, v) -> "${enc(k)}=${enc(v)}" }
 
     private fun enc(s: String): String =
-        java.net.URLEncoder.encode(s, Charsets.UTF_8).replace("+", "%20")
+        // v0.41 — overload «UTF-8» النصي: نسخة Charset تتطلب API 33 (NewApi)
+        java.net.URLEncoder.encode(s, "UTF-8").replace("+", "%20")
 }

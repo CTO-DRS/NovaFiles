@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
@@ -35,9 +36,13 @@ class MainActivity : AppCompatActivity() {
         captureViewIntent(intent, container)
 
         setContent {
-            val theme by container.settings.themeMode
-                .map { runCatching { ThemeMode.valueOf(it) }.getOrDefault(ThemeMode.SYSTEM) }
-                .collectAsState(ThemeMode.SYSTEM)
+            // v0.41 — تدفّق mapped مُستبقى عبر remember: بلا إعادة اشتراك/تصفير عند كل recomposition
+            // (الخطأ القديم: إنشاء Flow جديد داخل setContent كان يعيد تعيين الحالة إلى SYSTEM لحظياً)
+            val themeFlow = remember(container.settings.themeMode) {
+                container.settings.themeMode
+                    .map { runCatching { ThemeMode.valueOf(it) }.getOrDefault(ThemeMode.SYSTEM) }
+            }
+            val theme by themeFlow.collectAsState(ThemeMode.SYSTEM)
 
             // v0.17 — الإعداد اللوني المختار (12 لوحة)
             val paletteId by container.settings.paletteId.collectAsState("nova")

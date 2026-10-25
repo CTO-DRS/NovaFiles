@@ -27,7 +27,10 @@ object IntrusionCapturer {
     private const val CAPTURE_TIMEOUT_MS = 2500L
 
     fun capture(context: Context): InputStream? {
-        if (!hasCameraPermission(context)) return null
+        // v0.41 — فحص الصلاحية حرفياً داخل الدالة نفسها التي تستدعي openCamera:
+        // lint intra-procedural لا يرى المساعدات الخارجية — الفحص هنا يغلق MissingPermission
+        if (context.checkSelfPermission(android.Manifest.permission.CAMERA)
+            != PackageManager.PERMISSION_GRANTED) return null
         val manager = context.getSystemService(Context.CAMERA_SERVICE) as? CameraManager ?: return null
         val frontId = findFrontCamera(manager) ?: return null
 
@@ -102,9 +105,6 @@ object IntrusionCapturer {
 
         return if (!failed && bytes[0] != null) ByteArrayInputStream(bytes[0]) else null
     }
-
-    private fun hasCameraPermission(context: Context): Boolean =
-        context.checkSelfPermission(android.Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED
 
     private fun findFrontCamera(manager: CameraManager): String? {
         for (id in manager.cameraIdList) {
