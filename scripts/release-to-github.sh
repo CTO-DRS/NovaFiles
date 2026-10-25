@@ -43,10 +43,10 @@ for a in "${ASSETS[@]}"; do [[ -f "$a" ]] || fail "asset missing: $a"; done
 git -C "$LOCAL_REPO" rev-parse -q --verify "refs/tags/$TAG" >/dev/null \
   || fail "tag $TAG not found locally"
 
-ASKPASS="$(mktemp)"
+ASKPASS="$(mktemp /home/z/my-project/scripts/.askpass.XXXXXX)"
 trap 'rm -f "$ASKPASS"' EXIT
 printf '#!/usr/bin/env bash\necho "$GITHUB_TOKEN"\n' > "$ASKPASS"
-chmod 600 "$ASKPASS"
+chmod 700 "$ASKPASS"
 export GIT_ASKPASS="$ASKPASS" GIT_TERMINAL_PROMPT=0 GITHUB_TOKEN
 
 git -C "$LOCAL_REPO" remote remove origin 2>/dev/null || true
